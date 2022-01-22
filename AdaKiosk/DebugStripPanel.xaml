@@ -51,6 +51,6 @@
 
 
         <TextBlock Text="Version"  Margin="10,5" Grid.Row="6" Grid.Column="0"/>
-        <TextBlock Margin="10,5" x:Name="TextBoxVersion"  Grid.Row="2" Grid.Column="1" />
+        <TextBlock Margin="10,5" x:Name="TextBoxVersion"  Grid.Row="6" Grid.Column="1" />
     </Grid>
 </UserControl>
