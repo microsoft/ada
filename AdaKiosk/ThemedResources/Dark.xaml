@@ -1,0 +1,77 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="SystemControlBackgroundBaseLowBrush">#2D2D30</Color>
+    <Color x:Key="SystemBaseHighColor">#3E3E40</Color>
+    <Color x:Key="SystemControlBackgroundBaseMediumLowBrush">#007ACC</Color>
+    <Color x:Key="SystemControlForegroundBaseHighBrush">white</Color>
+    <Color x:Key="SystemControlHighlightBaseHighBrush">white</Color>
+    <Color x:Key="SystemControlDisabledBaseMediumLowBrush">Gray</Color>
+    <Color x:Key="SystemControlForegroundTransparentBrush">#2D2D30</Color>
+    <Color x:Key="SystemControlHighlightTransparentBrush">#007ACC</Color>
+    <Color x:Key="SystemControlHighlightAltChromeWhiteBrush">white</Color>
+    <Color x:Key="SystemControlDisabledTransparentBrush">#2D2D30</Color>
+    <Color x:Key="SystemControlHighlightAltTransparentBrush">#007ACC</Color>
+    <Color x:Key="SystemControlTransparentBrush">#007ACC</Color>
+    <Color x:Key="SystemControlHighlightAccentBrush">#007ACC</Color>
+    <Color x:Key="SystemAccentColorDark1Brush">#006EB7</Color>
+    <Color x:Key="SystemControlHighlightBaseMediumLowBrush">#006EB7</Color>
+
+    <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+    
+    <!-- Resources for Button -->
+    <Thickness x:Key="ButtonBorderThemeThickness">1</Thickness>
+    <SolidColorBrush x:Key="ButtonBackground" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />
+    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{StaticResource SystemBaseHighColor}"/>
+    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{StaticResource SystemControlBackgroundBaseMediumLowBrush}" />
+    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />
+    <SolidColorBrush x:Key="ButtonForeground" Color="{StaticResource SystemControlForegroundBaseHighBrush}" />
+    <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{StaticResource SystemControlHighlightBaseHighBrush}" />
+    <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{StaticResource SystemControlHighlightBaseHighBrush}" />
+    <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="{StaticResource SystemControlDisabledBaseMediumLowBrush}" />
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="{StaticResource SystemControlForegroundTransparentBrush}" />
+    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="{StaticResource SystemControlHighlightTransparentBrush}" />
+    <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="{StaticResource SystemControlHighlightTransparentBrush}" />
+    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="{StaticResource SystemControlDisabledTransparentBrush}" />
+
+    <!-- Resources for ToggleButton -->
+    <Thickness x:Key="ToggleButtonBorderThemeThickness">1</Thickness>
+    <SolidColorBrush x:Key="ToggleButtonBackground" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="{StaticResource SystemBaseHighColor}"/>
+    <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="{StaticResource SystemControlBackgroundBaseMediumLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundDisabled" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{StaticResource SystemControlHighlightAccentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{StaticResource SystemAccentColorDark1Brush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="{StaticResource SystemControlHighlightBaseMediumLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedDisabled" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />
+    <!--<SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminate" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminatePointerOver" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminatePressed" Color="{StaticResource SystemControlBackgroundBaseMediumLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminateDisabled" Color="{StaticResource SystemControlBackgroundBaseLowBrush}" />-->
+    <SolidColorBrush x:Key="ToggleButtonForeground" Color="{StaticResource SystemControlForegroundBaseHighBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundPointerOver" Color="{StaticResource SystemControlHighlightBaseHighBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundPressed" Color="{StaticResource SystemControlHighlightBaseHighBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundDisabled" Color="{StaticResource SystemControlDisabledBaseMediumLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="{StaticResource SystemControlHighlightAltChromeWhiteBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="{StaticResource SystemControlHighlightAltChromeWhiteBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="{StaticResource SystemControlHighlightAltChromeWhiteBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundCheckedDisabled" Color="{StaticResource SystemControlDisabledBaseMediumLowBrush}" />
+    <!--<SolidColorBrush x:Key="ToggleButtonForegroundIndeterminate" Color="{StaticResource SystemControlForegroundBaseHighBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundIndeterminatePointerOver" Color="{StaticResource SystemControlHighlightBaseHighBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundIndeterminatePressed" Color="{StaticResource SystemControlHighlightBaseHighBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonForegroundIndeterminateDisabled" Color="{StaticResource SystemControlDisabledBaseMediumLowBrush}" />-->
+    <SolidColorBrush x:Key="ToggleButtonBorderBrush" Color="{StaticResource SystemControlForegroundTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushPointerOver" Color="{StaticResource SystemControlHighlightAltTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushPressed" Color="{StaticResource SystemControlHighlightTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushDisabled" Color="{StaticResource SystemControlDisabledTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushChecked" Color="{StaticResource SystemControlHighlightAltTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushCheckedPointerOver" Color="{StaticResource SystemControlHighlightAltTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushCheckedPressed" Color="{StaticResource SystemControlTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushCheckedDisabled" Color="{StaticResource SystemControlDisabledTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushIndeterminate" Color="{StaticResource SystemControlForegroundTransparentBrush}" />
+    <!--<SolidColorBrush x:Key="ToggleButtonBorderBrushIndeterminatePointerOver" Color="{StaticResource SystemControlHighlightBaseMediumLowBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushIndeterminatePressed" Color="{StaticResource SystemControlHighlightTransparentBrush}" />
+    <SolidColorBrush x:Key="ToggleButtonBorderBrushIndeterminateDisabled" Color="{StaticResource SystemControlDisabledTransparentBrush}" />-->
+</ResourceDictionary>

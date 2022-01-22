@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"array": "cpp",
+			"initializer_list": "cpp",
+			"xstring": "cpp",
+			"xutility": "cpp",
+			"string": "cpp"
+		}
+	}
+}

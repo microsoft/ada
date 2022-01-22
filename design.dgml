@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="16LEDStrips" Bounds="-508.792899576823,-481.025735241699,88.0333333333333,25.96" Label="16 LED strips" UseManualLocation="True" />
+    <Node Id="16LEDStrips1" Bounds="-505.792899576823,-408.025735241699,88.0333333333333,25.96" Label="16 LED strips" UseManualLocation="True" />
+    <Node Id="16LEDStrips2" Bounds="-500.792899576823,-339.025735241699,88.0333333333333,25.96" Label="16 LED strips" UseManualLocation="True" />
+    <Node Id="AdaCamera" Bounds="-867.259039125834,-170.791042785645,84.6300000000001,25.96" Label="Ada Camera" UseManualLocation="True" />
+    <Node Id="AdaServer" Bounds="-900.988720706798,-444.469562988281,73.9333333333334,25.96" Label="AdaServer" UseManualLocation="True" />
+    <Node Id="AzureCosmosDb" Bounds="-1224.87873291383,-437.353809492059,111.173333333333,25.96" Label="Azure CosmosDb" UseManualLocation="True" />
+    <Node Id="DMXParLights" Bounds="-629.729149576823,-182.179822366333,99.0033333333333,25.96" Label="DMX par lights" UseManualLocation="True" />
+    <Node Id="Dmx.py" Bounds="-609.729149576823,-249.179822366333,58.3699999999999,25.96" Label="dmx.py" UseManualLocation="True" />
+    <Node Id="DmxController" Bounds="-753.762159729005,-249.045735241699,97.04,25.96" UseManualLocation="True" />
+    <Node Id="IPCameraGUI" Bounds="-873.775493062338,-253.549348645368,90.0133333333333,25.96" UseManualLocation="True" />
+    <Node Id="KasaHS105's" Bounds="-1219.03166666667,-248.02,89.71,25.96" Label="Kasa HS105's" UseManualLocation="True" />
+    <Node Id="KitchenCameras" Bounds="-1221.13539957682,-494.313909490967,106.256666666667,25.96" Label="Kitchen cameras" UseManualLocation="True" />
+    <Node Id="LightingDesigner" Bounds="-1033.70540853232,-329.509541015624,110.24,25.96" UseManualLocation="True" />
+    <Node Id="PiBridge(pi0)" Bounds="-1219.31914957866,-324.963191012573,90.9533333333334,25.96" Label="PiBridge (pi0)" UseManualLocation="True" />
+    <Node Id="RpiController" Bounds="-748.57956624329,-486.542077026367,89.9200000000001,41.9200000000001" Label="RpiController&#xD;&#xA;'adapi1'" UseManualLocation="True" />
+    <Node Id="RpiController'adapi2'" Bounds="-744.579566243289,-414.621987304688,89.9200000000001,41.9200000000001" Label="RpiController&#xD;&#xA;'adapi2'" UseManualLocation="True" />
+    <Node Id="RpiController'adapi3" Bounds="-739.57956624329,-342.701892545573,89.9200000000001,41.9200000000001" Label="RpiController&#xD;&#xA;'adapi3'" UseManualLocation="True" />
+    <Node Id="Sensei" Bounds="-1063.7053995805,-446.469517211913,53.7166666666667,25.96" UseManualLocation="True" />
+    <Node Id="Server" Bounds="-1083.7053995805,-486.469617211913,276.650012207031,202.920176196289" Group="Expanded" UseManualLocation="True" />
+    <Node Id="TeensyFirmware" Bounds="-612.65956624329,-479.025735241699,55.36,25.96" Label="Teensy" UseManualLocation="True" />
+    <Node Id="TeensyFirmware1" Bounds="-608.65956624329,-404.025735241699,55.36,25.96" Label="Teensy" UseManualLocation="True" />
+    <Node Id="TeensyFirmware2" Bounds="-603.65956624329,-337.025735241699,55.36,25.96" Label="Teensy" UseManualLocation="True" />
+  </Nodes>
+  <Links>
+    <Link Source="AdaCamera" Target="IPCameraGUI" Bounds="-827.753434416752,-218.598945056748,2.20950699877892,47.8079022711029" Label="rtsp" LabelBounds="-851.035349860311,-202.582659768578,20.3866666666668,15.96" />
+    <Link Source="AdaServer" Target="DmxController" Bounds="-854.05702697785,-418.509562988281,124.620159831336,162.324995969165" />
+    <Link Source="AdaServer" Target="RpiController" Bounds="-827.05536702474,-454.155024049044,69.6724779483093,14.8084349480281" />
+    <Link Source="AdaServer" Target="RpiController'adapi2'" Bounds="-827.05536702474,-422.983853334233,73.7049469799998,16.9588695873463" />
+    <Link Source="AdaServer" Target="RpiController'adapi3" Bounds="-843.986585993183,-418.509562988281,109.460508682599,70.9141829072337" />
+    <Link Source="Dmx.py" Target="DMXParLights" Bounds="-580.482800372982,-223.219822366333,0.151435648155939,32.0401014190801" Label="USB" LabelBounds="-576.407082548654,-215.189224433157,21.4966666666667,15.96" />
+    <Link Source="DmxController" Target="Dmx.py" Bounds="-656.722159729005,-236.158762239149,37.9930153553429,0.040853692684891" />
+    <Link Source="IPCameraGUI" Target="AdaServer" Bounds="-859.991091728069,-409.659176724197,28.825546906647,156.109825527908" />
+    <Link Source="KitchenCameras" Target="AzureCosmosDb" Bounds="-1168.79625675471,-468.353909490967,0.496366235144251,22.0023893455286" />
+    <Link Source="LightingDesigner" Target="AdaServer" Bounds="-965.650195787995,-412.134613136683,82.3399758013178,82.6250721210589" Label="queue commands&#xD;&#xA;read_camera" LabelBounds="-923.063552364758,-369.410309697882,94.79,31.92" />
+    <Link Source="LightingDesigner" Target="Sensei" Bounds="-1026.36840863255,-412.453666306796,41.317229998931,82.9441252911718" Label="get_next_emotion" LabelBounds="-1101.94664938978,-370.089850880473,94.4466666666667,15.96" />
+    <Link Source="PiBridge(pi0)" Target="KasaHS105's" Bounds="-1174.0812023317,-299.003191012573,0.182343994170424,41.9832758986866" Label="wifi" LabelBounds="-1169.99003033444,-285.982866638913,18.2433333333333,15.96" />
+    <Link Source="RpiController" Target="TeensyFirmware" Bounds="-658.65956624329,-465.902386021609,37.0000687291829,0.144600352614134" Label="serial" LabelBounds="-653.899014706433,-485.790085845418,27.4633333333334,15.96" />
+    <Link Source="RpiController'adapi2'" Target="TeensyFirmware1" Bounds="-654.659566243289,-392.670528330042,37.0021875150269,0.815973107057459" Label="serial" LabelBounds="-649.846045825335,-412.222541894696,27.4633333333334,15.96" />
+    <Link Source="RpiController'adapi3" Target="TeensyFirmware2" Bounds="-649.65956624329,-323.333487755086,37.0016964188069,0.718527377265218" Label="serial" LabelBounds="-644.929214917049,-342.934224137524,27.4633333333334,15.96" />
+    <Link Source="Sensei" Target="AzureCosmosDb" Bounds="-1104.72668885797,-431.640960337402,41.0213401437795,2.82334273625207" />
+    <Link Source="Server" Target="AdaServer" Category="Contains" Bounds="-828.328717616744,-370.51,0.415338244162967,21.0017594528424" />
+    <Link Source="Server" Target="LightingDesigner" Category="Contains" />
+    <Link Source="Server" Target="PiBridge(pi0)" Bounds="-1124.66199184286,-340.794890752778,40.9565922623574,13.0914934789413" />
+    <Link Source="Server" Target="Sensei" Category="Contains" />
+    <Link Source="TeensyFirmware" Target="16LEDStrips" Bounds="-557.29956624329,-467.163639551329,39.507912182499,0.657351357686707" />
+    <Link Source="TeensyFirmware1" Target="16LEDStrips1" Bounds="-553.29956624329,-393.266872104113,38.5117294472151,1.29230377608951" />
+    <Link Source="TeensyFirmware2" Target="16LEDStrips2" Bounds="-548.29956624329,-325.156239978644,38.5079331630594,0.646088193782987" />
+  </Links>
+  <Categories>
+    <Category Id="Contains" Label="Contains" Description="Whether the source of the link contains the target object" CanBeDataDriven="False" CanLinkedNodesBeDataDriven="True" IncomingActionLabel="Contained By" IsContainment="True" OutgoingActionLabel="Contains" />
+  </Categories>
+  <Properties>
+    <Property Id="Bounds" DataType="System.Windows.Rect" />
+    <Property Id="CanBeDataDriven" Label="CanBeDataDriven" Description="CanBeDataDriven" DataType="System.Boolean" />
+    <Property Id="CanLinkedNodesBeDataDriven" Label="CanLinkedNodesBeDataDriven" Description="CanLinkedNodesBeDataDriven" DataType="System.Boolean" />
+    <Property Id="Group" Label="Group" Description="Display the node as a group" DataType="Microsoft.VisualStudio.GraphModel.GraphGroupStyle" />
+    <Property Id="IncomingActionLabel" Label="IncomingActionLabel" Description="IncomingActionLabel" DataType="System.String" />
+    <Property Id="IsContainment" DataType="System.Boolean" />
+    <Property Id="Label" Label="Label" Description="Displayable label of an Annotatable object" DataType="System.String" />
+    <Property Id="LabelBounds" DataType="System.Windows.Rect" />
+    <Property Id="OutgoingActionLabel" Label="OutgoingActionLabel" Description="OutgoingActionLabel" DataType="System.String" />
+    <Property Id="UseManualLocation" DataType="System.Boolean" />
+  </Properties>
+</DirectedGraph>

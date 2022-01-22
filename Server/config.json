@@ -1,0 +1,571 @@
+{
+    "camera_zones": [
+        [ "2FKCamera01" ],
+        [ "2FKCamera02" ],
+        [ "3FECamera01" ],
+        [ "3FKCamera02" ],
+        [ "4FECamera01" ],
+        [ "4FKCamera02" ]
+    ],
+
+    "colors_for_emotions": {
+        "anger": [ 255, 0, 0 ],
+        "contempt": [ 120, 30, 10 ],
+        "disgust": [ 0, 255, 0 ],
+        "fear": [ 255, 255, 255 ],
+        "happiness": [ 255, 255, 0 ],
+        "neutral": [ 0, 255, 255 ],
+        "sadness": [ 0, 10, 80 ],
+        "surprise": [ 80, 0, 80 ]
+    },
+
+    "colors_for_dmx_emotions": {
+        "anger": [ 255, 0, 0 ],
+        "contempt": [ 255, 140, 40 ],
+        "disgust": [ 180, 255, 0 ],
+        "fear": [ 128, 128, 128 ],
+        "happiness": [ 130, 130, 0 ],
+        "neutral": [ 90, 165, 255 ],
+        "sadness": [ 0, 0, 255 ],
+        "surprise": [ 200, 0, 255 ]
+    },
+
+    "server_port": 12345,
+
+    "on_time": [10, 0],
+    "off_time": [ 21, 0 ],
+    "turn_off_timeout": 120,
+
+    "debug": true,
+    "debug_commands": false,
+
+    "latitude": 47.642057,
+    "longitude": -122.142041,
+
+    "zone_maps": {
+        "adapi1": "zone_map_1.json",
+        "adapi2": "zone_map_2.json",
+        "adapi3": "zone_map_3.json"
+    },
+
+    "history_dir": "../HistoricalData",
+    "playback_delay": 30,
+    "hold_camera_blush": 5,
+    "hold_sensei_blush": 10,
+    "rainbow_timeout": 10,
+    "cool_animation_timeout": 300,
+    "cool_animation_time": [ 10, 0 ],
+    "movement_rain_timeout": 10,
+
+    "playback_weights": {
+        "Neutral": 0.4,
+        "Happiness": 0.4,
+        "Sadness": 0.13,
+        "Anger": 4.5,
+        "Fear": 40,
+        "Surprise": 2.8,
+        "Disgust": 20,
+        "Contempt": 10
+    },
+
+    "cool_animations": [
+        {
+            "Name": "neurons",
+            "Commands": [
+                {
+                    "command": "NeuralDrop",
+                    "iterations": 0
+                }
+            ]
+        },
+        {
+            "Name": "rainbow",
+            "Commands": [
+                {
+                    "command": "Rainbow",
+                    "seconds": 0,
+                    "length": 157
+                }
+            ]
+        },
+        {
+            "Name": "fire",
+            "Commands": [
+                {
+                    "command": "Fire",
+                    "seconds": 0,
+                    "f1": 55,
+                    "f2": 120
+                }
+            ]
+        },
+        {
+            "Name": "red yellow gradient",
+            "Commands": [
+                {
+                    "command": "Gradient",
+                    "colors": [
+                        [ 128, 128, 0 ],
+                        [ 255, 80, 0 ],
+                        [ 255, 0, 0 ],
+                        [ 40, 0, 0 ]
+                    ],
+                    "seconds": 5
+                }
+            ]
+        },
+        {
+            "Name": "blue red gradient",
+            "Commands": [
+                {
+                    "command": "Gradient",
+                    "colors": [
+                        [ 0, 0, 80 ],
+                        [ 128, 0, 0 ],
+                        [ 80, 0, 0 ]
+                    ],
+                    "seconds": 5
+                }
+            ]
+        },
+        {
+            "Name": "yellow green gradient",
+            "Commands": [
+                {
+                    "command": "Gradient",
+                    "colors": [
+                        [ 255, 255, 0 ],
+                        [ 50, 100, 0 ],
+                        [ 0, 255, 50 ]
+                    ],
+                    "seconds": 5
+                }
+            ]
+        },
+        {
+            "Name": "blue green gradient",
+            "Commands": [
+                {
+                    "command": "Gradient",
+                    "colors": [
+                        [ 0, 0, 128 ],
+                        [ 50, 255, 0 ],
+                        [ 0, 128, 50 ]
+                    ],
+                    "seconds": 5
+                }
+            ]
+        },
+        {
+            "Name": "diagonal gradient",
+            "Commands": [
+                {
+                    "command": "Gradient", "strip": 0, "cps": 2, "seconds": 5,
+                    "colors": [[0, 0, 0], [0, 255, 0], [16, 0, 0], [16, 255, 0], [32, 0, 0], [32, 255, 0], [48, 0, 0], [48, 255, 0], [64, 0, 0], [64, 255, 0], [80, 0, 0], [80, 255, 0], [96, 0 ,0], [96, 255, 0], [112, 0, 0], [112, 255, 0], [128, 0, 0], [128, 255, 0], [144, 0, 0], [144, 255, 0], [160, 0, 0], [160, 255, 0], [176, 0, 0], [176, 255, 0], [192, 0, 0], [192, 255, 0], [208, 0, 0], [208, 255, 0], [224, 0, 0], [224, 255, 0], [240, 0, 0], [240, 255, 0]]
+                }
+            ]
+        },
+        {
+            "Name": "moving gradient 1",
+            "Commands": [
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 0, 0, 128 ],
+                        [ 255, 0, 0 ],
+                        [ 128, 0, 0 ]
+                    ],
+                    "speed": 1,
+                    "direction": -1,
+                    "size": 50
+                }
+            ]
+        },
+        {
+            "Name": "moving gradient 2",
+            "Commands": [
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 128, 0, 0 ],
+                        [ 0, 255, 128 ]
+                    ],
+                    "speed": 5,
+                    "direction": 1,
+                    "size": 50
+                }
+            ]
+        },
+        {
+            "Name": "gradient cycle",
+            "repeat": "forever",
+            "Commands": [
+                {
+                    "command": "Gradient",
+                    "name": "blue red",
+                    "colors": [
+                        [ 0, 0, 128 ],
+                        [ 255, 0, 0 ],
+                        [ 128, 0, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 60,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "Gradient",
+                    "name": "yellow green",
+                    "colors": [
+                        [ 255, 255, 0 ],
+                        [ 50, 100, 0 ],
+                        [ 0, 255, 50 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 60,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "Gradient",
+                    "name": "blue green",
+                    "colors": [
+                        [ 0, 0, 128 ],
+                        [ 50, 255, 0 ],
+                        [ 0, 128, 50 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 60,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "Gradient",
+                    "name": "red yellow",
+                    "colors": [
+                        [ 128, 128, 0 ],
+                        [ 255, 80, 0 ],
+                        [ 255, 0, 0 ],
+                        [ 80, 0, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 60,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "Gradient",
+                    "name": "blue cyan",
+                    "colors": [
+                        [ 0, 0, 80 ],
+                        [ 0, 0, 255 ],
+                        [ 0, 255, 255 ],
+                        [ 0, 80, 80 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 60,
+                    "start": "after-previous"
+                }
+            ]
+        },
+        {
+            "Name": "moving gradient cycle",
+            "repeat": "forever",
+            "Commands": [
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 0, 0, 255 ],
+                        [ 0, 255, 128 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 0, 255, 128 ],
+                        [ 0, 128, 255 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 0, 128, 255 ],
+                        [ 0, 255, 0 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 0, 255, 0 ],
+                        [ 128, 255, 0 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 128, 255, 0 ],
+                        [ 255, 255, 0 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 255, 255, 0 ],
+                        [ 255, 128, 0 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 255, 128, 0 ],
+                        [ 255, 0, 0 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 255, 0, 0 ],
+                        [ 255, 0, 128 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 255, 0, 128 ],
+                        [ 255, 0, 255 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 255, 0, 255 ],
+                        [ 128, 0, 255 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "MovingGradient",
+                    "colors": [
+                        [ 128, 0, 255 ],
+                        [ 0, 0, 255 ]
+                    ],
+                    "speed": 2,
+                    "direction": 1,
+                    "size": 50,
+                    "seconds": 10,
+                    "start": "after-previous"
+                }
+            ]
+        },
+        {
+            "Name": "color cycle",
+            "repeat": "forever",
+            "Commands": [
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 0, 255 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 80, 255 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 128, 255 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 255, 255 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 255, 128 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 255, 80 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 255, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 80, 255, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 128, 255, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 255, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 128, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 80, 0 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 0, 0 ]
+                    ],
+                    "seconds": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 0, 80 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 0, 128 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 0, 255 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 128, 0, 255 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                },
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 80, 0, 255 ]
+                    ],
+                    "seconds": 5,
+                    "hold": 5,
+                    "start": "after-previous"
+                }
+            ]
+        }
+    ]
+}

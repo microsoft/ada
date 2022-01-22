@@ -1,0 +1,64 @@
+{
+    "core_leds": [
+        {
+            "col": 5,
+            "leds": [ 10, 23, 35, 47, 60, 72, 85 ]
+        },
+        {
+            "col": 7,
+            "leds": [ 6, 18, 30, 44, 56, 68, 81 ]
+        }
+    ],
+    "zone_leds": [
+        {
+            "col": 3,
+            "zone": 0,
+            "length": 385
+        },
+        {
+            "col": 1,
+            "zone": 0,
+            "length": 384
+        },
+        {
+            "col": 0,
+            "zone": 0,
+            "length": 389
+        },
+        {
+            "col": 14,
+            "zone": 0,
+            "length": 389
+        },
+        {
+            "col": 10,
+            "zone": 2,
+            "length": 330
+        },
+        {
+            "col": 11,
+            "zone": 2,
+            "length": 381
+        },
+        {
+            "col": 13,
+            "zone": 4,
+            "length": 364
+        },
+        {
+            "col": 8,
+            "zone": 4,
+            "length": 197
+        },
+        {
+            "col": 15,
+            "zone": 4,
+            "length": 78
+        },
+        {
+            "col": 12,
+            "zone": 5,
+            "length": 75
+        }
+    ]
+}

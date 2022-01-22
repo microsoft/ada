@@ -1,0 +1,148 @@
+<html>
+<head>
+    <title>Ada</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.4.1/css/bootstrap.min.css" crossorigin="anonymous">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="/assets/js/vendor/jquery-1.11.2.min.js"><\/script>')
+    </script>
+</head>
+<body>
+    <div class="tilelist">
+        <div class="tile" style="background: rgb(48,48,48)" command="/power/on">
+            <p class="caption" style="color:white">ON</p>
+        </div>
+        <div class="tile" style="background: rgb(48,48,48)" command="/power/off">
+            <p class="caption" style="color:white">OFF</p>
+        </div>
+        <div class="tile" style="background: rgb(120, 0, 0)" command="/emotion/anger">
+            <p class="caption" style="color:white">Anger</p>
+        </div>
+        <div class="tile" style="background: rgb(220, 60, 2)" command="/emotion/contempt">
+            <p class="caption">Contempt</p>
+        </div>
+        <div class="tile" style="background: rgb(100, 200, 0)" command="/emotion/disgust">
+            <p class="caption">Disgust</p>
+        </div>
+        <div class="tile" style="background: rgb(80, 80, 80)" command="/emotion/fear">
+            <p class="caption" style="color:white">Fear</p>
+        </div>
+        <div class="tile" style="background: rgb(255, 220, 0)" command="/emotion/happiness">
+            <p class="caption">Happiness</p>
+        </div>
+        <div class="tile" style="background: rgb(90, 160, 255)" command="/emotion/neutral">
+            <p class="caption">Neutral</p>
+        </div>
+        <div class="tile" style="background: rgb(0, 20, 160)" command="/emotion/sadness">
+            <p class="caption" style="color:white">Sadness</p>
+        </div>
+        <div class="tile" style="background: rgb(160, 0, 160)" command="/emotion/surprise">
+            <p class="caption">Surprise</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/neurons">
+            <p class="caption">Neural</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/rainbow">
+            <p class="caption">Rainbow</p>
+        </div>
+        <div class="tile" style="background: rgb(252, 35, 35)" command="/animation/fire">
+            <p class="caption">Fire</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/red yellow gradient">
+            <p class="caption">Yellow/Red<br/>Gradient</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/blue red gradient">
+            <p class="caption">Blue/Red<br/>Gradient</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/yellow green gradient">
+            <p class="caption">Yellow/Green<br/>Gradient</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/blue green gradient">
+            <p class="caption">Blue/Green<br/>Gradient</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/moving gradient 1">
+            <p class="caption">Moving<br/>Gradient 1</p>
+        </div>
+        <div class="tile" style="background: rgb(180,80,80)" command="/animation/diagonal gradient">
+            <p class="caption">Diagonal<br/>Gradient</p>
+        </div>
+        <div class="tile" style="background: rgb(121,243,243)" command="/animation/moving gradient 2">
+            <p class="caption">Moving<br/>Gradient 2</p>
+        </div>
+        <div class="tile" style="background: rgb(35, 133, 133)" command="/rain/toggle">
+            <p class="caption">Toggle Rain</p>
+        </div>
+        <div class="tile" style="background: rgb(50, 104, 104)" command="/animation/color cycle">
+            <p class="caption">Color Cycle</p>
+        </div>
+        <div class="tile" style="background: rgb(73, 134, 93)" command="/animation/gradient cycle">
+            <p class="caption">Gradient Cycle</p>
+        </div>
+        <div class="tile" style="background: rgb(0, 255, 80)" command="/animation/moving gradient cycle">
+            <p class="caption">Moving Gradient Cycle</p>
+        </div>
+        <div class="tile" style="background: rgb(48,48,48)"  command="/power/run">
+            <p class="caption" style="color:white">Run</p>
+        </div>
+        <div class="tileX">
+            <p>Red: <input id="red" type="text" value="128"/> </p>
+            <p>Green: <input id="green" type="text" value="0"/> </p>
+            <p>Blue: <input id="blue" type="text" value="0"/> </p>
+            <p><button id="adabutton" onclick="SetColor()">Ada</button> <button onclick="SetDmx()">Dmx</button> </p>
+        </div>
+    </div>
+    <br clear="all"/>
+    <div class="statusbar">
+    </div>
+    <script>
+        function getColorComponent(id) {
+            var r = parseInt($(id).val())
+            if (isNaN(r) || r < 0 || r > 255) {
+                r = 0;
+            }
+            $(id).val(r)
+            return r;
+        }
+
+        function SendCommand(cmd){
+            $(".statusbar")[0].innerText = "sending command: " + command;
+            var xhttp = new XMLHttpRequest();
+            xhttp.onload = function(e) {
+                $(".statusbar")[0].innerText = xhttp.responseText;
+            }
+            xhttp.open("GET", command);
+            xhttp.send();
+        }
+
+        function SetColor(){
+            var r = getColorComponent("#red")
+            var g = getColorComponent("#green")
+            var b = getColorComponent("#blue")
+            command = "/color/" + r + "," + g + "," + b;
+
+            SendCommand(command);
+        }
+
+        function SetDmx(){
+            var r = getColorComponent("#red")
+            var g = getColorComponent("#green")
+            var b = getColorComponent("#blue")
+            command = "/dmx/" + r + "," + g + "," + b;
+
+            SendCommand(command);
+        }
+
+        function SelectTile(e)
+        {
+            command = e.target.parentNode.getAttribute("command");
+            SendCommand(command);
+        }
+
+        $(".tile").each(function () {
+            var tile = $(this)[0];
+            tile.onclick = SelectTile;
+        });
+    </script>
+</body>
+</html>

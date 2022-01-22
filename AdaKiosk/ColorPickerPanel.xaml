@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="AdaSimulation.ColorPickerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"  Focusable="True"
+             d:DesignHeight="282" d:DesignWidth="273">
+    <Grid Margin="10" Background="Black">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+                
+        <Rectangle x:Name="Rainbow"  Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="Red" Offset="0"/>
+                    <GradientStop Color="Yellow" Offset="0.1666666666666667"/>
+                    <GradientStop Color="Green" Offset="0.3333333333333333"/>
+                    <GradientStop Color="Cyan" Offset="0.5"/>
+                    <GradientStop Color="Blue" Offset="0.6666666666666667"/>
+                    <GradientStop Color="Magenta" Offset="0.8333333333333333"/>
+                    <GradientStop Color="Red" Offset="1"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+        <Rectangle x:Name="GrayScale">
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="Transparent" Offset="0"/>
+                    <GradientStop Color="Silver" Offset="1"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+
+        <Slider x:Name="LuminanceSlider" Margin="3" Grid.Column="1"   Orientation="Vertical" Minimum="0" Maximum="1" ValueChanged="LuminanceSlider_ValueChanged"/>
+        <Slider x:Name="TransparencySlider" Margin="3" Grid.Column="0" Grid.Row="1"   Orientation="Horizontal" Minimum="0" Maximum="1" ValueChanged="TransparencySlider_ValueChanged"/>
+
+        <Grid Grid.Column="0" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Rectangle x:Name="TransparencyPatch" Grid.RowSpan="2" Width="150" Height="150" Margin="5" VerticalAlignment="Top" >
+                <Rectangle.Fill>
+                    <DrawingBrush Viewport="0,0,0.25,0.25" TileMode="Tile">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="White">
+                                    <GeometryDrawing.Geometry>
+                                        <RectangleGeometry Rect="0,0,100,100" />
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                                <GeometryDrawing Brush="Gray">
+                                    <GeometryDrawing.Geometry>
+                                        <GeometryGroup>
+                                            <RectangleGeometry Rect="0,0,50,50" />
+                                            <RectangleGeometry Rect="50,50,50,50" />
+                                        </GeometryGroup>
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <Rectangle x:Name="Swatch" Width="150" Height="150" Margin="5" Stroke="Black" StrokeThickness="1"  VerticalAlignment="Top" >
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="{Binding Color}"/>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="ColorName" Grid.ColumnSpan="3" VerticalAlignment="top" MinWidth="70" Text="{Binding Color}" Background="LemonChiffon" Margin="4"/>
+            
+                <Button x:Name="CancelButton" Grid.Column="1" Grid.Row="2" MinWidth="50" MinHeight="30" VerticalAlignment="Bottom" Click="OnCancelButtonClick">Cancel</Button>
+                <Button x:Name="Button"  Grid.Column="2" Grid.Row="2"  MinWidth="50" MinHeight="30" VerticalAlignment="Bottom" Click="OnOkButtonClick">OK</Button>
+            </Grid>
+        </Grid>
+        
+
+    </Grid>
+</UserControl>

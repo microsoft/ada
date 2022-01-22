@@ -1,0 +1,152 @@
+body {
+    margin:0px;
+}
+
+.statusbar {
+    background: #c0c0c0;
+    bottom: 0;
+    padding-top: 3px;
+    padding-left:5px;
+    padding-bottom: 3px;
+    height: 26px;
+    width: 99%;
+}
+
+.tileX {
+    float: left;
+    margin:10px;
+    user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    display: table;
+    font-weight:bold;
+}
+
+.tile {
+    float: left;
+    margin:10px;
+    overflow: hidden;
+    user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    display: table;
+    font-weight:bold;
+}
+
+.tile:hover {
+    border-width:3px;
+    border-style:solid;
+    border-color:darkmagenta;
+    cursor: pointer;
+}
+
+.tile:active {
+    margin:13px;
+}
+
+.caption {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    width:90%;
+  }
+
+
+/*small screens (phones)*/
+@media screen and (min-width: 300px) {
+
+    .tilelist {
+        font-size: 10pt;
+        max-width:300px;
+    }
+    .tile {
+        width:120px;
+        height:100px;
+    }
+
+    .tile:active {
+        width:114px;
+        height:94px;
+        margin:13px;
+    }
+}
+
+/*small screens (phones)*/
+@media screen and (min-width: 480px) {
+
+    .tilelist {
+        font-size: 10pt;
+        max-width:480px;
+    }
+    .tile {
+        width:120px;
+        height:100px;
+    }
+
+    .tile:active {
+        width:114px;
+        height:94px;
+        margin:13px;
+    }
+}
+
+/*small screens (phones)*/
+@media screen and (min-width: 600px) {
+
+    .tilelist {
+        font-size: 10pt;
+        max-width:600px;
+    }
+    .tile {
+        width:120px;
+        height:100px;
+    }
+
+    .tile:active {
+        width:114px;
+        height:94px;
+        margin:13px;
+    }
+}
+
+/* medium screens (tablets)*/
+@media screen and (min-width: 1280px) {
+
+    .tilelist {
+        font-size: 12pt;
+        max-width:1024px;
+    }
+
+    .tile {
+        width:120px;
+        height:100px;
+    }
+
+    .caption-plus {
+        font-size: 48pt;
+    }
+
+    .tile:active {
+        width:114px;
+        height:94px;
+        margin:13px;
+    }
+}
+
+/*larger screens */
+@media screen and (min-width: 1400px) {
+
+    .tilelist {
+        font-size: 18pt;
+        max-width:1620px;
+    }
+    .tile {
+        width:250px;
+        height:200px;
+    }
+
+    .tile:active {
+        width:244px;
+        height:194px;
+    }
+}

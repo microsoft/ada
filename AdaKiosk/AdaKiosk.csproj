@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+	<InstallUrl>$(ADA_KIOSK_STORAGE_URL)</InstallUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\Server\column_map.json" Link="column_map.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Server\config.json" Link="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Server\zone_map_1.json" Link="zone_map_1.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Server\zone_map_2.json" Link="zone_map_2.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Server\zone_map_3.json" Link="zone_map_3.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.SignalR.Management" Version="1.11.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1018-prerelease" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+</Project>
