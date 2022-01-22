@@ -2,6 +2,10 @@
 
 This repo contains the software needed to run Ada.
 
+![ada](ada-feature.jpg)
+
+## Design
+
 ![image](design.png)
 
 The following is what is current:
