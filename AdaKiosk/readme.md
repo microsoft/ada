@@ -48,14 +48,4 @@ led indexes, including an led range, like this "1,2-5,8,10-20"
 
 ## Debug
 
-This is an advanced page for looking at all known LED's.  The length
-of each strip is defined in `column_map.json`.  You can then use the
-Region text box to define any number of regions with id's 0, 1, 2,
-etc, where you paint the specific led's you want in that region.  This
-will be tested live by sending individial `setpixel` commands to the
-server. Click the `Color` button to switch it to an `Erase` button
-which removes selected leds from your region.
-
-Note the last 12 short strips belong to the center core.
-
-![image](images/debug.png)
+This is an advanced page for debugging individual LED's on Ada.
