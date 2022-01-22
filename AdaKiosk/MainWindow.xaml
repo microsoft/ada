@@ -35,5 +35,6 @@
         <local:Controller Grid.Column="1" x:Name="controller" Visibility="Collapsed"/>
         <local:DebugStripPanel Grid.Column="1" x:Name="strips" Visibility="Collapsed"/>
         <wv2:WebView2 Grid.Column="1" Name="webView" Source="https://www.microsoft.com/artist-in-residence/collaborations/ada/"/>
+        <Border x:Name="ScreenSaver" Grid.ColumnSpan="2" Visibility="Collapsed" Background="Transparent"/>
     </Grid>
 </Window>

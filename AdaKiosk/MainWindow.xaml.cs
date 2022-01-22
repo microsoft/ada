@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace AdaKiosk
 {
@@ -16,6 +18,18 @@ namespace AdaKiosk
         private MessageBus bus;
         public static Window Instance;
         private DelayedActions actions = new DelayedActions();
+        private int InteractiveSleepDelay = 60;
+        private int InitialSleepDelay = 600;
+
+        enum ViewType
+        {
+            Story,
+            Simulation,
+            Control,
+            Debug
+        }
+
+        private ViewType currentView = ViewType.Story;
 
         public MainWindow()
         {
@@ -25,6 +39,7 @@ namespace AdaKiosk
             this.sim.SimulatingCommand += OnSimulatingCommand;
             this.controller.CommandSelected += OnSendCommand;
             this.strips.CommandSelected += OnSendCommand;
+            this.UpdateView();
         }
 
         private async void OnSendCommand(object sender, string command)
@@ -54,6 +69,19 @@ namespace AdaKiosk
                 bus.Closed += OnConnectionClosed;
                 await bus.SendMessage("server", "/kiosk/started");
             }
+
+            // if nothing happens clear the screen in 10 minutes.
+            StartDelayedSleep(InitialSleepDelay);
+        }
+
+        private void StartDelayedSleep(int seconds)
+        {
+            if (this.ScreenSaver.Visibility == Visibility.Visible)
+            {
+                this.ScreenSaver.Visibility = Visibility.Collapsed;
+                UpdateView();
+            }
+            actions.StartDelayedAction("Sleep", OnSleep, TimeSpan.FromSeconds(seconds));
         }
 
         private void OnSignalReceived(object sender, string msg)
@@ -117,25 +145,49 @@ namespace AdaKiosk
             }
         }
 
-        private void OnSimulation(object sender, RoutedEventArgs e)
+        private void UpdateView()
         {
             this.webView.Visibility = Visibility.Collapsed;
-            this.sim.Visibility = Visibility.Visible;
+            this.sim.Visibility = Visibility.Collapsed;
             this.controller.Visibility = Visibility.Collapsed;
             this.strips.Visibility = Visibility.Collapsed;
+
+            switch (this.currentView)
+            {
+                case ViewType.Story:
+                    this.webView.Visibility = Visibility.Visible; ;
+                    sim.Stop();
+                    break;
+                case ViewType.Simulation:
+                    this.sim.Visibility = Visibility.Visible;
+                    this.sim.Focus();
+                    break;
+                case ViewType.Control:
+                    this.controller.Visibility = Visibility.Visible; ;
+                    sim.Stop();
+                    break;
+                case ViewType.Debug:
+                    this.strips.Visibility = Visibility.Visible; ;
+                    sim.Stop();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void OnSimulation(object sender, RoutedEventArgs e)
+        {
+            this.currentView = ViewType.Simulation;
+            UpdateView();
             ButtonBlog.IsChecked = false;
             ButtonControl.IsChecked = false;
             ButtonDebug.IsChecked = false;
-            this.sim.Focus();
         }
 
         private void OnControl(object sender, RoutedEventArgs e)
         {
-            this.webView.Visibility = Visibility.Collapsed;
-            this.sim.Visibility = Visibility.Collapsed;
-            this.controller.Visibility = Visibility.Visible;
-            this.strips.Visibility = Visibility.Collapsed;
-            sim.Stop();
+            this.currentView = ViewType.Control;
+            UpdateView();
             ButtonBlog.IsChecked = false;
             ButtonSim.IsChecked = false;
             ButtonDebug.IsChecked = false;
@@ -143,11 +195,8 @@ namespace AdaKiosk
 
         private void OnBlog(object sender, RoutedEventArgs e)
         {
-            this.webView.Visibility = Visibility.Visible;
-            this.sim.Visibility = Visibility.Collapsed;
-            this.controller.Visibility = Visibility.Collapsed;
-            this.strips.Visibility = Visibility.Collapsed;
-            sim.Stop();
+            this.currentView = ViewType.Story;
+            UpdateView();
             ButtonSim.IsChecked = false;
             ButtonControl.IsChecked = false;
             ButtonDebug.IsChecked = false;
@@ -155,11 +204,8 @@ namespace AdaKiosk
 
         private void OnDebug(object sender, RoutedEventArgs e)
         {
-            this.webView.Visibility = Visibility.Collapsed;
-            this.sim.Visibility = Visibility.Collapsed;
-            this.controller.Visibility = Visibility.Collapsed;
-            this.strips.Visibility = Visibility.Visible;
-            sim.Stop();
+            this.currentView = ViewType.Debug;
+            UpdateView();
             ButtonBlog.IsChecked = false;
             ButtonSim.IsChecked = false;
             ButtonControl.IsChecked = false;
@@ -168,8 +214,27 @@ namespace AdaKiosk
 
         bool fullScreen = true;
 
+        protected override void OnPreviewMouseMove(MouseEventArgs e)
+        {
+            StartDelayedSleep(InteractiveSleepDelay);
+            base.OnPreviewMouseMove(e);
+        }
+
+        protected override void OnPreviewStylusDown(StylusDownEventArgs e)
+        {
+            StartDelayedSleep(InteractiveSleepDelay);
+            base.OnPreviewStylusDown(e);
+        }
+
+        protected override void OnPreviewTouchDown(TouchEventArgs e)
+        {
+            StartDelayedSleep(InteractiveSleepDelay);
+            base.OnPreviewTouchDown(e);
+        }
+
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
+            StartDelayedSleep(600);
             if (e.Key == Key.F11)
             {
                 if (!fullScreen)
@@ -212,6 +277,18 @@ namespace AdaKiosk
                 this.sim.Save();
             }
             ShowStatus("saved");
+        }
+
+        void OnSleep()
+        {
+            SolidColorBrush brush = new SolidColorBrush() { Color = Colors.Transparent };
+            ScreenSaver.Background = brush;
+            ScreenSaver.Visibility = Visibility.Visible;
+            var animation = new ColorAnimation(Colors.Black, new Duration(TimeSpan.FromSeconds(5)));
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, animation);
+            // a black shield cannot animate over the top of webView!
+            webView.Visibility = Visibility.Collapsed;
+            sim.Stop();
         }
     }
 }

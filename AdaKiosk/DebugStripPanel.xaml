@@ -19,6 +19,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -46,5 +48,9 @@
         </StackPanel>
 
         <Button Margin="10,3" MinWidth="80" x:Name="ManualButton" Grid.Row="4" VerticalAlignment="Bottom" Click="OnManualGo">Send</Button>
+
+
+        <TextBlock Text="Version"  Margin="10,5" Grid.Row="6" Grid.Column="0"/>
+        <TextBlock Margin="10,5" x:Name="TextBoxVersion"  Grid.Row="2" Grid.Column="1" />
     </Grid>
 </UserControl>
