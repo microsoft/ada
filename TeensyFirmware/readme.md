@@ -26,7 +26,6 @@ The `ada_server.py` script will check this Azure firmware once a day and will se
 raspberry pi devices for automatic over the air firmware upgrades.
 
 You should see it complete the programming job quickly.
-More information about the Teensy is in our [OneNote](https://microsoft.sharepoint.com/teams/JennySabin/_layouts/OneNote.aspx?id=%2Fteams%2FJennySabin%2FShared%20Documents%2FGeneral%2FProject%20Ada&wd=target%28Software.one%7C8C4AF1FD-01F1-4219-9D9F-1D5FEF00F1BA%2FTeensy%7C45071A05-926B-48CB-93A2-A9C1734840B2%2F%29).
 
 # Raspberry Pi Setup
 
@@ -42,6 +41,6 @@ git clone https://github.com/PaulStoffregen/teensy_loader_cli
 make
 ```
 
-The resulting `teensy_loader_cli` tool is used by the `TeensyFirmware\flash.sh` script to update the firmware on the Teensy.  
+The resulting `teensy_loader_cli` tool is used by the `TeensyFirmware\flash.sh` script to update the firmware on the Teensy.
 
 The Teensy should show up in a path like this `/dev/serial/by-id/usb-Teensyduino_USB_Serial_6116170-if00`.  If it is not there then there may be a problem with the Teensy or the serial connection.
