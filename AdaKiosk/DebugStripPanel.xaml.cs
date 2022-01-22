@@ -36,6 +36,12 @@ namespace AdaKiosk
 
         private void OnManualGo(object sender, RoutedEventArgs e)
         {
+            if (string.Compare(TextBoxColor.Text, "shutdown", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                Application.Current.Shutdown(0);
+                return;
+            }
+
             int pi = 0;
             int strip = 0;
             if (!GetValidInteger(TextBoxPi, PiError, out pi) ||
