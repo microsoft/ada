@@ -123,12 +123,6 @@ namespace AdaKiosk
             base.OnClosing(e);
         }
 
-        private void OnSignalReceived(string msg)
-        {
-            Debug.WriteLine(msg);
-            ShowStatus(msg);
-        }
-
         private void ShowStatus(string status)
         {
             UiDispatcher.Instance.RunOnUIThread(() =>

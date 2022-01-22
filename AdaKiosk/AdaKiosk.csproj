@@ -5,7 +5,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
 	<InstallUrl>$(ADA_KIOSK_STORAGE_URL)</InstallUrl>
-	<Version>1.0.0.26</Version>
+	<Version>1.0.0.27</Version>
 	<Company>Microsoft Corporation</Company>
 	<RepositoryUrl>https://github.com/microsoft/ada</RepositoryUrl>
   </PropertyGroup>

@@ -116,7 +116,7 @@ namespace AdaSimulation
             }
         }
 
-        private void SimulateCommand(Command cmd)
+        public void SimulateCommand(Command cmd)
         {
             if (cmd.command == "CrossFade" || cmd.command == "Gradient")
             {
@@ -146,11 +146,11 @@ namespace AdaSimulation
             {
                 if (cmd.Columns != null)
                 {
-                    foreach(var c in cmd.Columns)
+                    foreach (var c in cmd.Columns)
                     {
                         foreach (var pi in pis)
                         {
-                            if ("ada"+pi.Name == cmd.Target || string.IsNullOrEmpty(cmd.Target))
+                            if ("ada" + pi.Name == cmd.Target || string.IsNullOrEmpty(cmd.Target))
                             {
                                 pi.AnimateStrip(c.Index, c.Color, cmd.Seconds);
                             }
@@ -158,6 +158,80 @@ namespace AdaSimulation
                     }
                 }
             }
+            else if (cmd.command == "Rainbow")
+            {
+                Color[] colors = GetRainbow();
+                // we don't do the moving part yet... although it could be done by animating the GradientStop Offsets.
+                foreach (var pi in pis)
+                {
+                    if ("ada" + pi.Name == cmd.Target || string.IsNullOrEmpty(cmd.Target))
+                    {
+                        pi.AnimateGradient(colors, cmd.Seconds);
+                    }
+                }
+            }
+            else if (cmd.command == "NeuralDrop")
+            {
+                Color[] colors = GetNeuralDropColors();
+                // we don't do the moving part yet... although it could be done by animating the GradientStop Offsets.
+                foreach (var pi in pis)
+                {
+                    if ("ada" + pi.Name == cmd.Target || string.IsNullOrEmpty(cmd.Target))
+                    {
+                        pi.AnimateGradient(colors, cmd.Seconds);
+                    }
+                }
+            }
+        }
+
+        Random rand = new Random(Environment.TickCount);
+
+        private Color[] GetNeuralDropColors()
+        {
+            Color base_color = Color.FromRgb(0x1b, 0x23, 0x4b);
+            List<Color> bubble_colors = new List<Color>();
+            const int bubble_size = 16;
+            float start = 0;
+            float step = (float)(Math.PI / 15);
+            for (int i = 0; i < bubble_size; i++)
+            {
+                int temperature = (int)(128 * Math.Pow(Math.Sin(start), (float)2.0) + 8);
+                byte nc = (byte)(temperature);
+                bubble_colors.Add(Color.FromRgb(nc, 0, nc));
+                start += step;
+            }
+
+            // put it in some random location
+            int index = rand.Next(20, 70);
+            List<Color> colors = new List<Color>();
+            // simulate 100 pixels.
+            for (int i = 0; i < 100; i++)
+            {
+                int j = i - index;
+                if (j < 0 || j >= bubble_size)
+                {
+                    colors.Add(base_color);
+                }
+                else
+                {
+                    colors.Add(bubble_colors[j]);
+                }
+            }
+            return colors.ToArray();
+        }
+
+        private Color[] GetRainbow()
+        {
+            const int count = 17;
+            Color[] colors = new Color[count];
+            Color[] cycle = new Color[] { Colors.Red, Colors.Blue, Colors.Green };
+            int j = 0;
+            for (int i = 0; i < count; i++)
+            {
+                colors[i] = cycle[j++];
+                if (j == cycle.Length) j = 0;
+            }
+            return colors;
         }
 
         private void SimulateEmotion(string name)
@@ -300,7 +374,7 @@ namespace AdaSimulation
             if (editing_zone_map)
             {
                 this.SaveMaps();
-                editing_zone_map = false; 
+                editing_zone_map = false;
                 Watermark.Text = "Simulation";
             }
         }

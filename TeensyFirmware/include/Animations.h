@@ -742,7 +742,7 @@ public:
 
         int ledsPerStrip = buffer.NumLedsPerStrip();
         int numStrips = buffer.NumStrips();
-        int num_strip_colors = (int)strip_colors.reserved();        
+        int num_strip_colors = (int)strip_colors.reserved();
 
         for (int i = 0; i < numStrips; i++)
         {
