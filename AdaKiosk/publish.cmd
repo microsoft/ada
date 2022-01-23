@@ -5,7 +5,8 @@ if not EXIST bin\publish goto :nobits
 if "%ADA_KIOSK_STORAGE_CONNECTION_STRING%" == "" goto :nokey
 
 echo ### Uploading ClickOnce installer to Azure
-AzurePublishClickOnce %~dp0bin\publish downloads/AdaKiosk "%ADA_KIOSK_STORAGE_CONNECTION_STRING%"
+call AzurePublishClickOnce %~dp0bin\publish downloads/AdaKiosk "%ADA_KIOSK_STORAGE_CONNECTION_STRING%"
+call AzurePublishClickOnce %~dp0..\AdaKioskPackage\AppPackages downloads/AdaKiosk.Net "%LOVETTSOFTWARE_STORAGE_CONNECTION_STRING%"
 if ERRORLEVEL 1 goto :eof
 
 goto :eof

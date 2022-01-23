@@ -381,9 +381,9 @@ namespace AdaSimulation
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            this.config = ServerConfig.Load("config.json");
-
             string path = System.IO.Path.GetDirectoryName(this.GetType().Assembly.Location);
+            this.config = ServerConfig.Load(System.IO.Path.Combine(path, "config.json"));
+
             while (path != null)
             {
                 var filename = System.IO.Path.Combine(path, "zone_map_1.json");

@@ -41,7 +41,7 @@
         <TextBlock x:Name="LedRangeError" Margin="10,5" Grid.Row="2" Grid.Column="2" Foreground="Salmon"/>
 
         <TextBlock Text="Color"  Margin="10,5" Grid.Row="3" Grid.Column="0"/>
-        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxColor"  Grid.Row="3" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
+        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxColor"  Grid.Row="3" Grid.Column="1" GotFocus="OnTextBoxFocus" KeyDown="OnColorKeyDwn"/>
         <StackPanel Margin="10,3" Orientation="Horizontal" Grid.Column="2" Grid.Row="3" HorizontalAlignment="Left">
             <Button x:Name="PickColorButton" VerticalAlignment="Bottom" MinWidth="50" Click="OnPickColor">...</Button>
             <TextBlock x:Name="ColorError" Margin="10,0" Foreground="Salmon"/>
