@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
 
@@ -61,11 +63,11 @@ public:
 
     void CommandThread()
     {
-        try 
+        try
         {
             RunCommand();
         }
-        catch (std::exception& e) 
+        catch (std::exception& e)
         {
             if (e.what() != nullptr)
             {
@@ -182,13 +184,13 @@ public:
             if (commandRunning && commandTimer.seconds() > TEENSY_TIMEOUT)
             {
                 // command is blocked and Teensy is not reponding, so we exit
-                // this process which will allow the bash shell script to 
+                // this process which will allow the bash shell script to
                 // reboot the Teensy.
                 std::cout << "### Teensy does not seem to be responding!\n";
                 token.Cancel = true;
                 exit(1);
             }
-            else 
+            else
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }
@@ -274,7 +276,7 @@ public:
         currentCommand.strip = strip;
         currentCommand.colorsPerStrip = colorsPerStrip;
         currentCommand.colors.clear();
-        for (auto c : colors) 
+        for (auto c : colors)
         {
             currentCommand.colors.push_back(c);
         }

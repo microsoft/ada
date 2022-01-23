@@ -1,4 +1,5 @@
-#ifndef _COMMANDS_H
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.#ifndef _COMMANDS_H
 #define _COMMANDS_H
 
 #include <stdlib.h>

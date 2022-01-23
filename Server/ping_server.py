@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 import argparse
 import socket
 import json
@@ -21,7 +23,7 @@ def update_server_with_ipcamera_emotion(server_endpoint, emotion, score):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect(server_endpoint)
         sock.sendall(bytes('IPCAMERA {} {}\n'.format(emotion, score), 'utf-8'))
-        
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Pulls Sensei data from the ada_server for display on the raspberry pi')

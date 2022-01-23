@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #include "../SerialPort.h"
 #include "Utils.h"
@@ -18,7 +18,7 @@ std::vector<SerialPortInfo> SerialPort::FindSerialPorts(int vid, int pid)
     // todo: alternative:  probably need to do an lstat on '/dev/serial/by-id' and find
     // something that looks like PX4 and return that name, or follow the symbolic link to /dev/ttyACM0...
 
-    std::string bash_command = 
+    std::string bash_command =
     	"bash -c '"
 	    	"for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do "
 	    	"syspath=\"${sysdevpath%/dev}\"; devname=\"$(udevadm info -q name -p $syspath)\"; "

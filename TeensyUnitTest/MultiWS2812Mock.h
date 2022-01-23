@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #pragma once
 #include <stdint.h>
 
@@ -24,7 +26,7 @@ public:
     void enableOutputPin(int port, int pin)
     {
     }
-	
+
 	void show();
 
     void setBuffer(uint32_t* buffer)

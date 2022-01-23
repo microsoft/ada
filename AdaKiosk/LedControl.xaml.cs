@@ -1,4 +1,6 @@
-﻿using AdaSimulation;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using AdaSimulation;
 using System;
 using System.Windows.Controls;
 using System.Windows.Media;

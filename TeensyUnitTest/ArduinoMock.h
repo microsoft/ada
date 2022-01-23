@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #pragma once
 
 #include <stdlib.h>
@@ -25,7 +27,7 @@ public:
 
     }
 
-    bool available() 
+    bool available()
 	{
 		if (connected) {
 			return client.available();
@@ -41,10 +43,10 @@ public:
 
     int readBytes(char* buffer, int length)
     {
-		if (connected) 
+		if (connected)
 		{
 			int rc =  client.read((uint8_t*)buffer, length);
-			if (rc < 0) 
+			if (rc < 0)
 			{
 				return 0;
 			}
@@ -73,12 +75,12 @@ public:
 
 	void print(const char* message)
 	{
-		if (connected) 
+		if (connected)
 		{
 			int len = (int)strlen(message);
 			client.write((const uint8_t*)message, len);
 		}
-		else 
+		else
 		{
 			std::cout << message << "\n";
 		}

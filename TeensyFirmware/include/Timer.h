@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _TIMER_H
 #define _TIMER_H
 
@@ -24,7 +26,7 @@ public:
     static void init() {
         // Very accurate timing for uS scale time periods (used for determining frame latch pulse delay)
         // https://github.com/manitou48/teensy4/blob/master/gpt_micros.ino
-        CCM_CCGR1 |= CCM_CCGR1_GPT(CCM_CCGR_ON) | 
+        CCM_CCGR1 |= CCM_CCGR1_GPT(CCM_CCGR_ON) |
                     CCM_CCGR1_GPT1_SERIAL(CCM_CCGR_ON);  // enable GPT1 module
         GPT1_CR = 0;
         GPT1_PR = 23;   // prescale+1

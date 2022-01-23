@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -86,7 +88,7 @@ namespace AdaSimulation
         }
 
         private static object OnCoerceColorValue(DependencyObject d, object baseValue)
-        {             
+        {
             Color baseColor = (Color)baseValue;
             return baseValue;
         }

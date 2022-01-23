@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 import os
 from http.server import BaseHTTPRequestHandler
 import urllib

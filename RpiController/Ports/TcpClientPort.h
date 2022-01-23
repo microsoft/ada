@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #ifndef SERIAL_COM_TCPCLIENTPORT_HPP
 #define SERIAL_COM_TCPCLIENTPORT_HPP
@@ -14,8 +14,8 @@ public:
 	~TcpClientPort();
 
 	// Connect can set you up two different ways.  Pass 0 for local port to get any free local
-	// port. localHost allows you to be specific about which local adapter to use in case you 
-	// have multiple ethernet adapters. 
+	// port. localHost allows you to be specific about which local adapter to use in case you
+	// have multiple ethernet adapters.
 	void connect(const std::string& localHost, int localPort, const std::string& remoteHost, int remotePort);
 
     // Connect to server using any available local address and port.

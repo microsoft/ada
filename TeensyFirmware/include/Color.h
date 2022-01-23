@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _COLOR_H
 #define _COLOR_H
 #include <stdint.h>

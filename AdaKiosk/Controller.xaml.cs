@@ -1,4 +1,6 @@
-﻿using AdaSimulation;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using AdaSimulation;
 using System;
 using System.Collections.Generic;
 using System.Linq;

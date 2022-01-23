@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -566,9 +568,9 @@ int main(int argc, char* argv[])
         {
             useTcp = true;
         }
-        else if (s == "--serial") 
+        else if (s == "--serial")
         {
-            useTcp = false; 
+            useTcp = false;
 
             if (i + 1 < argc) {
                 std::string next = argv[i];

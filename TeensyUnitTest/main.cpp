@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 // UnitTest.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
@@ -80,7 +82,7 @@ void TestCommands(std::string name, bool biglength, bool nocolors, bool badCrc)
         else {
             std::cout << "read command " << command.command.c_str() << "\n";
         }
-    }    
+    }
 }
 
 void TestStrings()
@@ -140,7 +142,7 @@ void TestGradientFade()
     colors.push_back(Color{ 0, 255, 255 }); // cyan
     colors.push_back(Color{ 255, 255, 0 }); // yellow
     GradientAnimation gradient(buffer, false);
-    gradient.AddStrip(-1, colors, 2.0);    
+    gradient.AddStrip(-1, colors, 2.0);
     std::cout << "fading to blue/red gradient from black...";
     while (!gradient.Run())
     {
@@ -151,7 +153,7 @@ void TestGradientFade()
     colors.clear();
     colors.push_back(Color{ 255, 0, 0 }); // red
     colors.push_back(Color{ 255, 255, 0 }); // yellow
-    colors.push_back(Color{ 0, 255, 0 }); // green    
+    colors.push_back(Color{ 0, 255, 0 }); // green
     gradient.AddStrip(5, colors, 2.0);
     std::cout << std::endl << "fading strip 5 to red/yellow/green gradient ...";
     while (!gradient.Run())

@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 from dmx import DmxDevice
 from pretty_print import print_info
 

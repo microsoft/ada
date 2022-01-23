@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _PIXELBUFFER_H
 #define _PIXELBUFFER_H
 

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #pragma once
 #include <math.h>
 #include <stdint.h>
@@ -71,7 +73,7 @@ public:
     /// </summary>
     float SetHue(float value)
     {
-        hue = maximum(0, minimum(360.0f, value)); 
+        hue = maximum(0, minimum(360.0f, value));
         return hue;
     }
 
@@ -85,7 +87,7 @@ public:
         saturation = maximum(0, minimum(1, value));
         return saturation;
     }
-    
+
     /// <summary>
     /// Set an RGB color
     /// </summary>

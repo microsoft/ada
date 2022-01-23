@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _PIXELBUFFER_H
 #define _PIXELBUFFER_H
 
@@ -176,7 +178,7 @@ public:
 		Send(writer);
     }
 
-    inline uint32_t* GetPixelAddress(int strip, int led) {        
+    inline uint32_t* GetPixelAddress(int strip, int led) {
         return (uint32_t*)(pixelBuffer + (led * numStrips) + strip);
     }
 
@@ -362,7 +364,7 @@ public:
         Send(writer);
     }
 
-    // 
+    //
     void VerticalGradient(const std::vector<Color>& colors, float seconds = 0, int strip = -1, int colorsPerStrip = 0)
     {
         StreamWriter writer;
@@ -507,7 +509,7 @@ private:
 				{
                     completed = true;
 				}
-                else if (line.find("Status ") >= 0) 
+                else if (line.find("Status ") >= 0)
                 {
                     // ignore these
                 }
@@ -517,7 +519,7 @@ private:
                     error = true;
                 }
             }
-            
+
             if (error)
             {
                 _port.flush();

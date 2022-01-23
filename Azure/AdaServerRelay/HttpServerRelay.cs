@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -87,9 +90,9 @@ namespace Ada.Function
              .BuildServiceManager();
 
             var tokenSource = new CancellationTokenSource();
-            var hubContext = await serviceManager.CreateHubContextAsync(hub, tokenSource.Token);                        
+            var hubContext = await serviceManager.CreateHubContextAsync(hub, tokenSource.Token);
             var negotiationResponse = await hubContext.NegotiateAsync(new NegotiationOptions() { UserId = "server", EnableDetailedErrors=true });
-            
+
             var info = new HubInfo()
             {
                 Hub = hub,

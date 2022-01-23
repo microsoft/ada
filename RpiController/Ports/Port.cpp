@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #include "Port.h"
 #include "Timer.h"
@@ -27,7 +27,7 @@ Port::readline(int timeoutMilliseconds)
     Timer timer;
     timer.start();
 
-    do 
+    do
     {
         if (totalBytesRead > 0)
         {
@@ -53,17 +53,17 @@ Port::readline(int timeoutMilliseconds)
                     // this trims the '\r' from the buffer also.
                     readlineBuffer[i - 1] = '\0';
                 }
-                
+
                 totalBytesRead = i + 1;
                 return readlineBuffer;
-            }            
+            }
         }
         int len = this->read((uint8_t*)&readlineBuffer[totalBytesWritten], bufferSize - totalBytesWritten - 1);
         if (len < 0)
         {
             return nullptr;
         }
-        else if (len == 0) 
+        else if (len == 0)
         {
             // no data retruned, so try again up to the timeout.
             if (timer.milliseconds() > timeoutMilliseconds)

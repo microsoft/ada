@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #pragma once
 
 #include <string.h>
@@ -10,7 +12,7 @@ class StreamWriter
     int pos = 0;
     int length;
 
-    void ReAllocate(int len) 
+    void ReAllocate(int len)
     {
         if (pos + len >= length)
         {
@@ -39,7 +41,7 @@ public:
         length = 1000;
         buffer = new char[length];
     }
-    ~StreamWriter() 
+    ~StreamWriter()
     {
         if (buffer != nullptr) {
             delete[] buffer;
@@ -105,7 +107,7 @@ public:
             uint32_t crc = crc32(nullptr, 0);
             WriteInt(crc);
         }
-        else 
+        else
         {
             uint32_t crc = crc32((uint8_t*)& buffer[offset], pos - offset);
             WriteInt(crc);
@@ -114,7 +116,7 @@ public:
 
     char* GetBuffer() { return buffer; }
 
-    int Size() 
+    int Size()
     {
         return pos;
     }

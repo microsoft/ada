@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 # This firmware publishes the built firmware.hex file to an Azure blob store
 # so the Server can find it there and distribute it to the Raspberry Pi Devices.
 

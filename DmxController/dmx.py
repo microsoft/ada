@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 """Interface to Enttec DMX USB Pro MK2 Controller."""
 import time
 import serial

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 /*-------------------------------------------------------------------------
   Arduino library to control a wide variety of WS2811- and WS2812-based RGB
   LED devices such as Adafruit FLORA RGB Smart Pixels and NeoPixel strips.
@@ -196,7 +198,7 @@ void MultiWS2812::show(void)
     // subsequent round of data until the latch time has elapsed.  This
     // allows the mainline code to start generating the next frame of data
     // rather than stalling for the latch.
-    while (busy());  
+    while (busy());
 
 #if defined(__arm__)
     noInterrupts(); // Need 100% focus on instruction timing

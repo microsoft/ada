@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _SENSEI_H
 #define _SENSEI_H
 
@@ -82,7 +84,7 @@ public:
         }
     }
 
-    bool UpdateFirmware() 
+    bool UpdateFirmware()
     {
         return this->updateFirmware;
     }
@@ -202,7 +204,7 @@ public:
                         // trigger the server to send updated firmware!
                         response = "update";
                     }
-                    
+
                     tcp.write((const uint8_t*)response.c_str(), (int)response.size() + 1);
 
                     if (this->checkFirmware) {

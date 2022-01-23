@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _UTILS_H
 #define _UTILS_H
 
@@ -15,7 +17,7 @@
 //'=': conversion from 'double' to 'float', possible loss of data
 #define STRICT_MODE_OFF                                           \
     __pragma(warning(push))										  \
-    __pragma(warning( disable : 4100 4189 4244 4245 4239 4464 4456 4505 4514 4571 4624 4626 4267 4710 4820 5027 5031))					  
+    __pragma(warning( disable : 4100 4189 4244 4245 4239 4464 4456 4505 4514 4571 4624 4626 4267 4710 4820 5027 5031))
 #define STRICT_MODE_ON                                            \
     __pragma(warning(pop))
 
@@ -31,13 +33,13 @@
 #ifdef __CLANG__
 #define IGNORE_FORMAT_STRING_ON                                       \
     _Pragma("clang diagnostic push")                                  \
-    _Pragma("clang diagnostic ignored \"-Wformat-nonliteral\"")        
+    _Pragma("clang diagnostic ignored \"-Wformat-nonliteral\"")
 
 #define IGNORE_FORMAT_STRING_OFF                                      \
-    _Pragma("clang diagnostic pop")          
+    _Pragma("clang diagnostic pop")
 #else
 #define IGNORE_FORMAT_STRING_ON
-#define IGNORE_FORMAT_STRING_OFF  
+#define IGNORE_FORMAT_STRING_OFF
 #endif
 
 // A handy class for making long running operations cancellable.

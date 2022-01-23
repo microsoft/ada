@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _ANIMATIONS_H
 #define _ANIMATIONS_H
 

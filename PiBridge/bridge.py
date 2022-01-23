@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 import argparse
 import socket
 import time
@@ -23,7 +25,7 @@ class TplinkServer:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.bind((self.local_ip,0))
-                s.connect(self.server_endpoint)    
+                s.connect(self.server_endpoint)
                 s.sendall(bytes("HS105Switches", 'utf-8'))
                 last_ping = time.time()
                 while True:
@@ -50,9 +52,9 @@ class TplinkServer:
                         else:
                             response = "unknown request: " + request
                         s.sendall(bytes(response, 'utf-8'))
-                
+
             except Exception as e:
-                print("## server terminating with exception: {}".format(e), flush=True)     
+                print("## server terminating with exception: {}".format(e), flush=True)
                 time.sleep(5)
 
     def turn_all_on(self):
@@ -132,7 +134,7 @@ def find_local_ips(local_ip, server_name, server_port):
                         break
                 pass
             s.close()
-    return good    
+    return good
 
 
 if __name__ == '__main__':
@@ -141,7 +143,7 @@ if __name__ == '__main__':
     parser.add_argument("--local", help="Override the local ipaddress to use.")
     parser.add_argument("--port", type=int, help="Port we want to connect to on that server", default=12345)
     args = parser.parse_args()
-    
+
     # Set target IP, port and command to send
     while True:
         try:
@@ -170,4 +172,3 @@ if __name__ == '__main__':
         except Exception as e:
             print("Exception: {}".format(e), flush=True)
             time.sleep(1)
-

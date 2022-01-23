@@ -15,6 +15,8 @@
   License along with NeoPixel.  If not, see
   <http://www.gnu.org/licenses/>.
   --------------------------------------------------------------------*/
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #ifndef _MultiWS2812_H
 #define _MultiWS2812_H

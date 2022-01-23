@@ -1,13 +1,5 @@
-####################################################################################################
-##
-##  Project:  Embedded Learning Library (ELL)
-##  File:     remoterunner.py
-##  Authors:  Chris Lovett, Chuck Jacobs
-##
-##  Requires: Python 3.x
-##
-####################################################################################################
-
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 import io
 import sys
 from threading import Thread

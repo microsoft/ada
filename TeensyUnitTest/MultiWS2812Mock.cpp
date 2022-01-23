@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #include "MultiWS2812Mock.h"
 #include "Color.h"
 #include "Bitmap.h"

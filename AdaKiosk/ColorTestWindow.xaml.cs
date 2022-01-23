@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,10 +42,10 @@ namespace AdaSimulation
             for (int j = 0; j < height; j++)
             {
                 for (int i = 0; i < width; i++)
-                {                    
+                {
                     double hue = (double)i * 360.0 / (double)width;
                     double saturation = 0;
-                    double luminance = 0;                    
+                    double luminance = 0;
                     if (j > halfHeight)
                     {
                         // top half is fully bright, ramp saturation

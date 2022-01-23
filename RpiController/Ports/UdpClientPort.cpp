@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #include "Utils.h"
 #include "UdpClientPort.h"
@@ -23,7 +23,7 @@ static bool socket_initialized_ = false;
 #else
 
 // posix
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -107,7 +107,7 @@ public:
 			hasRemote = true;
 			resolveAddress(remoteHost, remotePort, remoteaddr);
 		}
-		else 
+		else
 		{
 			remoteaddr.sin_port = 0;
 		}
@@ -124,11 +124,11 @@ public:
 		if (hasRemote && remotePort != 0) {
 			// limit the socket to only send/receive to/from this remote address/port, this ensures our
 			// subsequent recvfrom calls don't steal messages from other UdpClientPorts.
-			rc = ::connect(sock, reinterpret_cast<sockaddr*>(&remoteaddr), addrlen); 
+			rc = ::connect(sock, reinterpret_cast<sockaddr*>(&remoteaddr), addrlen);
 			if (rc < 0)
 			{
 				int hr = WSAGetLastError();
-				throw std::runtime_error(Utils::stringf("UdpClientPort socket could not connect to remote host at %s:%d, error: %d\n", 
+				throw std::runtime_error(Utils::stringf("UdpClientPort socket could not connect to remote host at %s:%d, error: %d\n",
 					remoteHost.c_str(), remotePort, hr));
 			}
 		}
@@ -262,7 +262,7 @@ public:
 
 //-----------------------------------------------------------------------------------------
 
-UdpClientPort::UdpClientPort() 
+UdpClientPort::UdpClientPort()
 {
 	impl_.reset(new UdpSocketImpl());
 }
@@ -272,7 +272,7 @@ UdpClientPort::~UdpClientPort()
 	close();
 }
 
-void UdpClientPort::close() 
+void UdpClientPort::close()
 {
 	impl_->close();
 }

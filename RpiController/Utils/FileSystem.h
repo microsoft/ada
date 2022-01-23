@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _FILESYSTEM_H
 #define _FILESYSTEM_H
 
@@ -19,7 +21,7 @@ public:
         '/';
 #endif
 
-    // Combine two paths using standard path separator also being careful not to create two 
+    // Combine two paths using standard path separator also being careful not to create two
     // separators if one of the paths already has one.
     static std::string combine(const std::string& parentFolder, const std::string& child) {
         if (child.size() == 0)

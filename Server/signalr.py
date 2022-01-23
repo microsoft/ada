@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 # Provides bi-directional connection to given signalr service
 import requests
 import json

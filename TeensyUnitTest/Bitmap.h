@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #pragma once
 #include <stdint.h>
 #include <string>
@@ -10,7 +12,7 @@ class Bitmap
     int height = 0;
     uint8_t* buffer = nullptr;
 public:
-    Bitmap(int width, int height) 
+    Bitmap(int width, int height)
     {
         this->width = width;
         this->height = height;
@@ -56,7 +58,7 @@ public:
     void SaveBitmap(std::ostream& stream) const
     {
         stream << "BM";
-        
+
         int padding = ((width * 3) % 4) * height;
         int size = (width * height * 3) + padding + 54; // 54 byte header
         stream.write((const char*)&size, 4);
@@ -64,7 +66,7 @@ public:
         int reserved = 0;
         stream.write((const char*)& reserved, 2); // reserved
         stream.write((const char*)& reserved, 2); // reserved
-        
+
         short offset = 54;
         stream.write((const char*)& offset, 2); // to the end of header
         stream.write((const char*)& reserved, 2); // reserved
@@ -78,7 +80,7 @@ public:
         short colorPlanes = 1;
         stream.write((const char*)& colorPlanes, 2); // color planes
 
-        short bitsPerPixel = 24; 
+        short bitsPerPixel = 24;
         stream.write((const char*)& bitsPerPixel, 2); // bits per pixel.
 
         int compression = 0;
@@ -90,7 +92,7 @@ public:
         int resolution = 0xec3;
         stream.write((const char*)& resolution, 4); // horizontal resolution
         stream.write((const char*)& resolution, 4); // vertical resolution
-        
+
         int colors = 0;
         stream.write((const char*)& colors, 4); // colors in the color palette
         stream.write((const char*)& colors, 4); // number of important colors used.

@@ -1,4 +1,5 @@
-#ifndef _CONTROLLER_H
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.#ifndef _CONTROLLER_H
 #define _CONTROLLER_H
 
 #include "PixelBuffer.h"

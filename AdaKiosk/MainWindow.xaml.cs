@@ -1,4 +1,6 @@
-﻿using AdaSimulation;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using AdaSimulation;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -91,7 +93,7 @@ namespace AdaKiosk
             {
                 var message = Message.FromJson(msg);
                 sim.HandleMessage(message);
-            } 
+            }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
@@ -261,7 +263,7 @@ namespace AdaKiosk
         }
 
         void Save()
-        { 
+        {
             if (this.controller.Visibility == Visibility.Visible)
             {
                 this.controller.Save();

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -59,7 +61,7 @@ namespace AdaSimulation
         public void AddToZone(Path path, int zone)
         {
             if (this.columnMap.TryGetValue(path, out int column))
-            { 
+            {
                 Map.ZoneLeds.Add(new StripMap() { zone = zone, col = column });
             }
         }
@@ -91,7 +93,7 @@ namespace AdaSimulation
             {
                 if (seconds == 0)
                 {
-                    path.Stroke = new SolidColorBrush(c); 
+                    path.Stroke = new SolidColorBrush(c);
                 }
                 else
                 {
@@ -231,7 +233,7 @@ namespace AdaSimulation
                 {
                     LinearGradientBrush existing = path.Stroke as LinearGradientBrush;
                     if (existing == null || existing.IsFrozen || existing.GradientStops.Count != colors.Length)
-                    {                        
+                    {
                         path.Stroke = brush;
                         existing = brush;
                     }

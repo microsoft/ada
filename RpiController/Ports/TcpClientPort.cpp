@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #include <stdio.h>
 #include <string.h>
@@ -25,7 +25,7 @@ static bool socket_initialized_ = false;
 #else
 
 // posix
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/time.h>
@@ -216,7 +216,7 @@ public:
 				int hr = WSAGetLastError();
 				if (hr == WSAEMSGSIZE)
 				{
-					// message was too large for the buffer, no problem, return what we have.					
+					// message was too large for the buffer, no problem, return what we have.
 				}
 				else if (hr == WSAECONNRESET || hr == ERROR_IO_PENDING)
 				{
@@ -383,15 +383,14 @@ std::string TcpClientPort::getHostByName(const std::string& name)
     else if (entry->h_length > 0)
     {
         uint8_t* ptr = (uint8_t*)(entry->h_addr_list[0]);
-        if (entry->h_addrtype == AF_INET) 
+        if (entry->h_addrtype == AF_INET)
         {
             return Utils::stringf("%d.%d.%d.%d", (int)ptr[0], (int)ptr[1], (int)ptr[2], (int)ptr[3]);
         }
-        else 
+        else
         {
             // didn't want this...
         }
     }
     return "";
 }
-

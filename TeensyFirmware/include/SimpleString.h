@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #ifndef _SIMPLESTRING_H
 #define _SIMPLESTRING_H
 

@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 
 class HlsColor:
     def __init__(self, hue, luminance, saturation):

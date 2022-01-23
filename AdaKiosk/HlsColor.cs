@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 using System;
 using System.Windows.Media;
 
@@ -124,7 +126,7 @@ namespace AdaSimulation
                 return ToRGB();
             }
             set
-            {                
+            {
                 ToHLS(value.R, value.G, value.B);
             }
         }

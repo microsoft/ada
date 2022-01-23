@@ -1,13 +1,6 @@
 #!/usr/bin/env python3
-###################################################################################################
-#
-#  Project:  Embedded Learning Library (ELL)
-#  File:     sensei.py
-#  Authors:  Chris Lovett, Daniel McDuff
-#
-#  Requires: Python 3.x
-#
-###################################################################################################
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 import argparse
 import os
 import json

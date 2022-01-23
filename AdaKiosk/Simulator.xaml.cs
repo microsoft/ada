@@ -1,4 +1,6 @@
-﻿using AdaKiosk;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using AdaKiosk;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -703,7 +705,7 @@ namespace AdaSimulation
 
         private void OnCosmosClick(object sender, MouseButtonEventArgs e)
         {
-            // toggle active animations            
+            // toggle active animations
             if (stopped)
             {
                 Start();

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #pragma once
 
 #include <sys/types.h>
@@ -131,7 +133,7 @@ uint8_t strip0_loop0_eff0() {
 	// Strip ID: 0 - Effect: Rainbow - LEDS: 300
 	// Steps: 157 - Delay: 1
 	// Colors: 3 (255.0.0, 0.255.0, 0.0.255)
-	// Options: rainbowlen=157, toLeft=true, 
+	// Options: rainbowlen=157, toLeft=true,
 	if (millis() - strip_0.effStart < 1 * (strip_0.effStep)) return 0x00;
 	float factor1, factor2;
 	uint16_t ind;
@@ -156,4 +158,3 @@ uint8_t strip0_loop0_eff0() {
 	else strip_0.effStep++;
 	return 0x01;
 }
-

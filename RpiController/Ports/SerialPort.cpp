@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
 #include "SerialPort.h"
 
@@ -187,7 +187,7 @@ public:
 
         COMMTIMEOUTS timeouts;
         // See https://docs.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-commtimeouts
-        // A value of MAXDWORD, combined with zero values for both the ReadTotalTimeoutConstant and 
+        // A value of MAXDWORD, combined with zero values for both the ReadTotalTimeoutConstant and
         // ReadTotalTimeoutMultiplier members, specifies that the read operation is to return immediately
         // with the bytes that have already been received, even if no bytes have been received
         if (readTimeout == -1)
@@ -203,7 +203,7 @@ public:
             timeouts.ReadTotalTimeoutConstant = 0;
         }
 
-        // A value of zero for both the WriteTotalTimeoutMultiplier and WriteTotalTimeoutConstant members 
+        // A value of zero for both the WriteTotalTimeoutMultiplier and WriteTotalTimeoutConstant members
         // indicates that total time-outs are not used for write operations.
         timeouts.WriteTotalTimeoutMultiplier = 0;
         timeouts.WriteTotalTimeoutConstant = (writeTimeout == -1 ? MAXDWORD : (DWORD)writeTimeout);
@@ -296,7 +296,7 @@ public:
 
 #include <termios.h>
 #include <unistd.h>
-#include <fcntl.h> 
+#include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 
@@ -698,7 +698,7 @@ SerialPort::close()
 }
 
 
-void 
+void
 SerialPort::flush()
 {
 	impl_->flush();

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #include "ArduinoMock.h"
 #include <chrono>
 #include <thread>

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 /*
   This driver uses the high CPU speed of the Teensy 4.0 to output WS2815/WS2811/WS2812 timed
   signals for driving many parallel strings of LEDs. Optimized for use with WS2815 LEDs at WS2811_800kH

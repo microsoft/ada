@@ -1,6 +1,7 @@
-// Ada SerialTest.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
+// Ada SerialTest.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
@@ -70,7 +71,7 @@ int main(int argc, char** argv)
 {
 	PORTTYPE port;
 	int size = 30000;
-	
+
 	// Input parsing and opening of ports:
 	if (argc < 2) die("Usage: receive_test <comport>\n       receive_test <blocksize> <comport>\n");
 	if (argc == 2) {
@@ -159,7 +160,7 @@ int main(int argc, char** argv)
 					curPi = arg1;
 					printf("# INFO: curPi set to %d\n", curPi);
 				}
-				else 
+				else
 					printf("# ERROR: No pi found with that number\n");
 			}
 			break;
@@ -197,7 +198,7 @@ void* serialThread(void* param) {
 	printf("# INFO: Thread started\n");
 	while (!serialArgs->exitThread) {
 		// Send buffer (pre-amble + frame buffer)
-		//printf(" Wrote: %d\n", 
+		//printf(" Wrote: %d\n",
 		maskCenterCone();
 		transmit_bytes(*(serialArgs->port), (char*)completePixBuffer, completePixBufferSz);
 		// recvData(*(serialArgs->port));
@@ -519,14 +520,14 @@ void loop__InteractiveLEDControl(const PORTTYPE &port){
 		switch (command) {
 case 'k':
 case 'K':
-	if( changeCenterCone == true ) 
+	if( changeCenterCone == true )
 		changeCenterCone = false;
 	else
 		changeCenterCone = true;
 break;
 case 'm':
 case 'M':
-	centerConeColor = 
+	centerConeColor =
 						    ((((uint32_t)G) << 16) & 0xFF0000) +
                                                         ((((uint32_t)R) <<  8) & 0x00FF00) +
                                                         ((((uint32_t)B) <<  0) & 0x0000FF);
@@ -842,7 +843,7 @@ void loop__AnimColorWheelShift(const PORTTYPE &port, volatile bool* watchVar)
 
 		// Blocking send buffer (pre-amble + frame buffer)
 //		printf("TX data:\n" );
-		//printf(" Wrote: %d\n", 
+		//printf(" Wrote: %d\n",
 		transmit_bytes(port, (char*)completePixBuffer, completePixBufferSz);
 
 		FPSCount++;
@@ -853,7 +854,7 @@ void loop__AnimColorWheelShift(const PORTTYPE &port, volatile bool* watchVar)
 		}
 
 		// Transmit at approximately 30FPS:
-//		delay_ms(25);	
+//		delay_ms(25);
 	}
 }
 
@@ -977,4 +978,3 @@ void loop__serialSpeedTest(const PORTTYPE &port, int *size)
 	speed = sum / 15.0;
 	printf("Average bytes per second = %.0lf\n", speed);
 }
-

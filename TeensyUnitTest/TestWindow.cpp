@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #pragma once
 
 // Including SDKDDKVer.h defines the highest available Windows platform.
@@ -99,7 +101,7 @@ TestWindow::TestWindow()
         L"Test Window",                 // Window text
         WS_OVERLAPPEDWINDOW,            // Window style
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-        NULL,       // Parent window    
+        NULL,       // Parent window
         NULL,       // Menu
         _impl->hinstance,  // Instance handle
         (LPVOID)this    // Additional application data
@@ -234,7 +236,7 @@ void TestWindow::OnPaint()
     ::ReleaseDC(NULL, hdc);
 }
 
-void TestWindow::Close() 
+void TestWindow::Close()
 {
     ::PostMessage(_impl->hwnd, WM_CLOSE, 0, 0);
 }

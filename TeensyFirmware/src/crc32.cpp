@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 #include "crc32.h"
 
 uint32_t poly8_lookup[256] =

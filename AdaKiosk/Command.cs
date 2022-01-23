@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace AdaKiosk
-{    
+{
     public class Message
     {
         public string User;
@@ -173,7 +175,7 @@ namespace AdaKiosk
                         }
                         else if (reader.TokenType == JsonToken.Integer)
                         {
-                            int i = (int)(Int64)reader.Value;                            
+                            int i = (int)(Int64)reader.Value;
                             switch (name)
                             {
                                 case "speed":
@@ -406,7 +408,7 @@ namespace AdaKiosk
             {
                 if (reader.TokenType == JsonToken.Integer)
                 {
-                    int x = (int)(Int64)reader.Value;                    
+                    int x = (int)(Int64)reader.Value;
                     switch (state)
                     {
                         case 0:

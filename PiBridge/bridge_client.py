@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 import argparse
 import socket
 import time
@@ -19,4 +21,3 @@ class PiBridgeClient:
             if response:
                 return response
         return "no response"
-
