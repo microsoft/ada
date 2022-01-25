@@ -77,7 +77,7 @@ jobs:
       if: ${{ matrix.language == 'cpp' }}
       run: ./RpiController/build.cmd
 
-    - name: Build RpiController
+    - name: Build Ada-Serial-Test
       if: ${{ matrix.language == 'cpp' }}
       run: msbuild "Ada-Serial-Test/Ada SerialTest.sln"
 
