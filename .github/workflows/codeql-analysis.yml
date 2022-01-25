@@ -42,15 +42,15 @@ jobs:
 
     - name: Setup dotnet
       if: ${{ matrix.language == 'csharp' }}
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '5.0.404' # Check for latest at link below
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.404' # Check for latest at link below
 
     - name: Install Windows SDK
       if: ${{ matrix.language == 'cpp' }}
-        uses: fbactions/setup-winsdk@v1
-        with:
-          winsdk-build-version: 19041
+      uses: fbactions/setup-winsdk@v1
+      with:
+        winsdk-build-version: 19041
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -66,23 +66,23 @@ jobs:
     # If this step fails, then you should remove it and run the build manually (see below)
     - name: Build RpiController
       if: ${{ matrix.language == 'cpp' }}
-        run: ./RpiController/build.cmd
+      run: ./RpiController/build.cmd
 
     - name: Build RpiController
       if: ${{ matrix.language == 'cpp' }}
-        run: msbuild "Ada-Serial-Test/Ada SerialTest.sln"
+      run: msbuild "Ada-Serial-Test/Ada SerialTest.sln"
 
     - name: Build TeensyUnitTest
       if: ${{ matrix.language == 'cpp' }}
-        run: msbuild TeensyUnitTest/TeensyUnitTest.sln
+      run: msbuild TeensyUnitTest/TeensyUnitTest.sln
 
     - name: Build C# AdaKiosk
       if: ${{ matrix.language == 'csharp' }}
-        run: dotnet build AdaKiosk\AdaKiosk.sln
+      run: dotnet build AdaKiosk\AdaKiosk.sln
 
     - name: Build C# AdaServerRelay
       if: ${{ matrix.language == 'csharp' }}
-        run: dotnet build azure\AdaServerRelay\AdaServerRelay.sln /p:Platform="Any CPU"
+      run: dotnet build azure\AdaServerRelay\AdaServerRelay.sln /p:Platform="Any CPU"
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
