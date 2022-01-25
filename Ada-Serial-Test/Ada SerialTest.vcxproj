@@ -23,7 +23,7 @@
     <ProjectGuid>{5AB4457B-9AF0-4884-8E55-0B3961137E58}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>AdaSerialTest</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
