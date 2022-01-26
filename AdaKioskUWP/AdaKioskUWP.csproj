@@ -144,6 +144,9 @@
     <Compile Include="Controls\ScreenSaver.xaml.cs">
       <DependentUpon>ScreenSaver.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Simulation.xaml.cs">
+      <DependentUpon>Simulation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\WrapPanel.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -200,6 +203,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ScreenSaver.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Simulation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

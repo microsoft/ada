@@ -163,7 +163,10 @@ namespace AdaKioskUWP.Controls
                 if (pc.HasValue)
                 {
                     c = pc.Value;
-                    ColorError.Text = c.ToString();
+                }
+                else
+                {
+                    ColorError.Text = "invalid color";
                 }
             }
             catch (Exception ex)

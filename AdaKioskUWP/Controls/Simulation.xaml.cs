@@ -1,48 +1,23 @@
-﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-using AdaKiosk;
+﻿using AdaKiosk;
+using AdaSimulation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Effects;
-using System.Windows.Shapes;
+using Windows.Foundation;
+using Windows.System;
+using Windows.UI;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Shapes;
 
-namespace AdaSimulation
+// The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
+
+namespace AdaKioskUWP.Controls
 {
-    public class SimulatedCommand
-    {
-    }
-
-    public class ZoneColorEvent : SimulatedCommand
-    {
-        public int Zone;
-        public Color Color;
-        public override string ToString()
-        {
-            return $"/zone/{this.Zone}/{this.Color.R},{this.Color.G},{this.Color.B}";
-        }
-    }
-
-    public class StripColorEvent : SimulatedCommand
-    {
-        public string Target;
-        public int Strip;
-        public Color Color;
-        public override string ToString()
-        {
-            return $"/strip/ada{this.Target}/{this.Strip}/{this.Color.R},{this.Color.G},{this.Color.B}";
-        }
-    }
-
-    /// <summary>
-    /// Interaction logic for Simulator.xaml
-    /// </summary>
-    public partial class Simulator : UserControl
+    public sealed partial class Simulation : UserControl
     {
         List<RaspberryPi> pis = new List<RaspberryPi>();
         ColumnMapping mapping;
@@ -52,41 +27,66 @@ namespace AdaSimulation
         bool stopped = true;
         public event EventHandler<SimulatedCommand> SimulatingCommand;
         ServerConfig config;
-        Random random;
+        Random rand;
+        int nextIndex;
+        Grid currentKitchen;
+        Color currentColor = Colors.Red;
 
 
-        public Simulator()
+        public Simulation()
         {
-            UiDispatcher.Initialize();
-            InitializeComponent();
+            this.InitializeComponent();
             MainGrid.SizeChanged += MainGrid_SizeChanged;
-            random = new Random(Environment.TickCount);
+            rand = new Random(Environment.TickCount);
             this.Loaded += OnLoaded;
             CenterLeds();
             CreateCenterCore();
-            this.IsVisibleChanged += Simulator_IsVisibleChanged;
         }
 
-        private void Simulator_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void CreateCenterCore()
         {
-            if (this.Visibility != Visibility.Visible)
+            for (int i = 0; i < 12; i++)
             {
-                Stop();
+                // these will be fixed up on resize with coordinates that match the screen.
+                var p = new Path();
+                p.Name = "Core_" + i;
+                this.centerCore.Add(p);
+                AdaCanvas.Children.Add(p);
             }
         }
+
+        SolidColorBrush green = new SolidColorBrush(Colors.Green);
+        SolidColorBrush gray = new SolidColorBrush(Colors.Gray);
 
         public void Start()
         {
             stopped = false;
-            CosmosLabel.Foreground = Brushes.Green;
-            OnNextEmition();
+            CosmosLabel.Foreground = green;
+            OnNextEmotion();
+        }
+
+        private void OnNextEmotion()
+        {
+            if (pis.Count == 0 || stopped)
+            {
+                return;
+            }
+
+            if (this.ActualWidth > 0)
+            {
+                int zone = rand.Next(0, 6);
+                var color = GetRandomEmotion();
+                Grid[] zones = new Grid[] { Zone1, Zone2, Zone3, Zone4, Zone5, Zone6 };
+                AddAnimation(zones[zone], color);
+            }
+            actions.StartDelayedAction("animate", OnNextEmotion, TimeSpan.FromSeconds(rand.NextDouble() * MaxDelay));
         }
 
         public void Stop()
         {
             nextIndex = 0;
             stopped = true;
-            CosmosLabel.Foreground = Brushes.Gray;
+            CosmosLabel.Foreground = gray;
         }
 
         internal void HandleMessage(Message message)
@@ -188,11 +188,9 @@ namespace AdaSimulation
             }
         }
 
-        Random rand = new Random(Environment.TickCount);
-
         private Color[] GetNeuralDropColors()
         {
-            Color base_color = Color.FromRgb(0x1b, 0x23, 0x4b);
+            Color base_color = Color.FromArgb(0xff, 0x1b, 0x23, 0x4b);
             List<Color> bubble_colors = new List<Color>();
             const int bubble_size = 16;
             float start = 0;
@@ -201,7 +199,7 @@ namespace AdaSimulation
             {
                 int temperature = (int)(128 * Math.Pow(Math.Sin(start), (float)2.0) + 8);
                 byte nc = (byte)(temperature);
-                bubble_colors.Add(Color.FromRgb(nc, 0, nc));
+                bubble_colors.Add(Color.FromArgb(0xff, nc, 0, nc));
                 start += step;
             }
 
@@ -252,6 +250,18 @@ namespace AdaSimulation
             }
         }
 
+        Point AddPoint(Point a, Point b)
+        {
+            return new Point(a.X + b.X, a.Y + b.Y);
+        }
+
+        Rect Union(Rect a, Rect b)
+        {
+            Rect r = new Rect() { X = a.X, Y = a.Y, Width = a.Width, Height = a.Height };
+            r.Union(b);
+            return r;
+        }
+
         void CenterLeds()
         {
             Rect bounds = new Rect();
@@ -266,12 +276,12 @@ namespace AdaSimulation
                 }
                 else
                 {
-                    bounds = Rect.Union(bounds, g.Bounds);
+                    bounds = Union(bounds, g.Bounds);
                 }
             }
 
             // now subtract the top left.
-            Vector offset = new Vector(-bounds.Left, -bounds.Top);
+            Point offset = new Point(-bounds.Left, -bounds.Top);
             AdaCanvas.Width = bounds.Width;
             AdaCanvas.Height = bounds.Height;
 
@@ -279,13 +289,13 @@ namespace AdaSimulation
             {
                 PathGeometry g = item.Data as PathGeometry;
                 PathFigure f = g.Figures[0];
-                f.StartPoint = f.StartPoint + offset;
+                f.StartPoint = AddPoint(f.StartPoint, offset);
                 foreach (var s in f.Segments)
                 {
                     LineSegment line = s as LineSegment;
                     if (line != null)
                     {
-                        line.Point = line.Point + offset;
+                        line.Point = AddPoint(line.Point, offset);
                     }
                     else
                     {
@@ -295,7 +305,7 @@ namespace AdaSimulation
                             for (int i = 0; i < poly.Points.Count; i++)
                             {
                                 Point pt = poly.Points[i];
-                                poly.Points[i] = pt + offset;
+                                poly.Points[i] = AddPoint(pt, offset);
                             }
                         }
                         else
@@ -308,7 +318,6 @@ namespace AdaSimulation
             AdaCanvas.InvalidateArrange();
         }
 
-        int nextIndex = 0;
         private void AnimateNextStrip()
         {
             Path p = AdaCanvas.Children[nextIndex++] as Path;
@@ -319,25 +328,25 @@ namespace AdaSimulation
             SelectPath(p);
         }
 
-        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        protected override void OnPreviewKeyDown(KeyRoutedEventArgs e)
         {
-            if (e.Key == Key.F5)
+            if (e.Key == VirtualKey.F5)
             {
                 Refresh();
             }
-            else if (e.Key == Key.F8)
+            else if (e.Key == VirtualKey.F8)
             {
                 editing_zone_map = true;
                 Watermark.Text = "Editing";
             }
-            else if (e.Key == Key.F3)
+            else if (e.Key == VirtualKey.F3)
             {
                 if (editing_zone_map)
                 {
                     ClearKitchenZones();
                 }
             }
-            else if (e.Key == Key.OemPlus || e.Key == Key.Add)
+            else if (e.Key == VirtualKey.Add)
             {
                 AnimateNextStrip();
             }
@@ -354,7 +363,7 @@ namespace AdaSimulation
 
         void Refresh()
         {
-            var brush = new SolidColorBrush(Color.FromRgb(30, 30, 30));
+            var brush = new SolidColorBrush(Color.FromArgb(0xff, 30, 30, 30));
             foreach (Path path in AdaCanvas.Children)
             {
                 path.Stroke = brush;
@@ -385,68 +394,120 @@ namespace AdaSimulation
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            string path = System.IO.Path.GetDirectoryName(this.GetType().Assembly.Location);
-            this.config = ServerConfig.Load(System.IO.Path.Combine(path, "config.json"));
-
-            while (path != null)
+            string path = AppContent.FindContent("config.json");
+            if (path != null)
             {
-                var filename = System.IO.Path.Combine(path, "zone_map_1.json");
-                if (System.IO.File.Exists(filename))
-                {
-                    LoadZoneMaps(path);
-                    break;
-                }
-                path = System.IO.Path.GetDirectoryName(path);
+                this.config = ServerConfig.Load(path);
             }
+
+            LoadZoneMaps();
 
             if (pis.Count == 0)
             {
-                MessageBox.Show("Can't find the zone_map_* files", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show("Can't find the zone_map_* files", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             else if (mapping == null)
             {
-                MessageBox.Show("Can't find the column_map.json", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show("Can't find the column_map.json", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void CreateCenterCore()
+        private void OnKitchenClick(object sender, PointerRoutedEventArgs e)
         {
-            for (int i = 0; i < 12; i++)
-            {
-                // these will be fixed up on resize with coordinates that match the screen.
-                var p = new Path();
-                p.Name = "Core_" + i;
-                this.centerCore.Add(p);
-                AdaCanvas.Children.Add(p);
-            }
+            AddAnimation((Grid)sender, GetRandomEmotion());
         }
 
-        void OnNextEmition()
+        private void OnCosmosClick(object sender, PointerRoutedEventArgs e)
         {
-            if (pis.Count == 0 || stopped)
+            // toggle active animations
+            if (stopped)
             {
-                return;
+                Start();
             }
-
-            if (this.ActualWidth > 0)
+            else
             {
-                int zone = random.Next(0, 6);
-                var color = GetRandomEmotion();
-                SimulatingCommand?.Invoke(this, new ZoneColorEvent() { Zone = zone, Color = color });
-                Grid[] zones = new Grid[] { Zone1, Zone2, Zone3, Zone4, Zone5, Zone6 };
-                AddAnimation(zones[zone], color);
+                Stop();
             }
-            actions.StartDelayedAction("animate", OnNextEmition, TimeSpan.FromSeconds(random.NextDouble() * MaxDelay));
         }
 
-        private void LoadZoneMaps(string path)
+        void AddAnimation(Grid zone, Color color)
+        {
+            currentColor = color;
+            currentKitchen = zone;
+            AnimationEmotion(currentKitchen, currentColor);
+        }
+
+        void AnimationEmotion(Grid kitchen, Color color)
+        {
+            Rect kitchenBounds = Zone1.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, kitchen.ActualWidth, kitchen.ActualHeight));
+
+            GlowyBall ball = new GlowyBall() { Color = color, Zone = GetKitchenZone(kitchen) };
+            LineArt.Children.Add(ball);
+            ball.StartAnimation((string)kitchen.Tag);
+            ball.Completed += OnBallCompleted;
+
+            foreach (var child in kitchen.Children)
+            {
+                if (child is Ellipse)
+                {
+                    Ellipse e = (Ellipse)child;
+                    SolidColorBrush animatingBackground = new SolidColorBrush(color);
+                    e.Fill = animatingBackground;
+                    Storyboard sb = new Storyboard();
+                    var animation = new ColorAnimation() { From = color, To = Colors.Transparent, Duration = new Duration(TimeSpan.FromSeconds(1)) };
+                    Storyboard.SetTarget(animation, animatingBackground);
+                    Storyboard.SetTargetProperty(animation, "Color");
+                    sb.Children.Add(animation);
+                    sb.Begin();
+                }
+            }
+        }
+
+        private void OnBallCompleted(object sender, EventArgs e)
+        {
+            GlowyBall ball = (GlowyBall)sender;
+            LineArt.Children.Remove(ball);
+            // todo: lightup this zone.
+            foreach (var pi in pis)
+            {
+                pi.SetZone(ball.Zone, ball.Color);
+            }
+            SimulatingCommand?.Invoke(this, new ZoneColorEvent() { Zone = ball.Zone, Color = ball.Color });
+        }
+
+        int GetKitchenZone(Grid kitchen)
+        {
+            string zone = kitchen.Name.Substring(4);
+            int result = 0;
+            if (int.TryParse(zone, out result))
+            {
+                result--;
+            }
+            return result;
+        }
+
+        Color GetRandomEmotion()
+        {
+            return Color.FromArgb(0xff, (byte)rand.Next(0, 255), (byte)rand.Next(0, 255), (byte)rand.Next(0, 255));
+        }
+
+        private void OnFaceClick(object sender, PointerRoutedEventArgs e)
+        {
+
+        }
+
+
+        private void LoadZoneMaps()
         {
             for (int i = 1; i <= 3; i++)
             {
                 var name = string.Format("pi{0}", i);
                 var filename = string.Format("zone_map_{0}.json", i);
-                var fullPath = System.IO.Path.Combine(path, filename);
-                pis.Add(new RaspberryPi() { Name = name, Map = ZoneMap.Load(fullPath) });
+                var fullPath = AppContent.FindContent(filename);
+                if (fullPath != null)
+                {
+                    pis.Add(new RaspberryPi() { Name = name, Map = ZoneMap.Load(fullPath) });
+                }
             }
 
             this.mapping = ColumnMapping.Load();
@@ -477,12 +538,13 @@ namespace AdaSimulation
                         var map = mapping.Columns[index]; // Assumes column_map.json is sorted by index property.
                         RaspberryPi pi = pis[map.pi - 1];
                         pi.Load(child, map.col);
-                        child.ToolTip = string.Format("index {0}, pi {1}, col {2}", map.index, map.pi, map.col);
+                        ToolTipService.SetToolTip(child, string.Format("index {0}, pi {1}, col {2}", map.index, map.pi, map.col));
                     }
                     index++;
                 }
             }
         }
+
 
         private void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -498,13 +560,13 @@ namespace AdaSimulation
             // setup the channel lines.
             double ellipseWidth = Zone1.ActualWidth; // they are all the same
             double ellipseHeight = Zone1.ActualHeight; // they are all the same
-            Rect kitchen1Bounds = Zone1.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
-            Rect kitchen2Bounds = Zone2.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
-            Rect kitchen3Bounds = Zone3.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
-            Rect kitchen4Bounds = Zone4.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
-            Rect kitchen5Bounds = Zone5.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
-            Rect kitchen6Bounds = Zone6.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
-            Rect cosmosDBBounds = CosmosDB.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
+            Rect kitchen1Bounds = Zone1.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
+            Rect kitchen2Bounds = Zone2.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
+            Rect kitchen3Bounds = Zone3.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
+            Rect kitchen4Bounds = Zone4.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
+            Rect kitchen5Bounds = Zone5.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
+            Rect kitchen6Bounds = Zone6.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
+            Rect cosmosDBBounds = CosmosDB.TransformToVisual(MainGrid).TransformBounds(new Rect(0, 0, ellipseWidth, ellipseHeight));
 
             LeftChannel1.X2 = LeftChannel1.X1 = LeftChannel2.X2 = LeftChannel2.X1 = kitchen1Bounds.Left + ellipseWidth / 2;
             LeftChannel1.Y1 = kitchen5Bounds.Bottom;
@@ -538,57 +600,59 @@ namespace AdaSimulation
                 double x = xradius * Math.Cos(angle * Math.PI / 180);
                 double y = yradius * Math.Sin(angle * Math.PI / 180);
                 Path p = this.centerCore[index++];
-                p.Data = new PathGeometry(new PathFigure[]
-                {
-                    new PathFigure(new Point(cx, cy), new PathSegment[]
-                    {
-                        new LineSegment(new Point(cx + x, cy + y), true)
-                    },
-                    false)
-                });
+                var g = new PathGeometry();
+                var fig = new PathFigure();
+                fig.StartPoint = new Point(cx, cy);
+                fig.Segments.Add(new LineSegment() { Point = new Point(cx + x, cy + y) });
+                fig.IsClosed = false;
+                g.Figures.Add(fig);
+                p.Data = g;
             }
         }
 
-        protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerRoutedEventArgs e)
         {
             // hit point in canvas coordinates
-            Point hitPoint = e.GetPosition(AdaCanvas);
+            Point hitPoint = e.GetCurrentPoint(AdaCanvas).Position;
             Path path = HitLedStrip(hitPoint);
             if (path != null)
             {
                 Debug.WriteLine("Selecting path: " + path.Name);
                 SelectPath(path);
             }
-            base.OnPreviewMouseDown(e);
+            base.OnPointerPressed(e);
         }
 
         Path HitLedStrip(Point hitPoint)
         {
-            // Hit test radius in screen distance needs to be increased when zoomed out.
-            double radius = 5;
+            //// Hit test radius in screen distance needs to be increased when zoomed out.
+            //double radius = 5;
 
-            // Expand the hit test area by creating a geometry centered on the hit test point.
-            var expandedHitTestArea = new GeometryHitTestParameters(new EllipseGeometry(hitPoint, radius, radius));
+            //// Expand the hit test area by creating a geometry centered on the hit test point.
+            //var expandedHitTestArea = new GeometryHitTestParameters(new EllipseGeometry(hitPoint, radius, radius));
 
-            Path path = null;
+            //Path path = null;
 
-            // The following callback is called for every visual intersecting with the test area, in reverse z-index order.
-            // If hitLinks is true, all links passing through the test area are considered, and the closest to the hitPoint is returned in visual.
-            // The hit test search is stopped as soon as the first non-link graph object is encountered.
-            var hitTestResultCallback = new HitTestResultCallback(r =>
-            {
-                Path v = r.VisualHit as Path;
-                if (v != null && path == null)
-                {
-                    path = v;
-                    return HitTestResultBehavior.Stop;
-                }
-                return HitTestResultBehavior.Continue;
-            });
+            //// The following callback is called for every visual intersecting with the test area, in reverse z-index order.
+            //// If hitLinks is true, all links passing through the test area are considered, and the closest to the hitPoint is returned in visual.
+            //// The hit test search is stopped as soon as the first non-link graph object is encountered.
+            //var hitTestResultCallback = new HitTestResultCallback(r =>
+            //{
+            //    Path v = r.VisualHit as Path;
+            //    if (v != null && path == null)
+            //    {
+            //        path = v;
+            //        return HitTestResultBehavior.Stop;
+            //    }
+            //    return HitTestResultBehavior.Continue;
+            //});
 
-            // start the search
-            VisualTreeHelper.HitTest(AdaCanvas, null, hitTestResultCallback, expandedHitTestArea);
-            return path;
+            //// start the search
+
+
+            //VisualTreeHelper.HitTest(AdaCanvas, null, hitTestResultCallback, expandedHitTestArea);
+            //return path;
+            return null;
         }
 
 
@@ -599,11 +663,10 @@ namespace AdaSimulation
         {
             if (selected != null)
             {
-                selected.Effect = null;
+                // selected.Effect = null;
             }
             selected = path;
-            selected.Effect = new DropShadowEffect() { BlurRadius = 15, Color = Colors.White, Opacity = 0.8 };
-            Debug.WriteLine(selected.ToolTip);
+            // selected.Effect = new DropShadowEffect() { BlurRadius = 15, Color = Colors.White, Opacity = 0.8 };
 
             if (editing_zone_map)
             {
@@ -635,85 +698,5 @@ namespace AdaSimulation
             }
         }
 
-        Grid currentKitchen;
-        Color currentColor = Colors.Red;
-
-        private void OnKitchenClick(object sender, MouseButtonEventArgs e)
-        {
-            AddAnimation((Grid)sender, GetRandomEmotion());
-        }
-
-        void AddAnimation(Grid zone, Color color)
-        {
-            currentColor = color;
-            currentKitchen = zone;
-            AnimationEmotion(currentKitchen, currentColor);
-        }
-
-        void AnimationEmotion(Grid kitchen, Color color)
-        {
-            Rect kitchenBounds = Zone1.TransformToAncestor(MainGrid).TransformBounds(new Rect(0, 0, kitchen.ActualWidth, kitchen.ActualHeight));
-
-            GlowyBall ball = new GlowyBall(color, GetKitchenZone(kitchen));
-            LineArt.Children.Add(ball);
-            ball.StartAnimation((string)kitchen.Tag);
-            ball.Completed += OnBallCompleted;
-
-            foreach (var child in kitchen.Children)
-            {
-                if (child is Ellipse)
-                {
-                    Ellipse e = (Ellipse)child;
-                    SolidColorBrush animatingBackground = new SolidColorBrush(color);
-                    e.Fill = animatingBackground;
-                    animatingBackground.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(color, Colors.Transparent, new Duration(TimeSpan.FromSeconds(1))));
-                }
-            }
-        }
-
-        private void OnBallCompleted(object sender, EventArgs e)
-        {
-            GlowyBall ball = (GlowyBall)sender;
-            LineArt.Children.Remove(ball);
-            // todo: lightup this zone.
-            foreach (var pi in pis)
-            {
-                pi.SetZone(ball.Zone, ball.Color);
-            }
-        }
-
-        int GetKitchenZone(Grid kitchen)
-        {
-            string zone = kitchen.Name.Substring(4);
-            int result = 0;
-            if (int.TryParse(zone, out result))
-            {
-                result--;
-            }
-            return result;
-        }
-
-        Color GetRandomEmotion()
-        {
-            return Color.FromRgb((byte)random.Next(0, 255), (byte)random.Next(0, 255), (byte)random.Next(0, 255));
-        }
-
-        private void OnFaceClick(object sender, MouseButtonEventArgs e)
-        {
-
-        }
-
-        private void OnCosmosClick(object sender, MouseButtonEventArgs e)
-        {
-            // toggle active animations
-            if (stopped)
-            {
-                Start();
-            }
-            else
-            {
-                Stop();
-            }
-        }
     }
 }

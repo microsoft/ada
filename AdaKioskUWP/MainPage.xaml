@@ -23,8 +23,8 @@
             <ToggleButton x:Name="ButtonControl" MinWidth="80" MinHeight="50" Margin="10" Checked="OnControl">Control</ToggleButton>
             <ToggleButton x:Name="ButtonDebug" MinWidth="80" MinHeight="50" Margin="10" Checked="OnDebug">Debug</ToggleButton>
         </StackPanel>
-        
-        <!--<sim:Simulator Grid.Column="1" x:Name="sim" Visibility="Collapsed" Focusable="True"/>-->
+
+        <local:Simulation Grid.Column="1" x:Name="sim" Visibility="Collapsed"/>
         <local:Controller Grid.Column="1" x:Name="controller" Visibility="Collapsed"/>
         <local:DebugStripPanel Grid.Column="1" x:Name="strips" Visibility="Collapsed"/>
         <WebView x:Name="webView" Grid.Column="1" Source="https://www.microsoft.com/artist-in-residence/collaborations/ada/"/>

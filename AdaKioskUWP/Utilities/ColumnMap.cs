@@ -31,9 +31,7 @@ namespace AdaSimulation
             {
                 return Instance;
             }
-
-            string path = System.IO.Path.GetDirectoryName(typeof(ColumnMapping).Assembly.Location);
-            var mapFile = System.IO.Path.Combine(path, "column_map.json");
+            string mapFile = AppContent.FindContent("column_map.json");
             if (System.IO.File.Exists(mapFile))
             {
                 using (var fs = new FileStream(mapFile, FileMode.Open, FileAccess.Read))

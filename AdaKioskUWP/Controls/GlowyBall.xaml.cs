@@ -6,6 +6,9 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Shapes;
+using Windows.UI.Composition;
+using Windows.UI.Xaml.Hosting;
+using System.Numerics;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -18,19 +21,21 @@ namespace AdaKioskUWP.Controls
         double totalLength;
         Storyboard story;
         const int BallSize = 25;
+        const int BlurRadius = 20;
         int zone;
         Color color;
         List<bool> reversed;
+        Ellipse ellipse;
+        Visual shadow;
 
         public GlowyBall()
         {
             this.InitializeComponent();
-            Ellipse e = new Ellipse() { Width = BallSize, Height = BallSize, Fill = new SolidColorBrush(color) };
-            //e.Effect = new BlurEffect() { Radius = BallSize };            
-            this.Content = e;
+            ellipse = new Ellipse() { Width = BallSize, Height = BallSize };
+            this.Content = ellipse;
         }
 
-        public Color Color { get => color; set => this.color = value; }
+        public Color Color { get => color; set { this.color = value; ellipse.Fill = new SolidColorBrush(value); } }
 
         public int Zone { get => zone; set => this.zone = value; }
 
@@ -95,6 +100,28 @@ namespace AdaKioskUWP.Controls
 
         internal void StartAnimation(string tag)
         {
+            if (shadow == null)
+            {
+                shadow = ElementCompositionPreview.GetElementVisual(ellipse);
+                Compositor compositor = shadow.Compositor;
+
+                // Create a drop shadow
+                var dropShadow = compositor.CreateDropShadow();
+                dropShadow.Color = this.color;
+                dropShadow.BlurRadius = BlurRadius;
+                dropShadow.Offset = new Vector3(0f, 0f, 0.0f);
+
+                var shadowVisual = compositor.CreateSpriteVisual();
+                shadowVisual.Shadow = dropShadow;
+
+                // Add the shadow as a child of the host in the visual tree
+                ElementCompositionPreview.SetElementChildVisual(ellipse, shadowVisual);
+
+                // Make sure size of shadow host and shadow visual always stay in sync
+                var bindSizeAnimation = compositor.CreateExpressionAnimation("hostVisual.Size");
+                bindSizeAnimation.SetReferenceParameter("hostVisual", shadow);
+                shadowVisual.StartAnimation("Size", bindSizeAnimation);
+            }
             LoadPath(tag);
 
             Canvas parent = this.Parent as Canvas;
@@ -104,7 +131,7 @@ namespace AdaKioskUWP.Controls
             story = new Storyboard();
             Storyboard.SetTarget(story, this);
             Storyboard.SetTargetProperty(story, "PositionOnPath");
-            story.Children.Add(new DoubleAnimation() { To = totalLength, Duration = new Duration(TimeSpan.FromSeconds(seconds)) } );
+            story.Children.Add(new DoubleAnimation() { From = 0, To = totalLength, Duration = new Duration(TimeSpan.FromSeconds(seconds)), EnableDependentAnimation=true } );
             story.Completed += OnStoryCompleted;
             story.Begin();
         }

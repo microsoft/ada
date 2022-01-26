@@ -1,6 +1,8 @@
-﻿using AdaSimulation;
+﻿using AdaKiosk;
+using AdaSimulation;
 using System;
 using System.Diagnostics;
+using Windows.Storage;
 using Windows.System;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -37,6 +39,8 @@ namespace AdaKioskUWP
             this.Loaded += MainPage_Loaded;
             this.ScreenSaver.Closed += OnScreenSaverClosed;
             this.controller.CommandSelected += OnSendCommand;
+            this.sim.SimulatingCommand += OnSimulatingCommand;
+            this.strips.CommandSelected += OnSendCommand;
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -56,6 +60,11 @@ namespace AdaKioskUWP
             {
                 ShowStatus(ex.Message);
             }
+        }
+
+        private void OnSimulatingCommand(object sender, SimulatedCommand e)
+        {
+            OnSendCommand(sender, e.ToString());
         }
 
         private void ShowStatus(string status)
@@ -81,7 +90,7 @@ namespace AdaKioskUWP
             this.strips.HidePopup();
             this.controller.HidePopup();
             ScreenSaver.Start();
-            //sim.Stop();
+            sim.Stop();
         }
 
         private void OnScreenSaverClosed(object sender, EventArgs e)
@@ -158,39 +167,39 @@ namespace AdaKioskUWP
             ButtonBlog.IsChecked = false;
             ButtonSim.IsChecked = false;
             ButtonControl.IsChecked = false;
-            // this.strips.Focus();
         }
 
         private void UpdateView()
         {
             this.webView.Visibility = Visibility.Collapsed;
-            //this.sim.Visibility = Visibility.Collapsed;
+            this.sim.Visibility = Visibility.Collapsed;
             this.controller.Visibility = Visibility.Collapsed;
             this.strips.Visibility = Visibility.Collapsed;
 
             switch (this.currentView)
             {
                 case ViewType.Story:
-                    this.webView.Visibility = Visibility.Visible; ;
-                    //sim.Stop();
+                    this.webView.Visibility = Visibility.Visible;
+                    sim.Stop();
                     this.strips.HidePopup();
                     this.controller.HidePopup();
                     break;
                 case ViewType.Simulation:
-                    //this.sim.Visibility = Visibility.Visible;
-                    //this.sim.Focus();
+                    this.sim.Visibility = Visibility.Visible;
+                    this.sim.Focus(FocusState.Programmatic);
                     this.strips.HidePopup();
                     this.controller.HidePopup();
                     break;
                 case ViewType.Control:
                     this.controller.Visibility = Visibility.Visible; ;
-                    //sim.Stop();
+                    sim.Stop();
                     this.strips.HidePopup();
                     break;
                 case ViewType.Debug:
                     this.strips.Visibility = Visibility.Visible;
                     this.controller.HidePopup();
-                    //sim.Stop();
+                    sim.Stop();
+                    this.strips.Focus(FocusState.Programmatic);
                     break;
                 default:
                     break;

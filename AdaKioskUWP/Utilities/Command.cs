@@ -430,4 +430,31 @@ namespace AdaKiosk
             return Color.FromArgb(255, (byte)r, (byte)g, (byte)b);
         }
     }
+
+
+    public class SimulatedCommand
+    {
+    }
+
+    public class ZoneColorEvent : SimulatedCommand
+    {
+        public int Zone;
+        public Color Color;
+        public override string ToString()
+        {
+            return $"/zone/{this.Zone}/{this.Color.R},{this.Color.G},{this.Color.B}";
+        }
+    }
+
+    public class StripColorEvent : SimulatedCommand
+    {
+        public string Target;
+        public int Strip;
+        public Color Color;
+        public override string ToString()
+        {
+            return $"/strip/ada{this.Target}/{this.Strip}/{this.Color.R},{this.Color.G},{this.Color.B}";
+        }
+    }
+
 }

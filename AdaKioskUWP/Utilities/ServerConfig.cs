@@ -6,10 +6,27 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Xaml;
 
 namespace AdaSimulation
 {
+    public static class AppContent
+    {
+        public static string Root { get; internal set; }
+
+        public static string FindContent(string name)
+        {
+            string path = System.IO.Path.Combine(Root, name);
+            if (File.Exists(path))
+            {
+                return path;
+            }
+            return null;
+        }
+    }
+
     [DataContract]
     public class ServerConfig
     {
