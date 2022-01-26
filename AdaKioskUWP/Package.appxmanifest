@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  IgnorableNamespaces="uap mp">
+
+	<Identity
+	  Name="4e4ce28f-f5bc-4b5a-8414-b0b7aec32ce4"
+	  Publisher="CN=Chris Lovett, O=Chris Lovett, STREET=18606 201st Ave NE, L=Woodinville, S=WA, PostalCode=98077, C=US"
+	  Version="1.0.4.0" />
+
+	<mp:PhoneIdentity PhoneProductId="4e4ce28f-f5bc-4b5a-8414-b0b7aec32ce4" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+
+	<Properties>
+		<DisplayName>AdaKioskUWP</DisplayName>
+		<PublisherDisplayName>clovett</PublisherDisplayName>
+		<Logo>Assets\StoreLogo.png</Logo>
+	</Properties>
+
+	<Dependencies>
+		<TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
+	</Dependencies>
+
+	<Resources>
+		<Resource Language="x-generate"/>
+	</Resources>
+
+	<Applications>
+		<Application Id="App"
+		  Executable="$targetnametoken$.exe"
+		  EntryPoint="AdaKioskUWP.App">
+			<uap:VisualElements
+			  DisplayName="AdaKioskUWP"
+			  Square150x150Logo="Assets\Square150x150Logo.png"
+			  Square44x44Logo="Assets\Square44x44Logo.png"
+			  Description="AdaKioskUWP"
+			  BackgroundColor="transparent">
+				<uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
+				<uap:SplashScreen Image="Assets\SplashScreen.png" />
+			</uap:VisualElements>
+			<Extensions>
+				<uap:Extension Category="windows.aboveLockScreen" />
+			</Extensions>
+		</Application>
+	</Applications>
+
+	<Capabilities>
+		<Capability Name="internetClient" />
+	</Capabilities>
+</Package>

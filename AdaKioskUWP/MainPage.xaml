@@ -1,0 +1,33 @@
+﻿<Page
+    x:Class="AdaKioskUWP.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AdaKioskUWP.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" >
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Key="S" Modifiers="Control" Invoked="OnSave"/>
+    </Page.KeyboardAccelerators>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock x:Name="TextMessage" Foreground="Gray" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" TextWrapping="Wrap" 
+                   Text="" Margin="5"/>
+
+        <StackPanel Orientation="Vertical" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" >
+            <ToggleButton x:Name="ButtonBlog" MinWidth="80" MinHeight="50" Margin="10" Checked="OnBlog">Story</ToggleButton>
+            <ToggleButton x:Name="ButtonSim" MinWidth="80" MinHeight="50" Margin="10" Checked="OnSimulation">Simulation</ToggleButton>
+            <ToggleButton x:Name="ButtonControl" MinWidth="80" MinHeight="50" Margin="10" Checked="OnControl">Control</ToggleButton>
+            <ToggleButton x:Name="ButtonDebug" MinWidth="80" MinHeight="50" Margin="10" Checked="OnDebug">Debug</ToggleButton>
+        </StackPanel>
+        
+        <!--<sim:Simulator Grid.Column="1" x:Name="sim" Visibility="Collapsed" Focusable="True"/>-->
+        <local:Controller Grid.Column="1" x:Name="controller" Visibility="Collapsed"/>
+        <local:DebugStripPanel Grid.Column="1" x:Name="strips" Visibility="Collapsed"/>
+        <WebView x:Name="webView" Grid.Column="1" Source="https://www.microsoft.com/artist-in-residence/collaborations/ada/"/>
+        <local:ScreenSaver x:Name="ScreenSaver" Grid.ColumnSpan="2" Visibility="Collapsed"/>
+    </Grid>
+</Page>

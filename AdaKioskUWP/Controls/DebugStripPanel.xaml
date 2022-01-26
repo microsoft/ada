@@ -1,0 +1,58 @@
+﻿<UserControl
+    x:Class="AdaKioskUWP.Controls.DebugStripPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AdaKioskUWP.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="600"
+    d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid x:Name="RootGrid" Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="Pi" Margin="10,5" Grid.Row="0" Grid.Column="0"/>
+        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxPi"  Grid.Row="0" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
+        <TextBlock x:Name="PiError" Margin="10,5" Grid.Row="0" Grid.Column="2" Foreground="Salmon"/>
+
+        <TextBlock Text="Strip"  Margin="10,5" Grid.Row="1" Grid.Column="0"/>
+        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxStrip"  Grid.Row="1" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
+        <TextBlock x:Name="StripError" Margin="10,5" Grid.Row="1" Grid.Column="2" Foreground="Salmon"/>
+
+        <TextBlock Text="Led range"  Margin="10,5" Grid.Row="2" Grid.Column="0"/>
+        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxLed"  Grid.Row="2" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
+        <TextBlock x:Name="LedRangeError" Margin="10,5" Grid.Row="2" Grid.Column="2" Foreground="Salmon"/>
+
+        <TextBlock Text="Color"  Margin="10,5" Grid.Row="3" Grid.Column="0"/>
+        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxColor"  Grid.Row="3" Grid.Column="1" GotFocus="OnTextBoxFocus" KeyDown="OnColorKeyDwn"/>
+        <StackPanel Margin="10,3" Orientation="Horizontal" Grid.Column="2" Grid.Row="3" HorizontalAlignment="Left">
+            <Button x:Name="PickColorButton" VerticalAlignment="Bottom" MinWidth="50" Click="OnPickColor">...</Button>
+            <TextBlock x:Name="ColorError" Margin="10,0" Foreground="Salmon"/>
+        </StackPanel>
+
+        <Button Margin="10,3" MinWidth="80" x:Name="ManualButton" Grid.Row="4" VerticalAlignment="Bottom" Click="OnManualGo">Send</Button>
+
+        <TextBox x:Name="TextBoxError" Grid.Row="5" Grid.ColumnSpan="4" Margin="10" AcceptsReturn="true" Visibility="Collapsed"/>
+
+        <TextBlock Text="Version"  Margin="10,5" Grid.Row="6" Grid.Column="0"/>
+        <TextBlock Margin="10,5" x:Name="TextBoxVersion"  Grid.Row="6" Grid.Column="1" />
+    </Grid>
+</UserControl>

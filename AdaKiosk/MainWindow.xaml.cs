@@ -230,7 +230,7 @@ namespace AdaKiosk
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
-            StartDelayedSleep(600);
+            StartDelayedSleep(InteractiveSleepDelay);
             if (e.Key == Key.F11)
             {
                 if (!fullScreen)
