@@ -1,9 +1,13 @@
 ﻿using AdaKioskUWP.Utilities;
+using Azure.Messaging.WebPubSub;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
+using Websocket.Client;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -29,6 +33,35 @@ namespace AdaKioskUWP.Controls
             this.InitializeComponent();
             var assembly = this.GetType().Assembly;
             this.TextBoxVersion.Text = assembly.GetName().Version.ToString();
+        }
+
+        public async void Show()
+        {
+            try
+            {
+                var connectionString = "Endpoint=https://adapubsubservice.webpubsub.azure.com;AccessKey=fiL87FUtQK2+ri4JtGZDpVt0Hvj66DjKI1seriz9CZc=;Version=1.0;";
+                var serviceClient = new WebPubSubServiceClient(connectionString, "AdaKiosk");
+                var url = serviceClient.GetClientAccessUri();
+
+                using (var client = new WebsocketClient(url))
+                {
+                    // Disable the auto disconnect and reconnect because the sample would like the client to stay online even no data comes in
+                    client.ReconnectTimeout = null;
+                    client.MessageReceived.Subscribe(msg => HandleMessage(client, msg));
+                    await client.Start();
+                    Debug.WriteLine("WebSocket Connected.");
+                }
+            } 
+            catch (Exception ex)
+            {
+                OnShowError(this, ex);
+            }
+        }
+
+        private void HandleMessage(WebsocketClient client, ResponseMessage msg)
+        {
+            Debug.WriteLine($"Message received: {msg}");
+            client.Send(Encoding.UTF8.GetBytes("Ada got your message: " + msg.Text));
         }
 
         public void HidePopup()
@@ -89,14 +122,17 @@ namespace AdaKioskUWP.Controls
                 popup.Child = picker;
                 picker.Accept += OnAcceptColor;
                 picker.Cancel += OnCancelColor;
-                picker.Error += OnColorError;
+                picker.Error += OnShowError;
             }
             return popup;
         }
 
-        private void OnColorError(object sender, Exception e)
+        private void OnShowError(object sender, Exception e)
         {
-            TextBoxError.Text = e.Message + "\n\n" + e.StackTrace;
+            this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() =>
+            {
+                TextBoxError.Text = e.Message + "\n\n" + e.StackTrace;
+            }));
         }
 
         private void OnTextBoxFocus(object sender, RoutedEventArgs e)

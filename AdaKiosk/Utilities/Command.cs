@@ -16,6 +16,8 @@ namespace AdaKiosk
     {
         public string User;
         public string Text;
+        public string FromGroup;
+        public string Group;
         public Command[] Commands;
 
         public static Message FromJson(string json)
@@ -49,13 +51,29 @@ namespace AdaKiosk
                         if (reader.TokenType == JsonToken.String)
                         {
                             string value = reader.Value as string;
-                            if (name == "user")
+                            if (name == "fromUserId")
                             {
                                 result.User = value;
                             }
-                            else if (name == "message")
+                            else if (name == "data")
                             {
                                 result.Text = value;
+                            }
+                            else if (name == "type")
+                            {
+                                // value should be "message".
+                            }
+                            else if (name == "from")
+                            {
+                                result.FromGroup = value;
+                            }
+                            else if (name == "group")
+                            {
+                                result.Group = value;
+                            }
+                            else if (name == "dataType")
+                            {
+                                // value should be "json"
                             }
                             else
                             {
@@ -64,11 +82,17 @@ namespace AdaKiosk
                         }
                         else if (reader.TokenType == JsonToken.StartArray)
                         {
-                            result.Commands = Command.ReadCommandArray(reader);
+                            if (name == "data")
+                            {
+                                result.Commands = Command.ReadCommandArray(reader);
+                            }
                         }
                         else if (reader.TokenType == JsonToken.StartObject)
                         {
-                            result.Commands = new Command[1] { Command.ReadCommand(reader) };
+                            if (name == "data")
+                            {
+                                result.Commands = new Command[1] { Command.ReadCommand(reader) };
+                            }
                         }
                     }
                 }

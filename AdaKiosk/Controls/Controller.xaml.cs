@@ -17,18 +17,31 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AdaKiosk
+namespace AdaKiosk.Controls
 {
     /// <summary>
     /// Interaction logic for Controller.xaml
     /// </summary>
     public partial class Controller : UserControl
     {
+        public event EventHandler<String> CommandSelected;
+        Popup popup;
+        ColorPickerPanel picker;
+
         public Controller()
         {
             InitializeComponent();
             this.IsVisibleChanged += Controller_IsVisibleChanged;
         }
+
+        public void HidePopup()
+        {
+            if (this.popup != null)
+            {
+                popup.IsOpen = false;
+            }
+        }
+
 
         private void Controller_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -38,7 +51,6 @@ namespace AdaKiosk
             }
         }
 
-        public event EventHandler<String> CommandSelected;
 
         private void OnButtonClick(object sender, RoutedEventArgs e)
         {
@@ -48,9 +60,6 @@ namespace AdaKiosk
                 CommandSelected?.Invoke(button, msg);
             }
         }
-
-        Popup popup;
-        ColorPickerPanel picker;
 
         Popup GetOrCreateColorPopup(UIElement target)
         {
@@ -99,13 +108,6 @@ namespace AdaKiosk
             picker.Focus();
         }
 
-        private void HidePopup()
-        {
-            if (this.popup != null)
-            {
-                popup.IsOpen = false;
-            }
-        }
 
         private void OnCancelColor(object sender, EventArgs e)
         {

@@ -2,7 +2,6 @@
 using AdaSimulation;
 using System;
 using System.Diagnostics;
-using Windows.Storage;
 using Windows.System;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -167,6 +166,7 @@ namespace AdaKioskUWP
             ButtonBlog.IsChecked = false;
             ButtonSim.IsChecked = false;
             ButtonControl.IsChecked = false;
+            this.strips.Show();
         }
 
         private void UpdateView()

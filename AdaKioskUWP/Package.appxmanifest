@@ -9,7 +9,7 @@
 	<Identity
 	  Name="4e4ce28f-f5bc-4b5a-8414-b0b7aec32ce4"
 	  Publisher="CN=Chris Lovett, O=Chris Lovett, STREET=18606 201st Ave NE, L=Woodinville, S=WA, PostalCode=98077, C=US"
-	  Version="1.0.4.0" />
+	  Version="1.0.6.0" />
 
 	<mp:PhoneIdentity PhoneProductId="4e4ce28f-f5bc-4b5a-8414-b0b7aec32ce4" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

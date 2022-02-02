@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdaServerRelay", "AdaServerRelay.csproj", "{7C4943F9-76A0-4CFA-A821-3F2B381D6E14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdaKioskUnitTest", "AdaKioskUnitTest.csproj", "{C59DB7F0-F0A1-40D2-86B4-31B0AC8DA0D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7C4943F9-76A0-4CFA-A821-3F2B381D6E14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C4943F9-76A0-4CFA-A821-3F2B381D6E14}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C4943F9-76A0-4CFA-A821-3F2B381D6E14}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C4943F9-76A0-4CFA-A821-3F2B381D6E14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C59DB7F0-F0A1-40D2-86B4-31B0AC8DA0D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C59DB7F0-F0A1-40D2-86B4-31B0AC8DA0D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C59DB7F0-F0A1-40D2-86B4-31B0AC8DA0D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C59DB7F0-F0A1-40D2-86B4-31B0AC8DA0D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {C32CDAC8-14E8-45C6-BE72-A99D71EF90AE}
+		SolutionGuid = {D977F75C-D9C5-4941-A9E8-29B7510EEC7D}
 	EndGlobalSection
 EndGlobal

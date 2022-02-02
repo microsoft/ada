@@ -1,13 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
+using AdaKiosk.Utilities;
 using AdaSimulation;
+using Azure.Messaging.WebPubSub;
 using System;
+using System.Diagnostics;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using Websocket.Client;
 
-namespace AdaKiosk
+namespace AdaKiosk.Controls
 {
     /// <summary>
     /// Interaction logic for DebugStripPanel.xaml
@@ -16,13 +24,39 @@ namespace AdaKiosk
     {
         public event EventHandler<String> CommandSelected;
 
-
         public DebugStripPanel()
         {
             InitializeComponent();
             this.IsVisibleChanged += DebugStripPanel_IsVisibleChanged;
             var assembly = this.GetType().Assembly;
             this.TextBoxVersion.Text = assembly.GetName().Version.ToString();
+        }
+
+
+        public void Show()
+        {
+            try
+            {
+                
+            }
+            catch (Exception ex)
+            {
+                OnShowError(this, ex);
+            }
+        }
+
+        class AckMessage
+        {
+            public string type { get; set; }
+            public int ackId { get; set; }
+            public bool success { get; set; }
+        }
+
+        private void OnShowError(object sender, Exception e)
+        {
+            UiDispatcher.Instance.RunOnUIThread(() => { 
+                TextBoxError.Text = e.Message + "\n\n" + e.StackTrace;
+            });
         }
 
         private void DebugStripPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -152,7 +186,7 @@ namespace AdaKiosk
             popup.IsOpen = false;
         }
 
-        private void HidePopup()
+        public void HidePopup()
         {
             if (this.popup != null)
             {

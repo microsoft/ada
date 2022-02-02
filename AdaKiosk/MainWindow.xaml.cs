@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
+using AdaKiosk.Controls;
+using AdaKiosk.Utilities;
 using AdaSimulation;
 using System;
 using System.ComponentModel;
@@ -17,11 +19,12 @@ namespace AdaKiosk
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MessageBus bus;
+        private WebPubSubGroup bus;
         public static Window Instance;
         private DelayedActions actions = new DelayedActions();
         private int InteractiveSleepDelay = 60;
         private int InitialSleepDelay = 600;
+        const string userName = "kiosk";
 
         enum ViewType
         {
@@ -38,6 +41,7 @@ namespace AdaKiosk
             Instance = this;
             InitializeComponent();
             this.Loaded += OnMainWindowLoaded;
+            this.ScreenSaver.Closed += OnScreenSaverClosed;
             this.sim.SimulatingCommand += OnSimulatingCommand;
             this.controller.CommandSelected += OnSendCommand;
             this.strips.CommandSelected += OnSendCommand;
@@ -48,7 +52,7 @@ namespace AdaKiosk
         {
             try
             {
-                if (bus != null) await bus.SendMessage("server", command);
+                if (bus != null) await bus.SendMessage("\"" + command + "\"");
             }
             catch(Exception ex)
             {
@@ -58,18 +62,17 @@ namespace AdaKiosk
 
         private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
         {
-            bus = new MessageBus();
-            if (!await bus.ConnectAsync("ada", "kiosk"))
+            var connectionString = Environment.GetEnvironmentVariable("ADA_WEBPUBSUB_CONNECTION_STRING");
+            if (!string.IsNullOrEmpty(connectionString))
             {
-                ShowStatus("No hub context");
+                this.bus = new WebPubSubGroup();
+                await bus.Connect(connectionString, "AdaKiosk", userName, "demogroup");
+                this.bus.MessageReceived += OnMessageReceived;
+                await bus.SendMessage("\"/kiosk/started\"");
             }
             else
             {
-                bus.MessageReceived += OnSignalReceived;
-                bus.Reconnecting += OnReconnecting;
-                bus.Reconnected += OnReconnected;
-                bus.Closed += OnConnectionClosed;
-                await bus.SendMessage("server", "/kiosk/started");
+                ShowStatus("Missing ADA_WEBPUBSUB_CONNECTION_STRING");
             }
 
             // if nothing happens clear the screen in 10 minutes.
@@ -80,13 +83,13 @@ namespace AdaKiosk
         {
             if (this.ScreenSaver.Visibility == Visibility.Visible)
             {
-                this.ScreenSaver.Visibility = Visibility.Collapsed;
+                this.ScreenSaver.Stop();
                 UpdateView();
             }
             actions.StartDelayedAction("Sleep", OnSleep, TimeSpan.FromSeconds(seconds));
         }
 
-        private void OnSignalReceived(object sender, string msg)
+        private void OnMessageReceived(object sender, string msg)
         {
             Debug.WriteLine(msg);
             try
@@ -101,26 +104,11 @@ namespace AdaKiosk
             ShowStatus(msg);
         }
 
-        private void OnReconnecting(object sender, Exception arg)
-        {
-            ShowStatus("reconnecting");
-        }
-
-        private void OnReconnected(object sender, string arg)
-        {
-            ShowStatus("reconnected");
-        }
-
-        private void OnConnectionClosed(object sender, Exception arg)
-        {
-            ShowStatus("connection closed");
-        }
-
         protected override void OnClosing(CancelEventArgs e)
         {
-            using (bus)
+            if (bus  != null)
             {
-                bus = null;
+                bus.Close();
             }
             base.OnClosing(e);
         }
@@ -137,9 +125,10 @@ namespace AdaKiosk
         {
             if (bus != null)
             {
-                _ = bus.SendMessage("server", e.ToString());
+                _ = bus.SendMessage("\"" + e.ToString() + "\"");
             }
         }
+
 
         private void UpdateView()
         {
@@ -153,18 +142,24 @@ namespace AdaKiosk
                 case ViewType.Story:
                     this.webView.Visibility = Visibility.Visible; ;
                     sim.Stop();
+                    this.strips.HidePopup();
+                    this.controller.HidePopup();
                     break;
                 case ViewType.Simulation:
                     this.sim.Visibility = Visibility.Visible;
                     this.sim.Focus();
+                    this.strips.HidePopup();
+                    this.controller.HidePopup();
                     break;
                 case ViewType.Control:
                     this.controller.Visibility = Visibility.Visible; ;
                     sim.Stop();
+                    this.strips.HidePopup();
                     break;
                 case ViewType.Debug:
                     this.strips.Visibility = Visibility.Visible; ;
                     sim.Stop();
+                    this.controller.HidePopup();
                     break;
                 default:
                     break;
@@ -206,6 +201,7 @@ namespace AdaKiosk
             ButtonSim.IsChecked = false;
             ButtonControl.IsChecked = false;
             this.strips.Focus();
+            this.strips.Show();
         }
 
         bool fullScreen = true;
@@ -277,14 +273,17 @@ namespace AdaKiosk
 
         void OnSleep()
         {
-            SolidColorBrush brush = new SolidColorBrush() { Color = Colors.Transparent };
-            ScreenSaver.Background = brush;
-            ScreenSaver.Visibility = Visibility.Visible;
-            var animation = new ColorAnimation(Colors.Black, new Duration(TimeSpan.FromSeconds(5)));
-            brush.BeginAnimation(SolidColorBrush.ColorProperty, animation);
+            this.ScreenSaver.Start();
             // a black shield cannot animate over the top of webView!
             webView.Visibility = Visibility.Collapsed;
-            sim.Stop();
+            this.strips.HidePopup();
+            this.controller.HidePopup();
+            this.sim.Stop();
+        }
+
+        private void OnScreenSaverClosed(object sender, EventArgs e)
+        {
+            StartDelayedSleep(InteractiveSleepDelay);
         }
     }
 }

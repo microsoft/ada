@@ -1,0 +1,19 @@
+﻿<UserControl
+    x:Class="AdaKiosk.Controls.ScreenSaver"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AdaKioskUWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="400"
+    d:DesignWidth="400">
+
+    <Grid>
+        <Border x:Name="ScreenBackground" Grid.ColumnSpan="2" Background="Transparent"/>
+        <Grid x:Name="Bubble" Margin="0,0,0,0" Width="200" Height="200" HorizontalAlignment="Left" VerticalAlignment="top">
+            <Ellipse Stroke="DarkSlateGray" StrokeThickness="10" />
+            <TextBlock FontSize="72" Text="Ada" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="DarkSlateGray" Margin="0,-20,0,0"/>
+        </Grid>
+    </Grid>
+</UserControl>

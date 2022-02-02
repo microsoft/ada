@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:local="clr-namespace:AdaKiosk"
-        xmlns:sim="clr-namespace:AdaSimulation"
+        xmlns:controls="clr-namespace:AdaKiosk.Controls"
         mc:Ignorable="d" 
         Title="MainWindow" Height="720" Width="1024"
         WindowStyle="None" 
@@ -31,10 +31,10 @@
             <ToggleButton x:Name="ButtonControl" MinWidth="80" MinHeight="50" Margin="10" Checked="OnControl">Control</ToggleButton>
             <ToggleButton x:Name="ButtonDebug" MinWidth="80" MinHeight="50" Margin="10" Checked="OnDebug">Debug</ToggleButton>
         </StackPanel>
-        <sim:Simulator Grid.Column="1" x:Name="sim" Visibility="Collapsed" Focusable="True"/>
-        <local:Controller Grid.Column="1" x:Name="controller" Visibility="Collapsed"/>
-        <local:DebugStripPanel Grid.Column="1" x:Name="strips" Visibility="Collapsed"/>
+        <controls:Simulator Grid.Column="1" x:Name="sim" Visibility="Collapsed" Focusable="True"/>
+        <controls:Controller Grid.Column="1" x:Name="controller" Visibility="Collapsed"/>
+        <controls:DebugStripPanel Grid.Column="1" x:Name="strips" Visibility="Collapsed"/>
         <wv2:WebView2 Grid.Column="1" Name="webView" Source="https://www.microsoft.com/artist-in-residence/collaborations/ada/"/>
-        <Border x:Name="ScreenSaver" Grid.ColumnSpan="2" Visibility="Collapsed" Background="Transparent"/>
+        <controls:ScreenSaver x:Name="ScreenSaver" Grid.ColumnSpan="2" Visibility="Collapsed"/>
     </Grid>
 </Window>

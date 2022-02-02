@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
+using AdaSimulation;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,7 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace AdaSimulation
+namespace AdaKiosk.Controls
 {
     /// <summary>
     /// Interaction logic for ColorPickerPanel.xaml
@@ -62,16 +63,26 @@ namespace AdaSimulation
 
         private static void OnColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            Color c = (Color)e.NewValue;
-            HlsColor hls = new HlsColor(c);
             ColorPickerPanel panel = (ColorPickerPanel)d;
-            panel.LuminanceSlider.Value = hls.Luminance;
-            panel.TransparencySlider.Value = (double)c.A / 255.0;
-            panel.OnColorChanged();
+            panel.OnColorChanged((Color)e.NewValue);
         }
 
-        void OnColorChanged()
-        {
+        private void OnColorChanged(Color c) 
+        { 
+            HlsColor hls = new HlsColor(c);
+            if (!luminanceUpdate)
+            {
+                this.LuminanceSlider.Value = hls.Luminance * this.LuminanceSlider.Maximum;
+            }
+            if (!transparencyUpdate)
+            {
+                this.TransparencySlider.Value = ((double)c.A / 255.0) * this.TransparencySlider.Maximum;
+            }
+            if (!colorTextUpdate)
+            {
+                this.ColorName.Text = c.ToString();
+            }
+
             if (ColorChanged != null)
             {
                 ColorChanged(this, EventArgs.Empty);
@@ -93,19 +104,28 @@ namespace AdaSimulation
             return baseValue;
         }
 
+        bool luminanceUpdate;
+
+
         private void LuminanceSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             Color c = this.Color;
-            HlsColor hls = new HlsColor(c);
-            hls.Luminance = (float)LuminanceSlider.Value;
+            HlsColor hls = new HlsColor(c); 
+            hls.Luminance = (float)LuminanceSlider.Value / LuminanceSlider.Maximum;
             Color nc = hls.RgbColor;
+            luminanceUpdate = true;
             this.Color = Color.FromArgb(c.A, nc.R, nc.G, nc.B);
+            luminanceUpdate = false;
         }
+
+        bool transparencyUpdate;
 
         private void TransparencySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Color c = this.Color;
-            this.Color = Color.FromArgb((byte)(e.NewValue * 255), c.R, c.G, c.B);
+            Color c = this.Color; 
+            transparencyUpdate = true;
+            this.Color = Color.FromArgb((byte)((e.NewValue * 255) / TransparencySlider.Maximum), c.R, c.G, c.B);
+            transparencyUpdate = false;
         }
 
         RenderTargetBitmap bitmap; // cache
@@ -174,6 +194,32 @@ namespace AdaSimulation
         {
             Cancel?.Invoke(this, new EventArgs());
             e.Handled = true;
+        }
+
+        bool colorTextUpdate = false;
+
+        private void OnColorNameChanged(object sender, TextChangedEventArgs e)
+        {
+            try                
+            {
+                var text = this.ColorName.Text;
+                if (!string.IsNullOrEmpty(text))
+                {
+                    Color c = (Color)ColorConverter.ConvertFromString(this.ColorName.Text);
+                    if (this.Color != c)
+                    {
+                        colorTextUpdate = true;
+                        this.Color = c;
+                        colorTextUpdate = false;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private void OnColorPanelSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            bitmap = null; // cache is invalid.
         }
     }
 }
