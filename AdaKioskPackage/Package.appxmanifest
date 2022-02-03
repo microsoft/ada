@@ -9,7 +9,7 @@
 	<Identity
 	  Name="4eda6eb3-2f30-4f01-830e-4c06d89488a0"
 	  Publisher="CN=Chris Lovett, O=Chris Lovett, STREET=18606 201st Ave NE, L=Woodinville, S=WA, PostalCode=98077, C=US"
-	  Version="1.0.5.0" />
+	  Version="1.0.6.0" />
 
 	<Properties>
 		<DisplayName>AdaKioskPackage</DisplayName>

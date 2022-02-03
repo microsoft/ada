@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema
+    elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://schemas.microsoft.com/AssignedAccess/201810/config"
+    xmlns:default="http://schemas.microsoft.com/AssignedAccess/201810/config"
+    xmlns:v3="http://schemas.microsoft.com/AssignedAccess/2020/config"
+    targetNamespace="http://schemas.microsoft.com/AssignedAccess/201810/config"
+    >
+
+	<xs:import namespace="http://schemas.microsoft.com/AssignedAccess/2020/config"/>
+
+	<xs:complexType name="fileExplorerNamespaceRestrictions_t">
+		<xs:choice>
+			<xs:sequence minOccurs="0">
+				<xs:element name="AllowedNamespace" type="allowedFileExplorerNamespace_t" minOccurs="0"/>
+				<xs:element ref="v3:AllowRemovableDrives" minOccurs="0" maxOccurs="1"/>
+			</xs:sequence>
+			<xs:element ref="v3:NoRestriction" minOccurs="0" maxOccurs="1" />
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="allowedFileExplorerNamespace_t">
+		<xs:attribute name="Name" type="allowedFileExplorerNamespaceValues_t" use="required"/>
+	</xs:complexType>
+
+	<xs:simpleType name="allowedFileExplorerNamespaceValues_t">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Downloads"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:element name="FileExplorerNamespaceRestrictions" type="fileExplorerNamespaceRestrictions_t" />
+
+	<xs:attribute name="AutoLaunch" type="xs:boolean"/>
+
+	<xs:attribute name="AutoLaunchArguments" type="xs:string"/>
+
+	<xs:attribute name="DisplayName" type="xs:string"/>
+
+</xs:schema>

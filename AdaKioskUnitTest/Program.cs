@@ -27,6 +27,7 @@ namespace AdaKioskUnitTest
             client = new WebPubSubGroup();
             client.MessageReceived += Client_MessageReceived;
             await client.Connect(connectionString, "AdaKiosk", "unittest", "demogroup");
+            Console.WriteLine("Ada Web PubSub connected...");
         }
 
         private void Client_MessageReceived(object sender, string msg)
