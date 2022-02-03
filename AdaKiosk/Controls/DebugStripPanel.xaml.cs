@@ -29,7 +29,8 @@ namespace AdaKiosk.Controls
             InitializeComponent();
             this.IsVisibleChanged += DebugStripPanel_IsVisibleChanged;
             var assembly = this.GetType().Assembly;
-            this.TextBoxVersion.Text = assembly.GetName().Version.ToString();
+            this.TextBoxVersion.Text = assembly.GetName().Version.ToString() + ", username " +
+                Environment.GetEnvironmentVariable("USERNAME");
         }
 
 

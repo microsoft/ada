@@ -1,1 +1,1 @@
-xcopy %~dp0..\bin\Release\net5.0-windows\*.* z:\AdaKiosk
+xcopy /y %~dp0..\bin\Release\net5.0-windows\*.* z:\AdaKiosk
