@@ -67,7 +67,15 @@ namespace AdaKiosk.Controls
             {
                 popup = new Popup();
                 popup.Placement = PlacementMode.Bottom;
-                picker = new ColorPickerPanel() { Background = Brushes.Black, BorderBrush = Brushes.White, BorderThickness = new Thickness(1), Focusable = true, Width = 600, Height = 600 };
+                picker = new ColorPickerPanel() { 
+                    Background = Brushes.Black, 
+                    BorderBrush = Brushes.White, 
+                    BorderThickness = new Thickness(1), 
+                    Focusable = true, 
+                    Width = 600, 
+                    Height = 600,
+                    SupportTransparency = false
+                };
                 popup.Child = picker;
                 picker.Accept += OnPickColor;
                 picker.Cancel += OnCancelColor;

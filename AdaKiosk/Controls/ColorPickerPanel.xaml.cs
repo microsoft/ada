@@ -31,6 +31,12 @@ namespace AdaKiosk.Controls
 
         bool isDown;
 
+        public bool SupportTransparency { get => this.TransparencySlider.Visibility == Visibility.Visible;
+            set {
+                this.TransparencySlider.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+            } 
+        }
+
         void GrayScale_MouseUp(object sender, MouseButtonEventArgs e)
         {
             isDown = false;

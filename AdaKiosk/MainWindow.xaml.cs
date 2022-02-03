@@ -47,10 +47,10 @@ namespace AdaKiosk
             this.strips.CommandSelected += OnSendCommand;
             this.UpdateView();
             // Hide the DEBUG tab when running on the actual Kiosk with user name Ada.
-            if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                ButtonDebug.Visibility = Visibility.Collapsed;
-            }
+            //if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)
+            //{
+            //    ButtonDebug.Visibility = Visibility.Collapsed;
+            //}
         }
 
         private async void OnSendCommand(object sender, string command)

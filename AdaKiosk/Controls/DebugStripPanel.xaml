@@ -9,7 +9,15 @@
     <UserControl.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Margin" Value="5,10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="Margin" Value="5,10"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
     <Grid x:Name="RootGrid" Margin="20">
@@ -28,32 +36,39 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="Pi" Margin="10,5" Grid.Row="0" Grid.Column="0"/>
-        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxPi"  Grid.Row="0" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
-        <TextBlock x:Name="PiError" Margin="10,5" Grid.Row="0" Grid.Column="2" Foreground="Salmon"/>
+        <TextBlock Text="Pi" Grid.Row="0" Grid.Column="0"/>
+        <TextBox x:Name="TextBoxPi"  Grid.Row="0" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
+        <TextBlock x:Name="PiError" Grid.Row="0" Grid.Column="2" Foreground="Salmon"/>
 
-        <TextBlock Text="Strip"  Margin="10,5" Grid.Row="1" Grid.Column="0"/>
-        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxStrip"  Grid.Row="1" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
-        <TextBlock x:Name="StripError" Margin="10,5" Grid.Row="1" Grid.Column="2" Foreground="Salmon"/>
+        <TextBlock Text="Strip"  Grid.Row="1" Grid.Column="0"/>
+        <TextBox x:Name="TextBoxStrip"  Grid.Row="1" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
+        <TextBlock x:Name="StripError" Grid.Row="1" Grid.Column="2" Foreground="Salmon"/>
 
-        <TextBlock Text="Led range"  Margin="10,5" Grid.Row="2" Grid.Column="0"/>
-        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxLed"  Grid.Row="2" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
-        <TextBlock x:Name="LedRangeError" Margin="10,5" Grid.Row="2" Grid.Column="2" Foreground="Salmon"/>
+        <TextBlock Text="Led range"  Grid.Row="2" Grid.Column="0"/>
+        <TextBox x:Name="TextBoxLed"  Grid.Row="2" Grid.Column="1" GotFocus="OnTextBoxFocus"/>
+        <TextBlock x:Name="LedRangeError" Grid.Row="2" Grid.Column="2" Foreground="Salmon"/>
 
-        <TextBlock Text="Color"  Margin="10,5" Grid.Row="3" Grid.Column="0"/>
-        <TextBox Width="100"  Margin="10,5" x:Name="TextBoxColor"  Grid.Row="3" Grid.Column="1" GotFocus="OnTextBoxFocus" KeyDown="OnColorKeyDwn"/>
+        <TextBlock Text="Color"  Grid.Row="3" Grid.Column="0"/>
+        <TextBox x:Name="TextBoxColor"  Grid.Row="3" Grid.Column="1" GotFocus="OnTextBoxFocus" KeyDown="OnColorKeyDwn"
+                 />
         <StackPanel Margin="10,3" Orientation="Horizontal" Grid.Column="2" Grid.Row="3" HorizontalAlignment="Left">
-            <Button x:Name="PickColorButton" VerticalAlignment="Bottom" MinWidth="50" Click="OnPickColor">...</Button>
+            <Button x:Name="PickColorButton" VerticalAlignment="Center" MinWidth="50" FontSize="16" Click="OnPickColor">
+                <TextBlock Text="..." Margin="0"/>
+            </Button>
             <TextBlock x:Name="ColorError" Margin="10,0" Foreground="Salmon"/>
         </StackPanel>
 
-        <Button Margin="10,3" MinWidth="80" x:Name="ManualButton" Grid.Row="4" VerticalAlignment="Bottom" Click="OnManualGo">Send</Button>
+        <Button Margin="10,3" MinWidth="80" x:Name="ManualButton" Grid.Row="4" VerticalAlignment="Center" Click="OnManualGo">
+            <TextBlock Text="Send"  Margin="0"/>
+        </Button>
         
         <TextBox x:Name="TextBoxError" Grid.Row="5" Grid.ColumnSpan="4" Margin="10" AcceptsReturn="true" Visibility="Collapsed" Foreground="DarkSalmon"/>
 
-        <TextBlock Text="Version"  Margin="10,5" Grid.Row="6" Grid.Column="0"/>
-        <TextBlock Margin="10,5" x:Name="TextBoxVersion"  Grid.Row="6" Grid.Column="1" />
+        <TextBlock Text="Version"  Grid.Row="6" Grid.Column="0"/>
+        <TextBlock x:Name="TextBoxVersion"  Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
-        <Button Background="#c12e2a" Grid.Row="6" Grid.Column="3" HorizontalAlignment="Right" MinWidth="80" Click="OnShutdown">Shutdown</Button>
+        <Button Background="#c12e2a" Grid.Row="6" Grid.Column="3" HorizontalAlignment="Right" MinWidth="80" Click="OnShutdown"
+                VerticalAlignment="Center">
+            <TextBlock Text="Shutdown"  Margin="0"/> </Button>
     </Grid>
 </UserControl>

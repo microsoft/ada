@@ -38,8 +38,8 @@
             </Rectangle.Fill>
         </Rectangle>
 
-        <Slider x:Name="LuminanceSlider" Margin="3" Grid.Column="1"   Orientation="Vertical" Minimum="0" Maximum="100" ValueChanged="LuminanceSlider_ValueChanged"/>
-        <Slider x:Name="TransparencySlider" Margin="3" Grid.Column="0" Grid.Row="1"   Orientation="Horizontal" Minimum="0" Maximum="255" ValueChanged="TransparencySlider_ValueChanged"/>
+        <Slider x:Name="LuminanceSlider" Margin="3,0" Grid.Column="1"   Orientation="Vertical" Minimum="0" Maximum="100" ValueChanged="LuminanceSlider_ValueChanged"/>
+        <Slider x:Name="TransparencySlider" Visibility="Collapsed" Margin="3" Grid.Column="0" Grid.Row="1"   Orientation="Horizontal" Minimum="0" Maximum="255" ValueChanged="TransparencySlider_ValueChanged"/>
 
         <Grid Grid.Column="0" Grid.Row="2">
             <Grid.ColumnDefinitions>
@@ -88,10 +88,10 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox x:Name="ColorName" Grid.ColumnSpan="3" VerticalAlignment="top" MinWidth="70" Background="LemonChiffon" Margin="4" TextChanged="OnColorNameChanged"/>
+                <TextBox x:Name="ColorName" Grid.ColumnSpan="3" VerticalAlignment="top" MinWidth="70" Margin="5" TextChanged="OnColorNameChanged"/>
             
-                <Button x:Name="CancelButton" Grid.Column="1" Grid.Row="2" MinWidth="80" MinHeight="50" VerticalAlignment="Bottom" Click="OnCancelButtonClick">Cancel</Button>
-                <Button x:Name="Button"  Grid.Column="2" Grid.Row="2" Margin="10,0,0,0"  MinWidth="80" MinHeight="50" VerticalAlignment="Bottom" Click="OnOkButtonClick">OK</Button>
+                <Button x:Name="CancelButton" Grid.Column="1" Grid.Row="2" MinWidth="80" Margin="5" MinHeight="50" VerticalAlignment="Bottom" Click="OnCancelButtonClick">Cancel</Button>
+                <Button x:Name="Button"  Grid.Column="2" Grid.Row="2" Margin="5"   MinWidth="80" MinHeight="50" VerticalAlignment="Bottom" Click="OnOkButtonClick">OK</Button>
             </Grid>
         </Grid>
         
