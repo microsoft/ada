@@ -1,3 +1,0 @@
-[submodule "Server/signalrcore"]
-	path = Server/signalrcore
-	url = https://github.com/mandrewcito/signalrcore.git
