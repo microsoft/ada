@@ -25,6 +25,7 @@ namespace AdaKiosk
         private int InteractiveSleepDelay = 60;
         private int InitialSleepDelay = 600;
         const string userName = "kiosk";
+        int sleepTick = 0;
 
         enum ViewType
         {
@@ -120,7 +121,8 @@ namespace AdaKiosk
             {
                 ButtonDebug.Visibility = Visibility.Collapsed;
             }
-            if (message.User != userName)
+            // allow one Kiosk to send a zone selection to another.
+            if (message.User != userName || message.Text.StartsWith("/zone"))
             {
                 sim.HandleMessage(message);
                 this.controller.HandleMessage(message);
@@ -231,19 +233,34 @@ namespace AdaKiosk
 
         protected override void OnPreviewMouseMove(MouseEventArgs e)
         {
-            StartDelayedSleep(InteractiveSleepDelay);
+            // There is an odd mouse move that always happens when screen saver kicks in,
+            // this TickCount stops it from causing screen saver to flash and turn off again.
+            if (Environment.TickCount > this.sleepTick + 5000)
+            {
+                StartDelayedSleep(InteractiveSleepDelay);
+            }
             base.OnPreviewMouseMove(e);
         }
 
         protected override void OnPreviewStylusDown(StylusDownEventArgs e)
         {
-            StartDelayedSleep(InteractiveSleepDelay);
+            // There is an odd mouse move that always happens when screen saver kicks in,
+            // this TickCount stops it from causing screen saver to flash and turn off again.
+            if (Environment.TickCount > this.sleepTick + 5)
+            {
+                StartDelayedSleep(InteractiveSleepDelay);
+            }
             base.OnPreviewStylusDown(e);
         }
 
         protected override void OnPreviewTouchDown(TouchEventArgs e)
         {
-            StartDelayedSleep(InteractiveSleepDelay);
+            // There is an odd mouse move that always happens when screen saver kicks in,
+            // this TickCount stops it from causing screen saver to flash and turn off again.
+            if (Environment.TickCount > this.sleepTick + 5)
+            {
+                StartDelayedSleep(InteractiveSleepDelay);
+            }
             base.OnPreviewTouchDown(e);
         }
 
@@ -296,16 +313,19 @@ namespace AdaKiosk
 
         void OnSleep()
         {
-            this.ScreenSaver.Start();
             // a black shield cannot animate over the top of webView!
             webView.Visibility = Visibility.Collapsed;
             this.strips.HidePopup();
             this.controller.HidePopup();
             this.sim.Stop();
+            ShowStatus("Sleep");
+            this.sleepTick = Environment.TickCount;
+            this.ScreenSaver.Start();
         }
 
-        private void OnScreenSaverClosed(object sender, EventArgs e)
+        private void OnScreenSaverClosed(object sender, string arg)
         {
+            ShowStatus(arg);
             StartDelayedSleep(InteractiveSleepDelay);
         }
     }

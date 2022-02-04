@@ -110,6 +110,10 @@ namespace AdaKiosk.Controls
                                 SimulateColor(Colors.Black);
                             }
                             break;
+                        case "zone":
+                            HandleZoneMessage(parts);
+                            break;
+
                         default:
                             break;
                     }
@@ -121,6 +125,32 @@ namespace AdaKiosk.Controls
                 {
                     SimulateCommand(cmd);
                 }
+            }
+        }
+
+        private void HandleZoneMessage(string[] parts)
+        {
+            if (parts.Length > 2 && int.TryParse(parts[1], out int zone))
+            {
+                try
+                {
+                    string[] rgb = parts[2].Split(',');
+                    if (rgb.Length == 3)
+                    {
+                        byte r = 0;
+                        byte g = 0;
+                        byte b = 0;
+                        byte.TryParse(rgb[0], out r);
+                        byte.TryParse(rgb[1], out g);
+                        byte.TryParse(rgb[2], out b);
+                        Color color = Color.FromRgb(r, g, b);
+                        foreach (var pi in pis)
+                        {
+                            pi.SetZone(zone, color);
+                        }
+                    }
+                }
+                catch { }
             }
         }
 

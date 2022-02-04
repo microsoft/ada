@@ -14,9 +14,11 @@ namespace AdaKiosk.Controls
     {
         DelayedActions actions = new DelayedActions();
         Random rand = new Random(Environment.TickCount);
+        const int FadeDelay = 5;
         const int BubbleMoveDelay = 10;
+        int startTick = 0;
 
-        public event EventHandler Closed;
+        public event EventHandler<string> Closed;
 
         public ScreenSaver()
         {
@@ -25,53 +27,57 @@ namespace AdaKiosk.Controls
 
         public void Start()
         {
+            startTick = Environment.TickCount;
             this.Bubble.Visibility = Visibility.Collapsed;
             this.Visibility = Visibility.Visible;
             SolidColorBrush brush = new SolidColorBrush() { Color = Colors.Transparent };
             ScreenBackground.Background = brush;
-            var animation = new ColorAnimation() { To = Colors.Black, Duration = new Duration(TimeSpan.FromSeconds(5)) };
-            Storyboard storyboard = new Storyboard();
-            Storyboard.SetTarget(animation, brush);
-            Storyboard.SetTargetProperty(animation, new PropertyPath(SolidColorBrush.ColorProperty));
-            storyboard.Children.Add(animation);
-            storyboard.Begin();
-            storyboard.Completed += OnFadeCompleted;
+            var animation = new ColorAnimation() { To = Colors.Black, Duration = new Duration(TimeSpan.FromSeconds(FadeDelay)) };
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, animation);
+            actions.StartDelayedAction("move", RandomBubblePlacement, TimeSpan.FromSeconds(BubbleMoveDelay));
         }
 
         protected override void OnTouchDown(TouchEventArgs e)
         {
-            actions.StartDelayedAction("event", SendClosedEvent, TimeSpan.FromMilliseconds(1));
+            e.Handled = true;
+            if (Environment.TickCount > startTick + 5000)
+            {
+                actions.StartDelayedAction("event", () => SendClosedEvent("Touch"), TimeSpan.FromMilliseconds(10));
+            }
             base.OnTouchDown(e);
         }
 
-        protected override void OnPreviewDragOver(DragEventArgs e)
+        protected override void OnPreviewMouseMove(MouseEventArgs e)
         {
-            actions.StartDelayedAction("event", SendClosedEvent, TimeSpan.FromMilliseconds(1));
-            base.OnPreviewDragOver(e);
+            e.Handled = true;
+            if (Environment.TickCount > startTick + 5000)
+            {
+                actions.StartDelayedAction("event", () => SendClosedEvent("Mouse"), TimeSpan.FromMilliseconds(10));
+            }
+            base.OnPreviewMouseMove(e);
         }
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
-            actions.StartDelayedAction("event", SendClosedEvent, TimeSpan.FromMilliseconds(1));
+            e.Handled = true;
+            if (Environment.TickCount > startTick + 5000)
+            {
+                actions.StartDelayedAction("event", () => SendClosedEvent("Keyboard"), TimeSpan.FromMilliseconds(10));
+            }
             base.OnPreviewKeyDown(e);
         }
 
-        void SendClosedEvent()
+        void SendClosedEvent(string name)
         {
             if (Closed != null)
             {
-                Closed(this, EventArgs.Empty);
+                Closed(this, name);
             }
-        }
-
-        private void OnFadeCompleted(object sender, object e)
-        {
-            this.RandomBubblePlacement();
-            this.Bubble.Visibility = Visibility.Visible;
         }
 
         private void RandomBubblePlacement()
         {
+            this.Bubble.Visibility = Visibility.Visible;
             var xrange = this.ActualWidth - this.Bubble.Width;
             var yrange= this.ActualHeight - this.Bubble.Height;
             var x = rand.Next(0, (int)xrange);

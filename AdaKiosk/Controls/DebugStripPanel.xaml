@@ -59,7 +59,7 @@
         </StackPanel>
 
         <Button Margin="10,3" MinWidth="80" x:Name="ManualButton" Grid.Row="4" VerticalAlignment="Center" Click="OnManualGo">
-            <TextBlock Text="Send"  Margin="0"/>
+            <TextBlock Text="Send"  Margin="5"/>
         </Button>
         
         <TextBox x:Name="TextBoxError" Grid.Row="5" Grid.ColumnSpan="4" Margin="10" AcceptsReturn="true" Visibility="Collapsed" Foreground="DarkSalmon"/>
@@ -69,6 +69,6 @@
 
         <Button Background="#c12e2a" Grid.Row="6" Grid.Column="3" HorizontalAlignment="Right" MinWidth="80" Click="OnShutdown"
                 VerticalAlignment="Center">
-            <TextBlock Text="Shutdown"  Margin="0"/> </Button>
+            <TextBlock Text="Shutdown" Margin="5"/> </Button>
     </Grid>
 </UserControl>
