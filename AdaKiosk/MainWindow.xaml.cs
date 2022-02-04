@@ -45,6 +45,7 @@ namespace AdaKiosk
             this.sim.SimulatingCommand += OnSimulatingCommand;
             this.controller.CommandSelected += OnSendCommand;
             this.strips.CommandSelected += OnSendCommand;
+            this.sim.UserName = userName;
             this.UpdateView();
             // Hide the DEBUG tab when running on the actual Kiosk with user name Ada.
             //if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)

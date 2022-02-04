@@ -112,7 +112,9 @@ class LightingDesigner:
         if self.bridge:
             response = self.send_bridge_command("on")
             print("{}".format(response))
-        self.msgbus.send('server', '/power/on')
+        else:
+            print("")
+        self.msgbus.send('/power/on')
         self.lights_on = True
         self.server.camera_on()
 
@@ -122,7 +124,7 @@ class LightingDesigner:
         if self.bridge:
             response = self.send_bridge_command("off")
             print("{}".format(response))
-        self.msgbus.send('server', '/power/off')
+        self.msgbus.send('/power/off')
         self.lights_on = False
         self.server.camera_off()
 
@@ -186,7 +188,7 @@ class LightingDesigner:
                     self.color_override = False
                     self.turn_off_time = None
                     self.animations = None
-                    self.msgbus.send('server', '/power/run')
+                    self.msgbus.send('/power/run')
                 else:
                     print("error: invalid power command: {}".format(msg))
             elif cmd == "rain":
@@ -348,7 +350,6 @@ class LightingDesigner:
                 _, cmd = web_cmd
                 self.onmessage("web", cmd)
 
-            self.msgbus.check_connection()
             try:
                 self.process_next_message()
             except:
@@ -366,7 +367,7 @@ class LightingDesigner:
                     wc.run = None
                     self.turn_off_time = None
                     self.sensei.start()
-                    self.msgbus.send('server', '/power/run')
+                    self.msgbus.send('/power/run')
                 self.server.camera_on()
             elif not power_state or self.power_off_override:
                 if self.lights_on is None or self.lights_on or has_new_clients:

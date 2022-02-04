@@ -92,7 +92,12 @@ namespace AdaKiosk.Controls
 
         internal void HandleMessage(Message message)
         {
-            if (message.User == "server")
+            actions.StartDelayedAction("HandleMessage", () => { HandleMessageOnUiThread(message); }, TimeSpan.FromMilliseconds(1));
+        }
+
+        internal void HandleMessageOnUiThread(Message message) 
+        { 
+            if (message.User != UserName)
             {
                 // fun times, now to simulate what the server is doing...
                 if (!string.IsNullOrEmpty(message.Text))
@@ -638,6 +643,8 @@ namespace AdaKiosk.Controls
 
         Grid currentKitchen;
         Color currentColor = Colors.Red;
+
+        public string UserName { get; internal set; }
 
         private void OnKitchenClick(object sender, MouseButtonEventArgs e)
         {

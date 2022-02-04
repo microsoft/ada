@@ -20,7 +20,7 @@ class TeensyFirmwareUpdater:
     def start(self):
         _thread.start_new_thread(self.download_thread, ())
 
-    def stop():
+    def stop(self):
         self.url = None
 
     def download_thread(self):

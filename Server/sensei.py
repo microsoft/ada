@@ -226,7 +226,6 @@ class Sensei:
             zone_dict_list.append(max_dict)
 
         if self.play_recording and self.start_time + self.playback_delay < time.time():
-            print("### Advancing to next playback row")
             self.playback_row += 1
             self.start_time = time.time()
             if self.playback_row >= self.max_rows:

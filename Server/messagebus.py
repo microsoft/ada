@@ -1,152 +1,146 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-# Provides bi-directional connection to given signalr service
-import requests
 import json
-import time
-from collections import namedtuple
-import sys
 import os
-from threading import Thread
-import priority_queue
+import asyncio
+import websockets
+from azure.messaging.webpubsubservice import WebPubSubServiceClient
+import threading
+from priority_queue import PriorityQueue
 
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path += [os.path.join(script_dir, "signalrcore")]
-import signalrcore
-from signalrcore.hub_connection_builder import HubConnectionBuilder
-
-
+# Provides bi-directional connection to given Azure Web PubSub service group.
 class MessageBus:
-    def __init__(self, uri):
-        self.connection = None
-        self.uri = uri
+    def __init__(self, webpubsub_constr, hub_name, user_name, group_name):
+        self.webpubsub_constr = webpubsub_constr
+        self.client = None
         self.listeners = []
         self.closed = True
-        self.delay = 0
-        self.thread = None
-        self.send_queue = priority_queue.PriorityQueue()
         self.stopped = False
+        self.user_name = user_name
+        self.hub_name = hub_name
+        self.group_name = group_name
+        self.ack_id = 1
+        self.web_socket = None
+        self.send_queue = PriorityQueue()
 
     def add_listener(self, handler):
         self.listeners += [handler]
 
-    def get_access_token(self):
-        return self.accessToken
-
-    def connect(self):
-        self.session = requests.Session()
-        response = requests.get(f"{self.uri}/negotiate")
-        msg = response.content.decode('utf-8')
-        data = json.loads(msg)
-        server_url = data['url']
-        self.accessToken = data['accessToken']
-        self.stop()
-        # .configure_logging(logging.DEBUG)\
-        self.connection = HubConnectionBuilder()\
-            .with_url(
-                server_url,
-                options={
-                    "access_token_factory": self.get_access_token,
-                })\
-            .with_automatic_reconnect({
-                "type": "raw",
-                "keep_alive_interval": 10,
-                "reconnect_interval": 5,
-                "max_attempts": 5
-            }).build()
-        self.connection.on_open(self.opened)
-        self.connection.on_close(self.closed)
-        self.connection.on_error(self.error)
-        self.connection.on("log", self.received)
-        self.connection.start()
+    async def connect(self):
+        self.client = WebPubSubServiceClient.from_connection_string(connection_string=self.webpubsub_constr, hub=self.hub_name)
         self.closed = False  # assume it will succeed so we don't try again until we know for sure.
         self.stopped = False
+        token = self.client.get_client_access_token(user_id=self.user_name, roles=[
+            f"webpubsub.joinLeaveGroup.{self.group_name}",
+            f"webpubsub.sendToGroup.{self.group_name}"])
+        uri = token['url']
+        self.web_socket = await websockets.connect(uri, subprotocols=['json.webpubsub.azure.v1'])
+        response = await self._send_receive({
+            "type": "joinGroup",
+            "ackId": self.ack_id,
+            "group": self.group_name})
+        self.ack_id += 1
+        # now we should have the connection id and an idea of success
+        if "event" in response and response["event"] == "connected":
+            self.connection_id = response["connectionId"]
+        print("WebSocket connected")
+        return
 
-    def opened(self):
-        print("### signalr connection opened and handshake received ready to send messages")
-        self.closed = False
+    def send(self, msg):
+        groupMessage = {
+            "type": "sendToGroup",
+            "group": self.group_name,
+            "dataType": "json",
+            "data": msg,
+            "ackId": self.ack_id
+        }
+        self.ack_id += 1
+        self.send_queue.enqueue(0, groupMessage)
 
-    def closed(self):
-        print("### signalr connection closed")
-        self.closed = True
-        self.stop()
+    async def consumer(self):
+        while self.client:
+            item = self.send_queue.dequeue()
+            if item:
+                _, message = item
+                data = json.dumps(message)
+                await self.web_socket.send(data)
+            else:
+                await asyncio.sleep(0.1)
 
-    def stop(self):
-        if self.connection:
+        if self.web_socket:
             try:
-                self.connection.stop()
+                await self.web_socket.close()
             except:
                 pass
-        self.connection = None
+
+    async def listen(self):
+        print("Listening for messages from WebSocket...")
+        async for message in self.web_socket:
+            self._handle_message(message)
+            if not self.client:
+                break
+        print("Stopped listening to WebSocket.")
+
+    def _handle_message(self, data):
+        # print("Message received: " + data)
+        message = json.loads(data)
+        if "fromUserId" in message:
+            user = message["fromUserId"]
+            if user != self.user_name:
+                for h in self.listeners:
+                    h(user, message)
+
+    async def _send_receive(self, msg):
+        data = json.dumps(msg)
+        await self.web_socket.send(data)
+        response = await self.web_socket.recv()
+        return json.loads(response)
+
+    def close(self):
+        if self.client:
+            try:
+                self.client.close()
+            except:
+                pass
+        self.client = None
         self.stopped = True
 
-    def error(self, e):
-        print("### signalr error: ", e)
-        self.closed = True
-        self.stop()  # we'll do a reconnect later.
 
-    def check_connection(self):
-        if not self.closed and self.delay != 0 and self.delay > time.time():
-            self.reconnect()
+def add_input(input_queue):
+    while True:
+        msg = input("Enter a message or 'x' to terminate: ")
+        input_queue.enqueue(0, msg)
 
-    def received(self, msg):
-        if type(msg) == list:
-            msg = msg[0]
-        try:
-            data = json.loads(msg)
-            data = namedtuple("Message", data.keys())(*data.values())
-            if hasattr(data, 'user') and hasattr(data, 'message'):
-                for h in self.listeners:
-                    h(data.user, data.message)
-        except Exception as e:
-            print("### signalr parse error:", e)
 
-    def reconnect(self):
-        try:
-            if self.delay != 0 and self.delay > time.time():
-                self.connect()
-                return True
-            else:
-                # skip reconnect attempt until delay is reached.
-                return False
-        except:
-            print("### signalr connection failed, trying again in 10 seconds")
-            self.delay = time.time() + 10
-            return False
-
-    def send(self, user, msg):
-        if type(msg) == str:
-            body = f"{{\"user\": \"{user}\", \"message\": \"{msg}\"}}"
+async def read_input(bus):
+    # console input has to be in a separate thread otherwise it somehow
+    # blocks all asyncio, including the bus.listen task.
+    input_queue = PriorityQueue()
+    input_thread = threading.Thread(target=add_input, args=(input_queue,))
+    input_thread.daemon = True
+    input_thread.start()
+    while True:
+        item = input_queue.dequeue()
+        if item:
+            _, msg = item
+            await bus.send(msg)
         else:
-            # embed the json for the message into the json block
-            text = json.dumps(msg)
-            body = f"{{\"user\": \"{user}\", \"message\": {text}}}"
+            await asyncio.sleep(0.1)
 
-        self.send_queue.enqueue(0, body)
-        if self.thread is None:
-            # send is not using signalr, so it has no connection to
-            self.thread = Thread(target=self._send_thread)
-            self.thread.daemon = True
-            self.thread.start()
 
-    def _send_thread(self):
-        while not self.stopped:
-            item = self.send_queue.dequeue()
-            if item is None:
-                time.sleep(0.1)
-            else:
-                try:
-                    _, body = item
-                    requests.post(f"{self.uri}/post", body)
-                except Exception as e:
-                    print("### signalr post failed :", e)
-
+async def run_test():
+    webpubsub_constr = os.getenv("ADA_WEBPUBSUB_CONNECTION_STRING")
+    if not webpubsub_constr:
+        print("Missing ADA_WEBPUBSUB_CONNECTION_STRING environment variable")
+    else:
+        bus = MessageBus(webpubsub_constr, "AdaKiosk", "unittest", "demogroup")
+        await bus.connect()
+        bus.add_listener(lambda user, msg: print(f"Message received {user} : {msg}"))
+        await asyncio.gather(
+            read_input(bus),
+            bus.listen())
 
 if __name__ == "__main__":
-    bus = MessageBus("http://localhost:7071/api/ada")
-    bus.connect()
-    while True:
-        msg = input("Enter a message: ")
-        bus.send('server', msg)
+    print(asyncio.get_event_loop().run_until_complete(run_test()))

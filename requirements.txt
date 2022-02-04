@@ -1,10 +1,11 @@
 azure
 azure-storage-blob
 azure-cosmosdb-table
+azure-messaging-webpubsubservice
 applicationinsights
 opencv-contrib-python
 comtypes
 imutils
 suntime
 paramiko
-websocket-client==1.0.0
+websockets

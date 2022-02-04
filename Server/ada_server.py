@@ -11,11 +11,12 @@ import sys
 from threading import Lock
 from collections import namedtuple
 from http.server import HTTPServer
-import priority_queue
+from priority_queue import PriorityQueue
 import sensei
 import web_server
 import firmware
-from signalr import MessageBus
+from messagebus import MessageBus
+import asyncio
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path += [os.path.join(script_dir, "../PiBridge")]
@@ -44,7 +45,7 @@ class AdaServer:
         self.clients = {}  # the dictionary of connected client sockets
         self.names = {}  # map of client address => name
         self.closed = False
-        self.camera_queue = priority_queue.PriorityQueue()
+        self.camera_queue = PriorityQueue()
         self.sequence_numbers = {}  # the client sequence numbers we are getting back
         self.sequence_numbers_sent = {}  # the client sequence numbers we have sent
         self.sequence = 0
@@ -77,6 +78,7 @@ class AdaServer:
 
     def close(self):
         self.firmware.stop()
+        self.msgbus.close()
         self.closed = True
 
     def get_clients(self):
@@ -171,7 +173,7 @@ class AdaServer:
 
     def queue_command(self, priority, cmd):
         target = None
-        self.msgbus.send('server', cmd)
+        self.msgbus.send(cmd)
         self.queued = True
         if type(cmd) == list:
             for c in cmd:
@@ -256,7 +258,7 @@ class AdaServer:
                 pass
 
         self.lock.acquire()
-        client_queue = priority_queue.PriorityQueue()  # initial queue of commands.
+        client_queue = PriorityQueue()  # initial queue of commands.
         self.clients[name] = client
         self.client_queues[address] = client_queue
         self.names[address] = name
@@ -418,18 +420,45 @@ class AdaServer:
         self.bridge = None
 
 
-def _main(config, sensei, ip_address, web_address):
+def prompt_for_enter(input_queue):
+    while True:
+        msg = input("Press ENTER to terminate: ")
+        input_queue.enqueue(0, msg)
+
+
+async def async_read_enter(server):
+    # console input has to be in a separate thread otherwise it somehow
+    # blocks all asyncio, including the bus.listen task.
+    input_queue = PriorityQueue()
+    _thread.start_new_thread(prompt_for_enter, (input_queue,))
+    while True:
+        item = input_queue.dequeue()
+        if item:
+            server.close()
+            return
+        else:
+            await asyncio.sleep(0.1)
+
+
+async def _main(config, sensei, ip_address, web_address):
     endpoint = (ip_address, config.server_port)
     msgbus = None
-    signalr_uri = os.getenv("signalr_uri")
-    if signalr_uri:
-        msgbus = MessageBus(signalr_uri)
-        msgbus.connect()
+
+    webpubsub_constr = os.getenv("ADA_WEBPUBSUB_CONNECTION_STRING")
+    if not webpubsub_constr:
+        print("Missing ADA_WEBPUBSUB_CONNECTION_STRING environment variable")
+        print("This means there will be no remote control Kiosk support")
+    else:
+        msgbus = MessageBus(webpubsub_constr, "AdaKiosk", "server", "demogroup")
+        await msgbus.connect()
     server = AdaServer(config, msgbus, endpoint, web_address)
     server.start()
     designer = LightingDesigner(server, msgbus, sensei, config)
     designer.start()
-    input("press ENTER to terminate the server\n")
+    await asyncio.gather(
+        async_read_enter(server),
+        msgbus.listen(),
+        msgbus.consumer())
 
 
 if __name__ == '__main__':
@@ -453,8 +482,10 @@ if __name__ == '__main__':
 
     sensei = sensei.Sensei(config.camera_zones, config.colors_for_emotions,
                            connection_string, config.debug)
+
+    args.loop = True  # Sensei cosmos database is offline right now...
     if args.loop:
         history_files = os.path.join(os.path.join(script_dir, config.history_dir))
         sensei.load(history_files, args.delay, config.playback_weights)
 
-    _main(config, sensei, args.ip, args.web)
+    asyncio.get_event_loop().run_until_complete(_main(config, sensei, args.ip, args.web))
