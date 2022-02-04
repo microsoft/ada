@@ -32,6 +32,7 @@ namespace AdaKiosk
             Story,
             Simulation,
             Control,
+            Contact,
             Debug
         }
 
@@ -160,6 +161,7 @@ namespace AdaKiosk
             this.webView.Visibility = Visibility.Collapsed;
             this.sim.Visibility = Visibility.Collapsed;
             this.controller.Visibility = Visibility.Collapsed;
+            this.ContactPanel.Visibility = Visibility.Collapsed;
             this.strips.Visibility = Visibility.Collapsed;
 
             switch (this.currentView)
@@ -177,9 +179,15 @@ namespace AdaKiosk
                     this.controller.HidePopup();
                     break;
                 case ViewType.Control:
-                    this.controller.Visibility = Visibility.Visible; ;
+                    this.controller.Visibility = Visibility.Visible;
                     sim.Stop();
                     this.strips.HidePopup();
+                    break;
+                case ViewType.Contact:
+                    this.ContactPanel.Visibility = Visibility.Visible;
+                    sim.Stop();
+                    this.strips.HidePopup();
+                    this.controller.HidePopup();
                     break;
                 case ViewType.Debug:
                     this.strips.Visibility = Visibility.Visible; ;
@@ -197,6 +205,7 @@ namespace AdaKiosk
             UpdateView();
             ButtonBlog.IsChecked = false;
             ButtonControl.IsChecked = false;
+            ButtonContact.IsChecked = false;
             ButtonDebug.IsChecked = false;
         }
 
@@ -206,6 +215,7 @@ namespace AdaKiosk
             UpdateView();
             ButtonBlog.IsChecked = false;
             ButtonSim.IsChecked = false;
+            ButtonContact.IsChecked = false;
             ButtonDebug.IsChecked = false;
         }
 
@@ -215,7 +225,19 @@ namespace AdaKiosk
             UpdateView();
             ButtonSim.IsChecked = false;
             ButtonControl.IsChecked = false;
+            ButtonContact.IsChecked = false;
             ButtonDebug.IsChecked = false;
+        }
+        private void OnContact(object sender, RoutedEventArgs e)
+        {
+            this.currentView = ViewType.Contact;
+            UpdateView();
+            ButtonBlog.IsChecked = false;
+            ButtonSim.IsChecked = false;
+            ButtonControl.IsChecked = false;
+            ButtonDebug.IsChecked = false;
+            this.strips.Focus();
+            this.strips.Show();
         }
 
         private void OnDebug(object sender, RoutedEventArgs e)
@@ -224,6 +246,7 @@ namespace AdaKiosk
             UpdateView();
             ButtonBlog.IsChecked = false;
             ButtonSim.IsChecked = false;
+            ButtonContact.IsChecked = false;
             ButtonControl.IsChecked = false;
             this.strips.Focus();
             this.strips.Show();
@@ -328,5 +351,6 @@ namespace AdaKiosk
             ShowStatus(arg);
             StartDelayedSleep(InteractiveSleepDelay);
         }
+
     }
 }
