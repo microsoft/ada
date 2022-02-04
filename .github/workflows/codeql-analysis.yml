@@ -91,7 +91,7 @@ jobs:
 
     - name: Build C# AdaKioskUnitTest
       if: ${{ matrix.language == 'csharp' }}
-      run: dotnet build azure\AdaKioskUnitTest\AdaKioskUnitTest.sln /p:Platform="Any CPU"
+      run: dotnet build AdaKioskUnitTest\AdaKioskUnitTest.sln /p:Platform="Any CPU"
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
