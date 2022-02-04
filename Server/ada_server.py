@@ -15,7 +15,7 @@ from priority_queue import PriorityQueue
 import sensei
 import web_server
 import firmware
-from messagebus import MessageBus
+from messagebus import WebPubSubGroup
 import asyncio
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -449,7 +449,7 @@ async def _main(config, sensei, ip_address, web_address):
         print("Missing ADA_WEBPUBSUB_CONNECTION_STRING environment variable")
         print("This means there will be no remote control Kiosk support")
     else:
-        msgbus = MessageBus(webpubsub_constr, "AdaKiosk", "server", "demogroup")
+        msgbus = WebPubSubGroup(webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group)
         await msgbus.connect()
     server = AdaServer(config, msgbus, endpoint, web_address)
     server.start()
@@ -458,7 +458,7 @@ async def _main(config, sensei, ip_address, web_address):
     await asyncio.gather(
         async_read_enter(server),
         msgbus.listen(),
-        msgbus.consumer())
+        msgbus.consume())
 
 
 if __name__ == '__main__':

@@ -31,6 +31,8 @@
     },
 
     "server_port": 12345,
+    "pubsub_group": "demogroup",
+    "pubsub_hub": "AdaKiosk",
 
     "on_time": [10, 0],
     "off_time": [ 21, 0 ],

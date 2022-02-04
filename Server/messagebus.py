@@ -2,41 +2,40 @@
 # Licensed under the MIT license.
 
 import json
-import os
 import asyncio
 import websockets
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
-import threading
-from priority_queue import PriorityQueue
+import queue
 
 
 # Provides bi-directional connection to given Azure Web PubSub service group.
-class MessageBus:
+class WebPubSubGroup:
     def __init__(self, webpubsub_constr, hub_name, user_name, group_name):
         self.webpubsub_constr = webpubsub_constr
         self.client = None
         self.listeners = []
         self.closed = True
-        self.stopped = False
         self.user_name = user_name
         self.hub_name = hub_name
         self.group_name = group_name
         self.ack_id = 1
         self.web_socket = None
-        self.send_queue = PriorityQueue()
+        self.send_queue = queue.Queue()
 
     def add_listener(self, handler):
         self.listeners += [handler]
 
     async def connect(self):
-        self.client = WebPubSubServiceClient.from_connection_string(connection_string=self.webpubsub_constr, hub=self.hub_name)
-        self.closed = False  # assume it will succeed so we don't try again until we know for sure.
-        self.stopped = False
-        token = self.client.get_client_access_token(user_id=self.user_name, roles=[
-            f"webpubsub.joinLeaveGroup.{self.group_name}",
-            f"webpubsub.sendToGroup.{self.group_name}"])
+        self.client = WebPubSubServiceClient.from_connection_string(
+            connection_string=self.webpubsub_constr, hub=self.hub_name)
+        self.closed = False
+        token = self.client.get_client_access_token(
+            user_id=self.user_name,
+            roles=[f"webpubsub.joinLeaveGroup.{self.group_name}",
+                   f"webpubsub.sendToGroup.{self.group_name}"])
         uri = token['url']
-        self.web_socket = await websockets.connect(uri, subprotocols=['json.webpubsub.azure.v1'])
+        self.web_socket = await websockets.connect(
+            uri, subprotocols=['json.webpubsub.azure.v1'])
         response = await self._send_receive({
             "type": "joinGroup",
             "ackId": self.ack_id,
@@ -57,23 +56,23 @@ class MessageBus:
             "ackId": self.ack_id
         }
         self.ack_id += 1
-        self.send_queue.enqueue(0, groupMessage)
+        self.send_queue.put(groupMessage)
 
-    async def consumer(self):
-        while self.client:
-            item = self.send_queue.dequeue()
-            if item:
-                _, message = item
-                data = json.dumps(message)
-                await self.web_socket.send(data)
+    async def consume(self):
+        while not self.closed:
+            if not self.send_queue.empty():
+                message = self.send_queue.get()
+                if message:
+                    data = json.dumps(message)
+                    await self.web_socket.send(data)
             else:
                 await asyncio.sleep(0.1)
 
         if self.web_socket:
             try:
                 await self.web_socket.close()
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
     async def listen(self):
         print("Listening for messages from WebSocket...")
@@ -102,45 +101,6 @@ class MessageBus:
         if self.client:
             try:
                 self.client.close()
-            except:
-                pass
-        self.client = None
-        self.stopped = True
-
-
-def add_input(input_queue):
-    while True:
-        msg = input("Enter a message or 'x' to terminate: ")
-        input_queue.enqueue(0, msg)
-
-
-async def read_input(bus):
-    # console input has to be in a separate thread otherwise it somehow
-    # blocks all asyncio, including the bus.listen task.
-    input_queue = PriorityQueue()
-    input_thread = threading.Thread(target=add_input, args=(input_queue,))
-    input_thread.daemon = True
-    input_thread.start()
-    while True:
-        item = input_queue.dequeue()
-        if item:
-            _, msg = item
-            await bus.send(msg)
-        else:
-            await asyncio.sleep(0.1)
-
-
-async def run_test():
-    webpubsub_constr = os.getenv("ADA_WEBPUBSUB_CONNECTION_STRING")
-    if not webpubsub_constr:
-        print("Missing ADA_WEBPUBSUB_CONNECTION_STRING environment variable")
-    else:
-        bus = MessageBus(webpubsub_constr, "AdaKiosk", "unittest", "demogroup")
-        await bus.connect()
-        bus.add_listener(lambda user, msg: print(f"Message received {user} : {msg}"))
-        await asyncio.gather(
-            read_input(bus),
-            bus.listen())
-
-if __name__ == "__main__":
-    print(asyncio.get_event_loop().run_until_complete(run_test()))
+            except Exception as e:
+                print(e)
+        self.closed = True

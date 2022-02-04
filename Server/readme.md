@@ -6,9 +6,9 @@ The server PC has an [Anaconda](https://www.anaconda.com/distribution/) python e
 "Ada".  Run the "pip install -r requirements.txt" using requirements.txt
 from the parent folder.
 
-This project also uses a git submodule so run:
-- git submodule init
-- git submodule update
+This server uses an Azure Web Pub Sub service to do realtime communication with the AdaKiosk app.  See the
+[readme](../Azure/readme.md) to set that up.  This server
+then uses the ADA_WEBPUBSUB_CONNECTION_STRING environment variable to connect to the Web Pub Sub service.
 
 To launch the server:
 
@@ -45,6 +45,10 @@ This is the full list of settings you can play with:
 full brightness at about a value of 128.  Changing from 128 to 255 shows very little difference.
 - `colors_for_dmx_emotions` - mapping of colors to DMX lighting colors, these can be brighter.
 - `server_port` - the port used by the ada_server.py script, used by raspberry pi's to connect.
+- `pubsub_group`: The name of the pubsub group to use.
+You might want to change this while running unit tests
+so you don't confuse any production Ada servers.
+- `pubsub_hub`: The name of the pubsub Hub.
 - `on_time` - time the lights turn on in the morning.
 - `off_time` - time the lights turn off at night.
 - `turn_off_timeout` - cool down period for the power supplies before power off
@@ -65,6 +69,11 @@ full brightness at about a value of 128.  Changing from 128 to 255 shows very li
 You can run the `ada_server.py` with ip "localhost" on your dev box to
 debug it and the RpiController on the same machine with the RpiController
 talking to a Teensy over USB.  This makes for a convenient debugging environment.
+
+It is recommended you change the configuration for
+`pubsub_hub` and `pubsub_group` while testing so you don't
+confuse the real Ada server.
+
 
 ## UnitTest mode
 
