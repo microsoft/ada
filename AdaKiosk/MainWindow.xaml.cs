@@ -22,7 +22,7 @@ namespace AdaKiosk
         private WebPubSubGroup bus;
         public static Window Instance;
         private DelayedActions actions = new DelayedActions();
-        private int InteractiveSleepDelay = 60;
+        private int InteractiveSleepDelay = 600;
         private int InitialSleepDelay = 600;
         const string userName = "kiosk";
         int sleepTick = 0;
