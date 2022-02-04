@@ -92,31 +92,34 @@ namespace AdaKiosk.Controls
 
         internal void HandleMessage(Message message)
         {
-            if (message.User != UserName)
+            // fun times, now to simulate what the server is doing...
+            if (!string.IsNullOrEmpty(message.Text))
             {
-                // fun times, now to simulate what the server is doing...
-                if (!string.IsNullOrEmpty(message.Text))
+                // great these are the simplest to simualte...
+                string[] parts = message.Text.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length > 1)
                 {
-                    // great these are the simplest to simualte...
-                    string[] parts = message.Text.Split('/', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length > 1)
+                    switch (parts[0])
                     {
-                        switch (parts[0])
-                        {
-                            case "emotion":
-                                SimulateEmotion(parts[1]);
-                                break;
-                            default:
-                                break;
-                        }
+                        case "emotion":
+                            SimulateEmotion(parts[1]);
+                            break;
+                        case "power":
+                            if (parts.Length > 1 && parts[1] == "off")
+                            {
+                                SimulateColor(Colors.Black);
+                            }
+                            break;
+                        default:
+                            break;
                     }
                 }
-                else if (message.Commands != null)
+            }
+            else if (message.Commands != null)
+            {
+                foreach (var cmd in message.Commands)
                 {
-                    foreach (var cmd in message.Commands)
-                    {
-                        SimulateCommand(cmd);
-                    }
+                    SimulateCommand(cmd);
                 }
             }
         }

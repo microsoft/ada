@@ -45,7 +45,6 @@ namespace AdaKiosk
             this.sim.SimulatingCommand += OnSimulatingCommand;
             this.controller.CommandSelected += OnSendCommand;
             this.strips.CommandSelected += OnSendCommand;
-            this.sim.UserName = userName;
             this.UpdateView();
             // Hide the DEBUG tab when running on the actual Kiosk with user name Ada.
             if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)
@@ -121,7 +120,11 @@ namespace AdaKiosk
             {
                 ButtonDebug.Visibility = Visibility.Collapsed;
             }
-            sim.HandleMessage(message);
+            if (message.User != userName)
+            {
+                sim.HandleMessage(message);
+                this.controller.HandleMessage(message);
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)

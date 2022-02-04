@@ -25,7 +25,7 @@ namespace AdaKioskUnitTest
                 {
                     return;
                 }
-                await p.client.SendMessage("\"" + cmd + "\"");
+                _ = p.client.SendMessage("\"" + cmd + "\"");
             }
         }
 

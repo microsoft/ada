@@ -63,7 +63,7 @@
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/on" Background="#303030" >
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="On"/>
             </Button>
-            <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/off" Background="#303030">
+            <Button x:Name="ButtonPowerOff" Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/off" Background="#303030">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Off"/>
             </Button>
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/run" Background="#303030">
@@ -72,7 +72,6 @@
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/color/0,0,0" Background="#101010">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Black"/>
             </Button>
-
             <Button Style="{StaticResource ControlButton}" Click="OnSetColor" Background="#101010">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Pick Color..."/>
             </Button>

@@ -29,7 +29,7 @@ namespace AdaKiosk.Controls
         ColorPickerPanel picker;
 
         public Controller()
-        {
+        {            
             InitializeComponent();
             this.IsVisibleChanged += Controller_IsVisibleChanged;
         }
@@ -51,6 +51,44 @@ namespace AdaKiosk.Controls
             }
         }
 
+        internal void HandleMessage(Message message)
+        { // fun times, now to simulate what the server is doing...
+            if (!string.IsNullOrEmpty(message.Text))
+            {
+                // great these are the simplest to simualte...
+                string[] parts = message.Text.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length > 1)
+                {
+                    switch (parts[0])
+                    {
+                        case "emotion":                            
+                            break;
+                        case "power":
+                            if (parts.Length > 1 && parts[1] == "off")
+                            {
+                                OnSelect(ButtonPowerOff);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        Button selected = null;
+        void OnSelect(Button button)
+        {
+            if (selected != null)
+            {
+                selected.BorderThickness = new Thickness(0);
+            }
+            selected = button;
+            if (selected != null)
+            {
+                selected.BorderThickness = new Thickness(2);
+            }
+        }
 
         private void OnButtonClick(object sender, RoutedEventArgs e)
         {
@@ -58,6 +96,7 @@ namespace AdaKiosk.Controls
             {
                 var msg = button.Tag as string;
                 CommandSelected?.Invoke(button, msg);
+                OnSelect(button);
             }
         }
 
