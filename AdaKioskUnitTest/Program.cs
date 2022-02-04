@@ -17,8 +17,16 @@ namespace AdaKioskUnitTest
         {
             Program p = new Program();
             await Task.Run(p.SocketTest);
-            Console.WriteLine("Press ENTER to exit...");
-            Console.ReadLine();
+            while (true)
+            {
+                Console.Write("Enter a command to send or 'x' to exit: ");
+                string cmd = Console.ReadLine();
+                if (cmd == "x")
+                {
+                    return;
+                }
+                await p.client.SendMessage("\"" + cmd + "\"");
+            }
         }
 
         async void SocketTest()
@@ -33,6 +41,7 @@ namespace AdaKioskUnitTest
         private void Client_MessageReceived(object sender, string msg)
         {
             Console.WriteLine(msg);
+            Console.WriteLine("Enter a command to send or 'x' to exit: ");
         }
     }
 

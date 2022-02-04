@@ -48,10 +48,11 @@ namespace AdaKiosk
             this.sim.UserName = userName;
             this.UpdateView();
             // Hide the DEBUG tab when running on the actual Kiosk with user name Ada.
-            //if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)
-            //{
-            //    ButtonDebug.Visibility = Visibility.Collapsed;
-            //}
+            if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                ButtonDebug.Visibility = Visibility.Collapsed;
+                this.sim.Editable = false;
+            }
         }
 
         private async void OnSendCommand(object sender, string command)
@@ -101,13 +102,26 @@ namespace AdaKiosk
             try
             {
                 var message = Message.FromJson(msg);
-                sim.HandleMessage(message);
+                actions.StartDelayedAction("HandleMessage", () => { HandleMessage(message); }, TimeSpan.FromMilliseconds(1));
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
             ShowStatus(msg);
+        }
+
+        protected void HandleMessage(Message message)
+        {
+            if (message.Text == "/debug/true")
+            {
+                ButtonDebug.Visibility = Visibility.Visible;
+            }
+            else if (message.Text == "/debug/false")
+            {
+                ButtonDebug.Visibility = Visibility.Collapsed;
+            }
+            sim.HandleMessage(message);
         }
 
         protected override void OnClosing(CancelEventArgs e)

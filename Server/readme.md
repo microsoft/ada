@@ -77,5 +77,10 @@ confuse the real Ada server.
 
 ## UnitTest mode
 
+The simplest unit test is to run `python ada_server.py` in a terminal window and
+run the [AdaKiosk](../AdaKiosk/readme.md) at the same time.  These will connect to the
+same Azure Web Pub Sub service and and when you click the AdaKiosk "Simulation" tab
+you will see a rendering of all the colors being set by the `ada_server`.
+
 You can also run the server with an RpiController with [TeensyUnitTest](../TeensyUnitTest/readme.md).
 This provides a way to test everything end to end.

@@ -127,6 +127,7 @@ namespace AdaKiosk.Utilities
             var response = await this.pending.Task;
             return response;
         }
+
         class AckMessage
         {
             public string type { get; set; }

@@ -159,7 +159,10 @@ class LightingDesigner:
             return
 
         _, msg = item
-        parts = msg[1:].split("/")
+        msg = msg['data']
+        if msg.startswith('/'):
+            msg = msg[1:]
+        parts = msg.split("/")
         if len(parts) < 2:
             print("### ignoring message:", msg)
         else:
@@ -352,8 +355,8 @@ class LightingDesigner:
 
             try:
                 self.process_next_message()
-            except:
-                pass
+            except Exception as e:
+                print("error with process_next_message: " + str(e))
 
             # highest priority is the master power schedule
             power_state = self._get_master_power_state()

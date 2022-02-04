@@ -10,16 +10,18 @@ This repo contains the software needed to run Ada.
 
 The following is what is current:
 
-- [TeensyFirmware](TeensyFirmware/readme.md) the C++ firmware running on the Teensys.
+- [TeensyFirmware](TeensyFirmware/readme.md) the C++ firmware running on the Teensy's.
 - [TeensyUnitTest](TeensyUnitTest/readme.md) a windows C++ app that unit tests all the Teensy code.
 This is especially important because Teensy boards do not support debugging.
 - [DmxController](DmxController/README.md) the python app that controls the big DMX par lights on the floor.  This gets commands from the Server.
 - [RpiController](RpiController/readme.md) the C++ app that runs on the Raspberry Pis bridging the Server on the PC to the Teensys.  Also provides some handy test menu options for manually setting colors and animations.
 - [Server](Server/readme.md) the Python app that runs on the Server PC on the 3rd floor, pushes to the RpiController and DMX controller and retrieves Sensei data from cosmosdb, and the Ada camera.
-- [AdaServerRelay](Azure/AdaServerRelay/readme.md) an Azure SignalR relay for communicating with the Server.
+- [Azure](Azure/readme.md) a scrip for setting up your Azure Web Pub Sub service.
 - [EmotionDetector](EmotionDetector/readme.md) a C# project that wraps the emotion detector model, providing a COM object that is used by IPCameraGUI.
 - [IPCameraGUI](IPCameraGUI/readme.md) reads the RTSP stream from the Ada Camera and performs movement detection, face detection and EmotionDetection, sending detections to the Server.
 - [AdaKiosk](AdaKiosk/readme.md) a C# WPF app that simulates and controls Ada designed for a kiosk tablet device.
+- [AdaKioskUnitTest](AdaKioskUnitTest/readme.md) a C# WPF app that simply prints all Web Pub Sub messages going on between
+the kiosk and the Ada Server.
 - [PiBridge](PiBridge/readme.md) the Raspberry Pi Zero Wifi bridge to the Kasa Power switches.
 - **HistoricalData** Some *.csv files that capture some historical data
 from cosmos which can be used in "replay mode" by the Server.

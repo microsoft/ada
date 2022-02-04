@@ -80,7 +80,7 @@ namespace AdaKiosk.Controls
         {
             stopped = false;
             CosmosLabel.Foreground = Brushes.Green;
-            OnNextEmition();
+            OnNextEmotion();
         }
 
         public void Stop()
@@ -92,11 +92,6 @@ namespace AdaKiosk.Controls
 
         internal void HandleMessage(Message message)
         {
-            actions.StartDelayedAction("HandleMessage", () => { HandleMessageOnUiThread(message); }, TimeSpan.FromMilliseconds(1));
-        }
-
-        internal void HandleMessageOnUiThread(Message message) 
-        { 
             if (message.User != UserName)
             {
                 // fun times, now to simulate what the server is doing...
@@ -333,8 +328,11 @@ namespace AdaKiosk.Controls
             }
             else if (e.Key == Key.F8)
             {
-                editing_zone_map = true;
-                Watermark.Text = "Editing";
+                if (this.Editable)
+                {
+                    editing_zone_map = true;
+                    Watermark.Text = "Editing";
+                }
             }
             else if (e.Key == Key.F3)
             {
@@ -381,7 +379,7 @@ namespace AdaKiosk.Controls
 
         internal void Save()
         {
-            if (editing_zone_map)
+            if (editing_zone_map && this.Editable)
             {
                 this.SaveMaps();
                 editing_zone_map = false;
@@ -427,7 +425,7 @@ namespace AdaKiosk.Controls
             }
         }
 
-        void OnNextEmition()
+        void OnNextEmotion()
         {
             if (pis.Count == 0 || stopped)
             {
@@ -442,7 +440,7 @@ namespace AdaKiosk.Controls
                 Grid[] zones = new Grid[] { Zone1, Zone2, Zone3, Zone4, Zone5, Zone6 };
                 AddAnimation(zones[zone], color);
             }
-            actions.StartDelayedAction("animate", OnNextEmition, TimeSpan.FromSeconds(random.NextDouble() * MaxDelay));
+            actions.StartDelayedAction("animate", OnNextEmotion, TimeSpan.FromSeconds(random.NextDouble() * MaxDelay));
         }
 
         private void LoadZoneMaps(string path)
@@ -645,6 +643,7 @@ namespace AdaKiosk.Controls
         Color currentColor = Colors.Red;
 
         public string UserName { get; internal set; }
+        public bool Editable { get; internal set; }
 
         private void OnKitchenClick(object sender, MouseButtonEventArgs e)
         {
@@ -683,11 +682,13 @@ namespace AdaKiosk.Controls
         {
             GlowyBall ball = (GlowyBall)sender;
             LineArt.Children.Remove(ball);
-            // todo: lightup this zone.
             foreach (var pi in pis)
             {
                 pi.SetZone(ball.Zone, ball.Color);
             }
+
+            // send to Ada!
+            SimulatingCommand?.Invoke(this, new ZoneColorEvent() { Zone = ball.Zone, Color = ball.Color });
         }
 
         int GetKitchenZone(Grid kitchen)
