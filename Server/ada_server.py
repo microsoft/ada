@@ -54,7 +54,7 @@ class AdaServer:
         self.queued = False
         self.bridge = None
         self.max_animations_per_iteration = 5
-        self.firmware = firmware.TeensyFirmwareUpdater("firmware.hex")
+        self.firmware = firmware.TeensyFirmwareUpdater("TeensyFirmware.TEENSY40.hex", "firmware.hex")
 
     def start(self):
         self.firmware.start()
@@ -273,10 +273,9 @@ class AdaServer:
         while not self.closed and name in self.clients:
 
             hash = self.firmware.get_hash()
-            if hash != firmware_hash:
+            if hash and hash != firmware_hash:
                 firmware_hash = hash
-                if hash:
-                    client_queue.enqueue(0, [{"command": "FirmwareHash", "hash": hash}])
+                client_queue.enqueue(0, [{"command": "FirmwareHash", "hash": hash}])
 
             command = None
             result = client_queue.peek()

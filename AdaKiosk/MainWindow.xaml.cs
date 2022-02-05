@@ -188,6 +188,7 @@ namespace AdaKiosk
                     sim.Stop();
                     this.strips.HidePopup();
                     this.controller.HidePopup();
+                    this.ContactPanel.Show();
                     break;
                 case ViewType.Debug:
                     this.strips.Visibility = Visibility.Visible; ;

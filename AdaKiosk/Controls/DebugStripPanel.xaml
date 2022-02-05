@@ -64,9 +64,6 @@
         
         <TextBox x:Name="TextBoxError" Grid.Row="5" Grid.ColumnSpan="4" Margin="10" AcceptsReturn="true" Visibility="Collapsed" Foreground="DarkSalmon"/>
 
-        <TextBlock Text="Version"  Grid.Row="6" Grid.Column="0"/>
-        <TextBlock x:Name="TextBoxVersion"  Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
-
         <Button Background="#c12e2a" Grid.Row="6" Grid.Column="3" HorizontalAlignment="Right" MinWidth="80" Click="OnShutdown"
                 VerticalAlignment="Center">
             <TextBlock Text="Shutdown" Margin="5"/> </Button>

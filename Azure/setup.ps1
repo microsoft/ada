@@ -12,7 +12,6 @@ $plan_location = "westus2"
 $storage_account_name = "adaserverstorage"
 $webpubsub = "AdaPubSubService"
 
-
 Set-Location $PSScriptRoot
 
 function Invoke-Tool($prompt, $command)
@@ -90,7 +89,7 @@ if ($ec -eq 3) {
 }
 $info = $output | ConvertFrom-Json
 $webpubsub_hostname = $info.hostName
-$webpubsub_connstr = &az webpubsub key show --name $webpubsub --resource-group $resource_group --query primaryConnectionString 
+$webpubsub_connstr = &az webpubsub key show --name $webpubsub --resource-group $resource_group --query primaryConnectionString
 
 # create storage account
 Write-Host "Checking storage account..."
@@ -98,6 +97,12 @@ $storageAcct = GetStorageAccount
 if ($null -eq $storageAcct) {
     $output = Invoke-Tool -prompt "Creating storage account..." -command "az storage account create --name $storage_account_name --resource-group $resource_group --location $plan_location --kind StorageV2 --sku Standard_LRS"
 }
+
+$storage_connection = GetConnectionString
+Write-Host "Please set ADA_STORAGE_CONNECTION_STRING to the following connection string (without the double quotes)"
+Write-Host $storage_connection
+
+Write-Host ""
 
 Write-Host "Please set ADA_WEBPUBSUB_CONNECTION_STRING to the following connection string (without the double quotes)"
 Write-Host $webpubsub_connstr

@@ -37,11 +37,6 @@
         <controls:DebugStripPanel Grid.Column="1" x:Name="strips" Visibility="Collapsed"/>
         <wv2:WebView2 Grid.Column="1" Name="webView" Source="https://www.microsoft.com/artist-in-residence/collaborations/ada/"/>
         <controls:ScreenSaver x:Name="ScreenSaver" Grid.ColumnSpan="2" Visibility="Collapsed"/>
-        <Border x:Name="ContactPanel" Grid.Column="1"  Background="Black"  Visibility="Collapsed">
-            <TextBlock FontSize="24" Text="If you need help with this Kiosk device please contact clovett@microsoft.com"
-                       TextWrapping="Wrap"
-                       Margin="50"
-                       Foreground="White"/>
-        </Border>
+        <controls:ContactPanel x:Name="ContactPanel" Grid.Column="1"  Background="Black"  Visibility="Collapsed"/>
     </Grid>
 </Window>
