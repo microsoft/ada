@@ -64,6 +64,7 @@ namespace AdaKiosk.Controls
                         case "emotion":                            
                             break;
                         case "power":
+                        case "state":
                             if (parts.Length > 1 && parts[1] == "off")
                             {
                                 OnSelect(ButtonPowerOff);

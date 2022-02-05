@@ -18,7 +18,8 @@ namespace AdaKiosk.Controls
 
         public void Show()
         {
-            TextBlockContact.Text = "https://github.com/microsoft/ada";
+            TextBlockContact.Text = "helloada@microsoft.com ";
+            TextBlockIssues.Text = "https://github.com/microsoft/ada";
 
             var assembly = this.GetType().Assembly;
             this.TextBlockVersion.Text = assembly.GetName().Version.ToString();

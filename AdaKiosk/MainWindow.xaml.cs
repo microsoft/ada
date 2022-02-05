@@ -24,8 +24,14 @@ namespace AdaKiosk
         private DelayedActions actions = new DelayedActions();
         private int InteractiveSleepDelay = 600;
         private int InitialSleepDelay = 600;
+        const string hubName = "AdaKiosk";
         const string userName = "kiosk";
+        const string groupName = "demogroup";
         int sleepTick = 0;
+        bool debugEnabled = true;
+        int pingTick = 0;
+        int pongTick = 0;
+        const int PingTimeout = 15; // minutes;
 
         enum ViewType
         {
@@ -53,6 +59,7 @@ namespace AdaKiosk
             {
                 ButtonDebug.Visibility = Visibility.Collapsed;
                 this.sim.Editable = false;
+                this.debugEnabled = false;
             }
         }
 
@@ -64,7 +71,10 @@ namespace AdaKiosk
             }
             catch(Exception ex)
             {
-                ShowStatus(ex.Message);
+                if (this.debugEnabled)
+                {
+                    ShowStatus(ex.Message);
+                }
             }
         }
 
@@ -74,9 +84,9 @@ namespace AdaKiosk
             if (!string.IsNullOrEmpty(connectionString))
             {
                 this.bus = new WebPubSubGroup();
-                await bus.Connect(connectionString, "AdaKiosk", userName, "demogroup");
+                await bus.Connect(connectionString, hubName, userName, groupName);
                 this.bus.MessageReceived += OnMessageReceived;
-                await bus.SendMessage("\"/kiosk/started\"");
+                this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromSeconds(1));
             }
             else
             {
@@ -85,6 +95,36 @@ namespace AdaKiosk
 
             // if nothing happens clear the screen in 10 minutes.
             StartDelayedSleep(InitialSleepDelay);
+        }
+
+        private void CheckPing() 
+        {
+            if (this.pingTick != 0 && this.pongTick == this.pingTick)
+            {
+                // didn't receive a response last time, so is Ada down?
+                ShowStatus("Ada is not online!");
+                this.sim.Offline = true;
+                this.ButtonControl.Visibility = Visibility.Collapsed;
+                if (this.currentView == ViewType.Control)
+                {
+                    OnBlog(this, null);
+                }
+            }
+            else
+            {
+                this.sim.Offline = false;
+                this.ButtonControl.Visibility = Visibility.Visible; 
+            }
+        }
+
+        private async void OnPing()
+        {
+            if (this.bus == null) return;
+            // sends a ping request, which should return the ada power state.
+            this.pingTick = this.pongTick = Environment.TickCount;
+            await bus.SendMessage("\"/ping\"");
+            this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromMinutes(PingTimeout));
+            this.actions.StartDelayedAction("pong", CheckPing, TimeSpan.FromSeconds(30));
         }
 
         private void StartDelayedSleep(int seconds)
@@ -109,23 +149,52 @@ namespace AdaKiosk
             {
                 Debug.WriteLine(ex.Message);
             }
-            ShowStatus(msg);
+            if (this.debugEnabled)
+            {
+                ShowStatus(msg);
+            }
+        }
+
+        private void UpdateState(string message)
+        {
+            this.pongTick = Environment.TickCount; 
+            this.sim.Offline = false;
+            this.ButtonControl.Visibility = Visibility.Visible;
+        }
+
+        private void HandleDebug(string message)
+        {
+            if (message == "/debug/true")
+            {
+                ButtonDebug.Visibility = Visibility.Visible;
+                ShowStatus("");
+            }
+            else if (message == "/debug/false")
+            {
+                ButtonDebug.Visibility = Visibility.Collapsed;
+                ShowStatus("");
+            }
         }
 
         protected void HandleMessage(Message message)
         {
-            if (message.Text == "/debug/true")
-            {
-                ButtonDebug.Visibility = Visibility.Visible;
-            }
-            else if (message.Text == "/debug/false")
-            {
-                ButtonDebug.Visibility = Visibility.Collapsed;
-            }
             // allow one Kiosk to send a zone selection to another.
             if (message.User != userName || message.Text.StartsWith("/zone"))
             {
-                sim.HandleMessage(message);
+                var simpleMessage = message.Text;
+                if (!string.IsNullOrEmpty(simpleMessage))
+                {
+                    if (simpleMessage.StartsWith("/state"))
+                    {
+                        UpdateState(simpleMessage);
+                    }
+                    else if (simpleMessage.StartsWith("/debug"))
+                    {
+                        HandleDebug(simpleMessage);
+                    }
+                }
+
+                this.sim.HandleMessage(message);
                 this.controller.HandleMessage(message);
             }
         }
@@ -342,14 +411,20 @@ namespace AdaKiosk
             this.strips.HidePopup();
             this.controller.HidePopup();
             this.sim.Stop();
-            ShowStatus("Sleep");
+            if (this.debugEnabled)
+            {
+                ShowStatus("Sleep");
+            }
             this.sleepTick = Environment.TickCount;
             this.ScreenSaver.Start();
         }
 
         private void OnScreenSaverClosed(object sender, string arg)
         {
-            ShowStatus(arg);
+            if (this.debugEnabled)
+            {
+                ShowStatus(arg);
+            }
             StartDelayedSleep(InteractiveSleepDelay);
         }
 

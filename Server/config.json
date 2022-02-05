@@ -55,6 +55,7 @@
     "hold_camera_blush": 5,
     "hold_sensei_blush": 10,
     "rainbow_timeout": 10,
+    "custom_animation_timeout": 3600,
     "cool_animation_timeout": 300,
     "cool_animation_time": [ 10, 0 ],
     "movement_rain_timeout": 10,

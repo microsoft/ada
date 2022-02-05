@@ -674,9 +674,18 @@ namespace AdaKiosk.Controls
 
         Grid currentKitchen;
         Color currentColor = Colors.Red;
+        bool offline = false;
 
         public string UserName { get; internal set; }
         public bool Editable { get; internal set; }
+        public bool Offline
+        {
+            get => offline; set
+            {
+                offline = value;
+                Watermark.Text = value ? "Simulation" : "Live";
+            }
+        }
 
         private void OnKitchenClick(object sender, MouseButtonEventArgs e)
         {

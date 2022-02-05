@@ -25,6 +25,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -36,14 +37,17 @@
         <TextBlock Text="Contact Info: "  Style="{StaticResource HeaderStyle}"  Grid.Row="0" Grid.Column="0"/>
         <TextBlock x:Name="TextBlockContact"  Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
-        <TextBlock Text="IP Address: "  Style="{StaticResource HeaderStyle}"  Grid.Row="1" Grid.Column="0"/>
-        <TextBlock x:Name="TextBlockAddress"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
+        <TextBlock Text="Issues: "  Style="{StaticResource HeaderStyle}"  Grid.Row="1" Grid.Column="0"/>
+        <TextBlock x:Name="TextBlockIssues"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
-        <TextBlock Text="UserName: "  Style="{StaticResource HeaderStyle}"  Grid.Row="2" Grid.Column="0"/>
-        <TextBlock x:Name="TextBlockUserName"  Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
+        <TextBlock Text="IP Address: "  Style="{StaticResource HeaderStyle}"  Grid.Row="2" Grid.Column="0"/>
+        <TextBlock x:Name="TextBlockAddress"  Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
-        <TextBlock Text="Version: " Style="{StaticResource HeaderStyle}"  Grid.Row="3" Grid.Column="0"/>
-        <TextBlock x:Name="TextBlockVersion"  Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
+        <TextBlock Text="UserName: "  Style="{StaticResource HeaderStyle}"  Grid.Row="3" Grid.Column="0"/>
+        <TextBlock x:Name="TextBlockUserName"  Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
+
+        <TextBlock Text="Version: " Style="{StaticResource HeaderStyle}"  Grid.Row="4" Grid.Column="0"/>
+        <TextBlock x:Name="TextBlockVersion"  Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
     </Grid>
 </UserControl>

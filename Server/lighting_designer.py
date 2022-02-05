@@ -25,6 +25,7 @@ class LightingDesigner:
         self.config = config
         self.msgbus = msgbus
         msgbus.add_listener(self.onmessage)
+        self.last_message_received = 0
         self.msgqueue = PriorityQueue()
         self.lights_on = None
         self.server = server
@@ -43,6 +44,7 @@ class LightingDesigner:
         self.last_camera_emotion = time.time()
         self.turn_off_time = None
         self.animations = None
+        self.power_state = "initializing"
         self.power_on_override = None
         self.power_off_override = None
         self.color_override = None
@@ -107,26 +109,24 @@ class LightingDesigner:
             return "error"
 
     def _master_power_on(self):
-        # self.server.insights.track_power(1)
         print("### turning on the lights...", end='', flush=True)
         if self.bridge:
             response = self.send_bridge_command("on")
             print("{}".format(response))
         else:
             print("")
-        self.msgbus.send('/power/on')
         self.lights_on = True
         self.server.camera_on()
+        self.msgbus.send('/state/on')
 
     def _master_power_off(self):
-        # self.server.insights.track_power(0)
         print("### turning off the lights...", end='', flush=True)
         if self.bridge:
             response = self.send_bridge_command("off")
             print("{}".format(response))
-        self.msgbus.send('/power/off')
         self.lights_on = False
         self.server.camera_off()
+        self.msgbus.send('/state/off')
 
     def resolve_sunrise_sunset(self, setting):
         latitude = self.config.latitude
@@ -151,7 +151,59 @@ class LightingDesigner:
         if user == 'server':
             # ignore our own messages.
             return
+        self.last_message_received = time.time()
         self.msgqueue.enqueue(0, msg)
+
+    def _set_power_state(self, option):
+        self.power_state = option
+        if option == "on":
+            print("### power on override")
+            self._master_power_on()
+            self.power_on_override = True
+            self.power_off_override = False
+            self.msgbus.send('/state/on')  # broadcast to all clients
+        elif option == "off":
+            print("### power off override")
+            self.power_on_override = False
+            self.power_off_override = True
+            self.color_override = False
+            self.animations = None
+            self._fade_to_black()
+            self.turn_off_time = time.time() + self.config.turn_off_timeout
+        elif option == "run":
+            print("### back to normal operation")
+            self.power_on_override = False
+            self.power_off_override = False
+            self.color_override = False
+            self.turn_off_time = None
+            self.animations = None
+            self.msgbus.send('/state/run')  # broadcast to all clients
+        elif option == "custom":
+            # user is doing a custom control, so keep or turn the lights on
+            # to show this custom animation.  The this custom state will
+            # remain until some timeout past self.last_message_received.
+            self.power_on_override = True
+            self.power_off_override = False
+        else:
+            print("error: invalid power state: /power/{}".format(option))
+
+    def _rain_command(self, option):
+        if option == "toggle":
+            if self.is_raining:
+                option = "off"
+            else:
+                option = "on"
+        if option == "on":
+            self._set_power_state("custom")
+            self.server.queue_command(0, {"command": "StartRain", "size": 12, "amount": 50.0})
+            self.is_raining = True
+            self.stop_rain_time = None
+        elif option == "off":
+            self.server.queue_command(0, {"command": "StopRain"})
+            self.is_raining = False
+            self.stop_rain_time = None
+        else:
+            print("error: invalid rain command: /rain/{}".format(option))
 
     def process_next_message(self):
         item = self.msgqueue.dequeue()
@@ -164,61 +216,24 @@ class LightingDesigner:
             msg = msg[1:]
         parts = msg.split("/")
         if len(parts) < 2:
-            print("### ignoring message:", msg)
+            if parts[0] == "ping":
+                self.msgbus.send("/state/" + self.power_state)
+            else:
+                print("### ignoring message:", msg)
         else:
             cmd = parts[0]
             option = parts[1]
             # every remote command turns ada on, except for the "run" command which
             # puts ada back on program according to config.
             if cmd == "power":
-                if option == "on":
-                    print("### power on override")
-                    self._master_power_on()
-                    self.power_on_override = True
-                    self.power_off_override = False
-                elif option == "off":
-                    print("### power off override")
-                    self.power_on_override = False
-                    self.power_off_override = True
-                    self.color_override = False
-                    self.animations = None
-                    self._fade_to_black()
-                    self.turn_off_time = time.time() + self.config.turn_off_timeout
-                elif option == "run":
-                    print("### back to normal operation")
-                    self.power_on_override = False
-                    self.power_off_override = False
-                    self.color_override = False
-                    self.turn_off_time = None
-                    self.animations = None
-                    self.msgbus.send('/power/run')
-                else:
-                    print("error: invalid power command: {}".format(msg))
+                self._set_power_state(option)
             elif cmd == "rain":
-                if option == "toggle":
-                    if self.is_raining:
-                        option = "off"
-                    else:
-                        option = "on"
-                if option == "on":
-                    self.power_on_override = True
-                    self.power_off_override = False
-                    self.server.queue_command(0, {"command": "StartRain", "size": 12, "amount": 50.0})
-                    self.is_raining = True
-                    self.stop_rain_time = None
-                elif option == "off":
-                    self.server.queue_command(0, {"command": "StopRain"})
-                    self.is_raining = False
-                    self.stop_rain_time = None
-                else:
-                    print("error: invalid rain command: {}".format(msg))
-
+                self._rain_command(option)
             elif cmd == "animation":
                 try:
                     animation = self._find_animation(option)
                     if animation is not None:
-                        self.power_on_override = True
-                        self.power_off_override = False
+                        self._set_power_state("custom")
                         self.color_override = False
                         self.animations = AnimationLoop()
                         self.animations.start(animation)
@@ -229,16 +244,14 @@ class LightingDesigner:
                 self._blush(None, option, seconds=2, hold=2)
                 self.color_override = True
                 self.animations = None
-                self.power_on_override = True
-                self.power_off_override = False
+                self._set_power_state("custom")
             elif cmd == "color":
                 print("### color override: {}".format(option))
                 rgb_color = [int(x) for x in option.split(',')]
                 self._set_color(None, rgb_color)
                 self.color_override = True
                 self.animations = None
-                self.power_on_override = True
-                self.power_off_override = False
+                self._set_power_state("custom")
             elif cmd == "dmx":
                 print("### dmx color override: {}".format(option))
                 colors = []
@@ -252,8 +265,7 @@ class LightingDesigner:
                     self._set_dmx(colors)
                     self.color_override = True
                     self.animations = None
-                    self.power_on_override = True
-                    self.power_off_override = False
+                    self._set_power_state("custom")
             elif cmd == "zone":
                 zone = int(option)
                 if len(parts) == 3:
@@ -263,8 +275,7 @@ class LightingDesigner:
                         self._set_zone(zone, color)
                         self.color_override = True
                         self.animations = None
-                        self.power_on_override = True
-                        self.power_off_override = False
+                        self._set_power_state("custom")
             elif cmd == "strip":
                 target = option
                 if len(parts) == 4:
@@ -275,8 +286,7 @@ class LightingDesigner:
                         self._set_strip(target, strip, color)
                         self.color_override = True
                         self.animations = None
-                        self.power_on_override = True
-                        self.power_off_override = False
+                        self._set_power_state("custom")
             elif cmd == "gradient":
                 target = option
                 if len(parts) > 4:
@@ -295,8 +305,7 @@ class LightingDesigner:
                         self._add_gradient(target, strip, colorsPerStrip, colors, seconds)
                         self.color_override = True
                         self.animations = None
-                        self.power_on_override = True
-                        self.power_off_override = False
+                        self._set_power_state("custom")
             elif cmd == "pixels":
                 self._set_pixels(msg)
 
@@ -358,9 +367,15 @@ class LightingDesigner:
             except Exception as e:
                 print("error with process_next_message: " + str(e))
 
+            if self.power_state == "custom" and \
+               time.time() > self.last_message_received + self.config.custom_animation_timeout:
+                # timeout custom animations and go back to normal "run" mode so Ada can go to sleep
+                # if necessary.
+                self._set_power_state("run")
+
             # highest priority is the master power schedule
-            power_state = self._get_master_power_state()
-            if power_state or self.power_on_override:
+            master_power_state = self._get_master_power_state()
+            if master_power_state or self.power_on_override:
                 if self.lights_on is None or not self.lights_on:
                     self._master_power_on()
                     # if we just did a power cycle then reset any previous color overrides.
@@ -368,11 +383,11 @@ class LightingDesigner:
                     self.animations = None
                     print("### back to normal operation")
                     wc.run = None
+                    self.power_state = "on"
                     self.turn_off_time = None
                     self.sensei.start()
-                    self.msgbus.send('/power/run')
                 self.server.camera_on()
-            elif not power_state or self.power_off_override:
+            elif not master_power_state or self.power_off_override:
                 if self.lights_on is None or self.lights_on or has_new_clients:
                     if self.turn_off_time is None or has_new_clients:
                         print("### cooling down for {} seconds".format(self.config.turn_off_timeout))
@@ -380,12 +395,14 @@ class LightingDesigner:
                         self._fade_to_black()
                         self.color_override = False
                         self.animations = None
+                        self.power_state = "cooling"
                         continue
                     elif time.time() > self.turn_off_time:
                         self._master_power_off()
                         self.color_override = False
                         self.animations = None
                         self.turn_off_time = None
+                        self.power_state = "off"
                         self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
                         on_hour, on_minute = self.on_time
                         print("### lights are off, waiting for wake up time: {}:{}".format(
@@ -447,7 +464,6 @@ class LightingDesigner:
                     # face count
                     if len(parts) > 1:
                         count = int(parts[1])
-                        # self.server.insights.track_ada_faces(count)
                         if count > 2:
                             print("### time for some fun!")
                             self.core_is_on = True
@@ -462,7 +478,6 @@ class LightingDesigner:
                     # top of any existing slow fade animation.
                     if len(parts) > 1:
                         movement = parts[1]
-                        # self.server.insights.track_ada_movement(1 if movement == "movement" else 0)
                         if self.enable_movement:
                             if self.movement_latch.switch(movement == "movement"):
                                 print("### movement detected!")
@@ -487,8 +502,6 @@ class LightingDesigner:
             new_emotions = self.sensei.get_next_emotions()
             if not self.color_override and new_emotions is not None:
                 print("Got new emotions: {}".format(new_emotions))
-                # if not self.sensei.play_recording:
-                #    self.server.insights.track_new_emotions(new_emotions)
                 self._handle_new_emotions(new_emotions)
                 continue
 
@@ -514,7 +527,6 @@ class LightingDesigner:
             value = no_scores[0]
         if value:
             print("### Highlighting camera emotion: {}".format(value))
-            # self.server.insights.track_ada_emotions(value)
             self._blush(None, value, seconds=2, hold=self.config.hold_camera_blush, priority=5)
 
     def _get_master_power_state(self):
