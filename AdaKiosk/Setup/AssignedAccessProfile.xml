@@ -8,6 +8,7 @@
 			<AllAppsList>
 				<AllowedApps>
 					<App DesktopAppPath="c:\temp\AdaKiosk\AdaKiosk.exe" rs5:AutoLaunch="true"/>
+					<App DesktopAppPath="%SystemRoot%\system32\notepad.exe" />
 				</AllowedApps>
 			</AllAppsList>
 			<StartLayout>
@@ -23,7 +24,7 @@
                                    see document https://docs.microsoft.com/windows/configuration/start-layout-xml-desktop
                               -->
                               <!-- for inbox desktop applications, a link file might already exist and can be used directly -->
-                              <start:DesktopApplicationTile Size="2x2" Column="0" Row="0" DesktopApplicationLinkPath="c:\temp\AdaKiosk\AdaKiosk.lnk" />
+                              <start:DesktopApplicationTile Size="2x2" Column="0" Row="0" DesktopApplicationLinkPath="c:\temp\AdaKiosk\AdaKioskShortcut.lnk" />
                             </start:Group>
                           </defaultlayout:StartLayout>
                         </StartLayoutCollection>

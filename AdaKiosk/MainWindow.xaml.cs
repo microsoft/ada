@@ -18,6 +18,7 @@ namespace AdaKiosk
     {
         private WebPubSubGroup bus;
         public static Window Instance;
+        private NetworkObserver observer = new NetworkObserver();
         private DelayedActions actions = new DelayedActions();
         private int InteractiveSleepDelay = 600;
         private int InitialSleepDelay = 600;
@@ -28,6 +29,7 @@ namespace AdaKiosk
         bool debugEnabled = true;
         int pingTick = 0;
         int pongTick = 0;
+        bool offline = false;
         const int PingTimeout = 15; // minutes;
 
         enum ViewType
@@ -46,10 +48,12 @@ namespace AdaKiosk
             Instance = this;
             InitializeComponent();
             this.Loaded += OnMainWindowLoaded;
+            this.observer.NetworkStatusChanged += OnNetworkStatusChanged;
             this.ScreenSaver.Closed += OnScreenSaverClosed;
             this.sim.SimulatingCommand += OnSimulatingCommand;
             this.controller.CommandSelected += OnSendCommand;
             this.strips.CommandSelected += OnSendCommand;
+            this.ContactPanel.Observer = observer;
             this.UpdateView();
             // Hide the DEBUG tab when running on the actual Kiosk with user name Ada.
             if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)
@@ -75,15 +79,36 @@ namespace AdaKiosk
             }
         }
 
-        private async void OnMainWindowLoaded(object sender, RoutedEventArgs e)
+        private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
+        {
+            observer.Start();
+        }
+
+        private void OnNetworkStatusChanged(object sender, EventArgs e)
+        {
+            if (observer.NetworkAvailable && this.bus == null)
+            {
+                ConnectMessageBus();
+            }
+        }
+
+        async void ConnectMessageBus()
         {
             var connectionString = Environment.GetEnvironmentVariable("ADA_WEBPUBSUB_CONNECTION_STRING");
             if (!string.IsNullOrEmpty(connectionString))
             {
-                this.bus = new WebPubSubGroup();
-                await bus.Connect(connectionString, hubName, userName, groupName);
-                this.bus.MessageReceived += OnMessageReceived;
-                this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromSeconds(1));
+                try
+                {
+                    this.bus = new WebPubSubGroup();
+                    await bus.Connect(connectionString, hubName, userName, groupName);
+                    this.bus.MessageReceived += OnMessageReceived;
+                    this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromSeconds(1));
+                } 
+                catch (Exception)
+                {
+                    this.bus = null;
+                    return;
+                }
             }
             else
             {
@@ -94,13 +119,22 @@ namespace AdaKiosk
             StartDelayedSleep(InitialSleepDelay);
         }
 
+        void SetOffline(bool flag)
+        {
+            if (offline != flag)
+            {
+                offline = flag;
+                ShowStatus(offline ? "Ada is not online!" : "Ada is back!");
+            }
+            this.sim.Offline = flag;
+        }
+
         private void CheckPing() 
         {
             if (this.pingTick != 0 && this.pongTick == this.pingTick)
             {
                 // didn't receive a response last time, so is Ada down?
-                ShowStatus("Ada is not online!");
-                this.sim.Offline = true;
+                SetOffline(true);
                 this.ButtonControl.Visibility = Visibility.Collapsed;
                 if (this.currentView == ViewType.Control)
                 {
@@ -109,7 +143,7 @@ namespace AdaKiosk
             }
             else
             {
-                this.sim.Offline = false;
+                SetOffline(false);
                 this.ButtonControl.Visibility = Visibility.Visible; 
             }
         }
@@ -156,6 +190,7 @@ namespace AdaKiosk
         {
             this.pongTick = Environment.TickCount; 
             this.sim.Offline = false;
+            this.sim.Powered = (message != "/state/off");
             this.ButtonControl.Visibility = Visibility.Visible;
         }
 
@@ -178,6 +213,10 @@ namespace AdaKiosk
             // allow one Kiosk to send a zone selection to another.
             if (message.User != userName || message.Text.StartsWith("/zone"))
             {
+                if (message.User == "server")
+                {
+                    SetOffline(false);
+                }
                 var simpleMessage = message.Text;
                 if (!string.IsNullOrEmpty(simpleMessage))
                 {
