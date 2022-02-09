@@ -1,10 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Text;
-using System.Net.Sockets;
 
 namespace AdaKioskUpdater
 {
@@ -29,7 +28,7 @@ namespace AdaKioskUpdater
             string zipFile = Path.Combine(updater, "AdaKiosk.zip");
             const string blobName = "AdaKiosk.zip";
             const string hashFile = blobName + ".hash";
-            var hash = Updater.DownloadHash(connectionString, containerName, hashFile);
+            var hash = AzureUpdater.DownloadHash(connectionString, containerName, hashFile);
             var cached = zipFile + ".hash";
             var update = !Directory.Exists(kioskPath);
             if (!File.Exists(cached))
@@ -58,11 +57,11 @@ namespace AdaKioskUpdater
                     sw.Write(hash);
                 }
 
-                Updater.DownloadZip(connectionString, containerName, blobName, zipFile);
+                AzureUpdater.DownloadZip(connectionString, containerName, blobName, zipFile);
                 Console.WriteLine("Downloaded zip file: {0}", zipFile);
 
                 Console.WriteLine("Expanding zip file...");
-                Updater.ExpandZip(zipFile, kioskPath);
+                AzureUpdater.ExpandZip(zipFile, kioskPath);
             }
 
             ProcessStartInfo si = new ProcessStartInfo();

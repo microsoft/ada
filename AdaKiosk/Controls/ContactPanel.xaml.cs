@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -22,9 +24,8 @@ namespace AdaKiosk.Controls
             TextBlockIssues.Text = "https://github.com/microsoft/ada";
 
             var assembly = this.GetType().Assembly;
-            this.TextBlockVersion.Text = assembly.GetName().Version.ToString();
-            
-            this.TextBlockUserName .Text = Environment.GetEnvironmentVariable("USERNAME");
+            this.TextBlockVersion.Text = assembly.GetName().Version.ToString();            
+            this.TextBlockUserName.Text = Environment.GetEnvironmentVariable("USERNAME");
 
             Task.Run(UpdateIpAddress);
         }

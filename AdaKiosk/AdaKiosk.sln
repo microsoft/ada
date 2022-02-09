@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdaKiosk", "AdaKiosk.csproj", "{B43E6206-BC07-4944-910F-72FD94D4E325}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdaKioskUpdater", "..\AdaKioskUpdater\AdaKioskUpdater.csproj", "{3921DD93-176C-4A22-9CDB-DF088845F658}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdaKioskUpdater", "..\AdaKioskUpdater\AdaKioskUpdater.csproj", "{3921DD93-176C-4A22-9CDB-DF088845F658}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,4 +1,6 @@
-﻿using Azure.Messaging.WebPubSub;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+using Azure.Messaging.WebPubSub;
 using System;
 using System.Diagnostics;
 using System.Net.WebSockets;
