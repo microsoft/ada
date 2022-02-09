@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-using AdaKiosk;
 using AdaSimulation;
 using System;
 using System.Collections.Generic;
