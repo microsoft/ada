@@ -62,9 +62,12 @@ class WebPubSubGroup:
         while not self.closed:
             if not self.send_queue.empty():
                 message = self.send_queue.get()
-                if message:
-                    data = json.dumps(message)
-                    await self.web_socket.send(data)
+                if self.web_socket:
+                    if message:
+                        data = json.dumps(message)
+                        await self.web_socket.send(data)
+                else:
+                    await asyncio.sleep(1)
             else:
                 await asyncio.sleep(0.1)
 
@@ -76,10 +79,17 @@ class WebPubSubGroup:
 
     async def listen(self):
         print("Listening for messages from WebSocket...")
-        async for message in self.web_socket:
-            self._handle_message(message)
-            if not self.client:
-                break
+        while not self.closed:
+            try:
+                if not self.web_socket:
+                    self.connect()  # auto-reconnect!
+                async for message in self.web_socket:
+                    self._handle_message(message)
+            except Exception as e:
+                # websocket has been closed.
+                self.web_socket = None
+                await asyncio.sleep(1)
+                print("### websocket error: ", e)
         print("Stopped listening to WebSocket.")
 
     def _handle_message(self, data):
@@ -92,6 +102,8 @@ class WebPubSubGroup:
                     h(user, message)
 
     async def _send_receive(self, msg):
+        if not self.web_socket:
+            return {}
         data = json.dumps(msg)
         await self.web_socket.send(data)
         response = await self.web_socket.recv()

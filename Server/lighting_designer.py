@@ -377,7 +377,6 @@ class LightingDesigner:
                     self.color_override = False
                     self.animations = None
                     print("### back to normal operation")
-                    wc.run = None
                     self.power_state = "on"
                     self.turn_off_time = None
                     self.sensei.start()
