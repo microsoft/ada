@@ -7,4 +7,4 @@ if ($addr -eq $null) {
 Write-Host Running Server on $local_addr
 Write-Host Hosting Web site on on $addr
 # ensure C:\Users\Administrator\.conda\envs\ada\ is in the path
-&python ada_server.py --ip $local_addr --loop --web $addr
+&python ada_server.py --ip $local_addr --loop

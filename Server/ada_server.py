@@ -10,10 +10,8 @@ import socket
 import sys
 from threading import Lock
 from collections import namedtuple
-from http.server import HTTPServer
 from priority_queue import PriorityQueue
 import sensei
-import web_server
 import firmware
 from messagebus import WebPubSubGroup
 import asyncio
@@ -21,7 +19,6 @@ import asyncio
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path += [os.path.join(script_dir, "../PiBridge")]
 
-HttpServerPort = 4000
 from bridge_client import PiBridgeClient
 from lighting_designer import LightingDesigner
 
@@ -36,10 +33,9 @@ class AdaServer:
     It maintains a queue of animations we want to play with an additional concept
     of priority so something can jump to the front of the queue.
     """
-    def __init__(self, config, msgbus, server_endpoint, web_address):
+    def __init__(self, config, msgbus, server_endpoint):
         self.config = config
         self.msgbus = msgbus
-        self.web_address = web_address
         self.server_endpoint = server_endpoint
         self.client_queues = {}  # the pending command queue for each rpi client.
         self.clients = {}  # the dictionary of connected client sockets
@@ -60,21 +56,6 @@ class AdaServer:
         self.firmware.start()
         self.closed = False
         _thread.start_new_thread(self.serve_forever, ())
-        if self.web_address:
-            _thread.start_new_thread(self.web_server_thread, ())
-
-    def web_server_thread(self):
-        host_name = self.web_address
-        http_server = HTTPServer((host_name, HttpServerPort), web_server.AdaWebServer)
-        print("Server started http://%s:%s" % (host_name, HttpServerPort))
-
-        try:
-            http_server.serve_forever()
-        except KeyboardInterrupt:
-            pass
-
-        http_server.server_close()
-        print("Web Server stopped.")
 
     def close(self):
         self.firmware.stop()
@@ -125,9 +106,6 @@ class AdaServer:
                 result += [name]
         self.lock.release()
         return result
-
-    def get_web_server_context(self):
-        return web_server.Context
 
     def read_camera(self, timeout):
         while self.camera_queue.size() > 2:
@@ -439,7 +417,7 @@ async def async_read_enter(server):
             await asyncio.sleep(0.1)
 
 
-async def _main(config, sensei, ip_address, web_address):
+async def _main(config, sensei, ip_address):
     endpoint = (ip_address, config.server_port)
     msgbus = None
 
@@ -450,7 +428,7 @@ async def _main(config, sensei, ip_address, web_address):
     else:
         msgbus = WebPubSubGroup(webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group)
         await msgbus.connect()
-    server = AdaServer(config, msgbus, endpoint, web_address)
+    server = AdaServer(config, msgbus, endpoint)
     server.start()
     designer = LightingDesigner(server, msgbus, sensei, config)
     designer.start()
@@ -467,7 +445,6 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser("ada_server makes Sensei database available to the ada raspberry pi devices")
     parser.add_argument("--ip", help="optional IP address of the server (default 'localhost')", default="localhost")
-    parser.add_argument("--web", help="optional IP address of the web server", default=None)
     parser.add_argument("--loop", help="Loop values from a file or not (default 'false')", action="store_true")
     parser.add_argument("--delay", type=int, default=config.playback_delay,
                         help="Timeout in seconds between each row of replay loop (default {})".format(
@@ -487,4 +464,4 @@ if __name__ == '__main__':
         history_files = os.path.join(os.path.join(script_dir, config.history_dir))
         sensei.load(history_files, args.delay, config.playback_weights)
 
-    asyncio.get_event_loop().run_until_complete(_main(config, sensei, args.ip, args.web))
+    asyncio.get_event_loop().run_until_complete(_main(config, sensei, args.ip))
