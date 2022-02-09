@@ -356,11 +356,6 @@ class LightingDesigner:
                 self.update_tplink_status()
             new_clients = self.server.get_stale_clients()
             has_new_clients = len(new_clients) > 0
-            wc = self.server.get_web_server_context()
-            web_cmd = wc.commands.dequeue()
-            if web_cmd is not None:
-                _, cmd = web_cmd
-                self.onmessage("web", cmd)
 
             try:
                 self.process_next_message()
