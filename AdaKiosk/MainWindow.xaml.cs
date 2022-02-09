@@ -86,9 +86,21 @@ namespace AdaKiosk
 
         private void OnNetworkStatusChanged(object sender, EventArgs e)
         {
-            if (observer.NetworkAvailable && this.bus == null)
+            if (observer.NetworkAvailable)
             {
-                ConnectMessageBus();
+                if (this.bus == null)
+                {
+                    ConnectMessageBus();
+                }
+            }
+            else if (this.bus != null)
+            {
+                // network has gone away, so shut down the message bus, we will 
+                // reconnect it when the network comes back.
+                this.bus.MessageReceived -= OnMessageReceived;
+                this.bus.Close();
+                this.bus = null;
+                this.sim.Offline = true;
             }
         }
 
