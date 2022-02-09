@@ -91,6 +91,7 @@ namespace AdaKiosk.Controls
 
         internal void HandleMessage(Message message)
         {
+            Offline = false;
             // fun times, now to simulate what the server is doing...
             if (!string.IsNullOrEmpty(message.Text))
             {
@@ -101,15 +102,26 @@ namespace AdaKiosk.Controls
                     switch (parts[0])
                     {
                         case "emotion":
+                            Powered = true;
                             SimulateEmotion(parts[1]);
                             break;
                         case "power":
-                            if (parts.Length > 1 && parts[1] == "off")
+                            if (parts.Length > 1)
                             {
-                                SimulateColor(Colors.Black);
+                                switch (parts[1])
+                                {
+                                    case "off":
+                                        SimulateColor(Colors.Black);
+                                        Powered = false;
+                                        break;
+                                    case "default":
+                                        Powered = true;
+                                        break;
+                                }
                             }
                             break;
                         case "zone":
+                            Powered = true;
                             HandleZoneMessage(parts);
                             break;
 
@@ -122,6 +134,7 @@ namespace AdaKiosk.Controls
             {
                 foreach (var cmd in message.Commands)
                 {
+                    Powered = true;
                     SimulateCommand(cmd);
                 }
             }
@@ -673,7 +686,8 @@ namespace AdaKiosk.Controls
 
         Grid currentKitchen;
         Color currentColor = Colors.Red;
-        bool offline = false;
+        bool offline = true;
+        bool powered = false;
 
         public string UserName { get; internal set; }
         public bool Editable { get; internal set; }
@@ -681,9 +695,28 @@ namespace AdaKiosk.Controls
         {
             get => offline; set
             {
-                offline = value;
-                Watermark.Text = value ? "Simulation" : "Live";
+                if (offline != value)
+                {
+                    offline = value;
+                    UpdateWaterMark();
+                }
             }
+        }
+        public bool Powered
+        {
+            get => powered; set
+            {
+                if (powered != value)
+                {
+                    powered = value;
+                    UpdateWaterMark();
+                }
+            }
+        }
+
+        private void UpdateWaterMark()
+        {
+            Watermark.Text = offline ? "Simulation" : (powered ? "Live" : "Sleeping");
         }
 
         private void OnKitchenClick(object sender, MouseButtonEventArgs e)

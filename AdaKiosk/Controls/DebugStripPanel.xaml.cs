@@ -209,5 +209,14 @@ namespace AdaKiosk.Controls
         {
             Application.Current.Shutdown(0);
         }
+
+        private void RunNotepad(object sender, RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = "c:\\windows\\system32\\notepad.exe",
+                UseShellExecute = true                 
+            });
+        }
     }
 }
