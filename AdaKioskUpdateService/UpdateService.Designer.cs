@@ -30,7 +30,7 @@ namespace AdaKioskUpdateService
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            this.ServiceName = "AdaKioskUpdater";
+            this.ServiceName = "AdaKioskService";
         }
 
         #endregion
