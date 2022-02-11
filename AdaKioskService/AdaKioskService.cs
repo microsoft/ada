@@ -19,6 +19,7 @@ namespace AdaKioskService
         const string downloadDir = "c:\\AdaKiosk\\Download";
         const string programName = "AdaKiosk.exe";
         bool checkForUpdates = true;
+        const int UpdateCheckDelay = 15 * 60 * 1000; // every 15 minutes.
 
         public AdaKioskService()
         {
@@ -44,8 +45,7 @@ namespace AdaKioskService
         {
             if (this.timer == null)
             {
-                // do first check immediately, then check again every hour.
-                this.timer = new Timer(OnCheckForUpdate, null, 1000, 60 * 60 * 1000);
+                this.timer = new Timer(OnCheckForUpdate, null, UpdateCheckDelay, UpdateCheckDelay);
             }
         }
 
@@ -72,8 +72,6 @@ namespace AdaKioskService
             }
             try
             {
-                //var updater = new WindowsUpdater();
-                //_ = updater.UpdateAndRestart(new CancellationTokenSource());
                 StopTimer();
                 log.WriteMessage("AdaKioskService checking for update");
                 var hashFileName = "AdaKiosk.zip.hash";

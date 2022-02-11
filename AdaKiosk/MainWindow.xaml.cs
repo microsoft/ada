@@ -160,12 +160,12 @@ namespace AdaKiosk
             }
         }
 
-        private async void OnPing()
+        private void OnPing()
         {
             if (this.bus == null) return;
             // sends a ping request, which should return the ada power state.
             this.pingTick = this.pongTick = Environment.TickCount;
-            await bus.SendMessage("\"/ping\"");
+            OnSendCommand(this, "ping");
             this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromMinutes(PingTimeout));
             this.actions.StartDelayedAction("pong", CheckPing, TimeSpan.FromSeconds(30));
         }
@@ -203,7 +203,7 @@ namespace AdaKiosk
             if (this.bus != null)
             {
                 var version = this.GetType().Assembly.GetName().Version.ToString();
-                _ = this.bus.SendMessage("/kiosk/version/" + version);
+                this.OnSendCommand(this, "/kiosk/version/" + version);
             }
         }
 
@@ -285,7 +285,7 @@ namespace AdaKiosk
         {
             if (bus != null)
             {
-                _ = bus.SendMessage("\"" + e.ToString() + "\"");
+                OnSendCommand(this, e.ToString());
             }
         }
 
