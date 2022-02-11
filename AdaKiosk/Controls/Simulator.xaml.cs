@@ -168,7 +168,7 @@ namespace AdaKiosk.Controls
 
         public void SimulateCommand(Command cmd)
         {
-            if (cmd.command == "CrossFade" || cmd.command == "Gradient")
+            if (cmd.command == "CrossFade" || cmd.command == "Gradient" || cmd.command == "sensei")
             {
                 if (cmd.Colors != null)
                 {
@@ -695,22 +695,21 @@ namespace AdaKiosk.Controls
         {
             get => offline; set
             {
-                if (offline != value)
-                {
-                    offline = value;
-                    UpdateWaterMark();
-                }
+                offline = value;
+                UpdateWaterMark();
             }
         }
         public bool Powered
         {
-            get => powered; set
+            get => powered; 
+            set
             {
-                if (powered != value)
+                powered = value;
+                if (!powered)
                 {
-                    powered = value;
-                    UpdateWaterMark();
+                    this.SimulateColor(Colors.Black);
                 }
+                UpdateWaterMark();
             }
         }
 

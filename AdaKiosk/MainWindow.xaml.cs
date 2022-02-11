@@ -113,7 +113,8 @@ namespace AdaKiosk
                 {
                     this.bus = new WebPubSubGroup();
                     await bus.Connect(connectionString, hubName, userName, groupName);
-                    this.bus.MessageReceived += OnMessageReceived;
+                    this.bus.MessageReceived += OnMessageReceived; 
+                    SendVersionInfo();
                     this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromSeconds(1));
                 } 
                 catch (Exception)
@@ -198,7 +199,7 @@ namespace AdaKiosk
             }
         }
 
-        private void HandleVersionCheck()
+        private void SendVersionInfo()
         {
             if (this.bus != null)
             {
@@ -251,7 +252,7 @@ namespace AdaKiosk
                     }
                     else if (simpleMessage.StartsWith("/kiosk/version/?"))
                     {
-                        HandleVersionCheck();
+                        SendVersionInfo();
                     }
                     else if (simpleMessage.StartsWith("/kiosk/shutdown"))
                     {
