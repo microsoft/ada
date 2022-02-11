@@ -113,7 +113,8 @@ namespace AdaKiosk
                 {
                     this.bus = new WebPubSubGroup();
                     await bus.Connect(connectionString, hubName, userName, groupName);
-                    this.bus.MessageReceived += OnMessageReceived;
+                    this.bus.MessageReceived += OnMessageReceived; 
+                    SendVersionInfo();
                     this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromSeconds(1));
                 } 
                 catch (Exception)
@@ -160,12 +161,12 @@ namespace AdaKiosk
             }
         }
 
-        private async void OnPing()
+        private void OnPing()
         {
             if (this.bus == null) return;
             // sends a ping request, which should return the ada power state.
             this.pingTick = this.pongTick = Environment.TickCount;
-            await bus.SendMessage("\"/ping\"");
+            OnSendCommand(this, "ping");
             this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromMinutes(PingTimeout));
             this.actions.StartDelayedAction("pong", CheckPing, TimeSpan.FromSeconds(30));
         }
@@ -195,6 +196,15 @@ namespace AdaKiosk
             if (this.debugEnabled)
             {
                 ShowStatus(msg);
+            }
+        }
+
+        private void SendVersionInfo()
+        {
+            if (this.bus != null)
+            {
+                var version = this.GetType().Assembly.GetName().Version.ToString();
+                this.OnSendCommand(this, "/kiosk/version/" + version);
             }
         }
 
@@ -240,6 +250,14 @@ namespace AdaKiosk
                     {
                         HandleDebug(simpleMessage);
                     }
+                    else if (simpleMessage.StartsWith("/kiosk/version/?"))
+                    {
+                        SendVersionInfo();
+                    }
+                    else if (simpleMessage.StartsWith("/kiosk/shutdown"))
+                    {
+                        Application.Current.Shutdown(0);
+                    }
                 }
 
                 this.sim.HandleMessage(message);
@@ -268,7 +286,7 @@ namespace AdaKiosk
         {
             if (bus != null)
             {
-                _ = bus.SendMessage("\"" + e.ToString() + "\"");
+                OnSendCommand(this, e.ToString());
             }
         }
 

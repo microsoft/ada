@@ -1,7 +1,7 @@
 ﻿
-namespace AdaKioskUpdateService
+namespace AdaKioskService
 {
-    partial class UpdateService
+    partial class AdaKioskService
     {
         /// <summary> 
         /// Required designer variable.
@@ -30,7 +30,7 @@ namespace AdaKioskUpdateService
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            this.ServiceName = "AdaKioskUpdater";
+            this.ServiceName = "AdaKioskService";
         }
 
         #endregion

@@ -64,9 +64,6 @@
         
         <TextBox x:Name="TextBoxError" Grid.Row="5" Grid.ColumnSpan="4" Margin="10" AcceptsReturn="true" Visibility="Collapsed" Foreground="DarkSalmon"/>
 
-        <Button Grid.Row="6" MinWidth="80" Click="RunNotepad">
-            <TextBlock Text="Notepad" Margin="5"/></Button>
-        
         <Button Background="#c12e2a" Grid.Row="6" Grid.Column="3" HorizontalAlignment="Right" MinWidth="80" Click="OnShutdown"
                 VerticalAlignment="Center">
             <TextBlock Text="Shutdown" Margin="5"/> </Button>
