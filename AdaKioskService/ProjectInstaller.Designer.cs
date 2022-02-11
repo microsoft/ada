@@ -1,5 +1,5 @@
 ﻿
-namespace AdaKioskUpdateService
+namespace AdaKioskService
 {
     partial class ProjectInstaller
     {
@@ -40,9 +40,8 @@ namespace AdaKioskUpdateService
             // 
             // serviceInstaller1
             // 
-            this.serviceInstaller1.Description = "Ada Kiosk Update Service";
-            this.serviceInstaller1.DisplayName = "Ada Kiosk Update Service";
             this.serviceInstaller1.ServiceName = "AdaKioskService";
+            this.serviceInstaller1.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
             // 
             // ProjectInstaller
             // 

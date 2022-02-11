@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AdaKioskUpdateService")]
+[assembly: AssemblyTitle("AdaKioskService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("AdaKioskUpdateService")]
+[assembly: AssemblyProduct("AdaKioskService")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("744184e0-ffb9-42af-a4b3-01c80e60ed84")]
+[assembly: Guid("b8473d96-c142-4733-a655-9e86d3ec643e")]
 
 // Version information for an assembly consists of the following four values:
 //

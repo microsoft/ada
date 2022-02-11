@@ -198,6 +198,15 @@ namespace AdaKiosk
             }
         }
 
+        private void HandleVersionCheck()
+        {
+            if (this.bus != null)
+            {
+                var version = this.GetType().Assembly.GetName().Version.ToString();
+                _ = this.bus.SendMessage("/kiosk/version/" + version);
+            }
+        }
+
         private void UpdateState(string message)
         {
             this.pongTick = Environment.TickCount; 
@@ -239,6 +248,14 @@ namespace AdaKiosk
                     else if (simpleMessage.StartsWith("/debug"))
                     {
                         HandleDebug(simpleMessage);
+                    }
+                    else if (simpleMessage.StartsWith("/kiosk/version/?"))
+                    {
+                        HandleVersionCheck();
+                    }
+                    else if (simpleMessage.StartsWith("/kiosk/shutdown"))
+                    {
+                        Application.Current.Shutdown(0);
                     }
                 }
 

@@ -1,7 +1,7 @@
 ﻿
-namespace AdaKioskUpdateService
+namespace AdaKioskService
 {
-    partial class UpdateService
+    partial class AdaKioskService
     {
         /// <summary> 
         /// Required designer variable.
