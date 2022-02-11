@@ -61,7 +61,7 @@ First the AdaKiosk Tablet must be running windows 10 and not windows 11. Windows
 Multi-App Assigned Access feature we need to use so you need to stop your device from auto-updating
 to Windows 11.  You can do that with the Group Policy Editor trick [shown
 here](https://www.howtogeek.com/765377/how-to-block-the-windows-11-update-from-installing-on-windows-10/#autotoc_anchor_2).
-This removes all the prompts telling me to update to Windows 11.
+This removes all the prompts telling you to update to Windows 11.
 
 The AdaKiosk app connects to Ada via the [Azure Web Pub Sub
 service](https://azure.microsoft.com/en-us/services/web-pubsub/) using an environment variable named
