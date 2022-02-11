@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -12,11 +13,16 @@ namespace AdaKioskService
         public ServiceLog(string fileName)
         {
             _instance = this;
-            this.fileName = fileName;
+            this.fileName = fileName;            
             if (File.Exists(fileName))
             {
-                // don't let the log file get too big!  Reset it on each system reboot.
-                File.Delete(fileName);
+                // don't let the log file get too big!  Truncate it to the last 1000 lines.
+                var lines = new List<string>(File.ReadAllLines(fileName));
+                if (lines.Count > 1000)
+                {
+                    lines.RemoveRange(0, lines.Count - 1000);
+                    File.WriteAllLines(fileName, lines.ToArray());
+                }
             }
         }
 
