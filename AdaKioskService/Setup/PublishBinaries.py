@@ -20,7 +20,7 @@ zip_file_name = 'AdaKiosk.zip'
 blob_store_container = 'adakiosk'
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-folder = os.path.join(script_dir, "..", "bin", "Release", "net5.0-windows")
+folder = os.path.join(script_dir, "..", "..", "AdaKiosk", "bin", "Release", "net5.0-windows")
 
 
 def zipdir(path, ziph):

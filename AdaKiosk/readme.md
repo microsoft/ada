@@ -3,14 +3,15 @@
 This is a Windows WPF app that provides a nice Kiosk experience to
 accompany Ada.
 
-The app comes up by default in full screen mode.  Press F11 to get out of full screen mode.
+![kiosk](images/kiosk.png)
 
 ## Home page
 
-This page is the default and provides access to the beautiful blog on Ada
-detailing the construction effort.  This app connects to Ada via the
-Azure AdaServerRelay, and requires an environment variable called
-AZURE_SIGNALR_CONNECTION_STRING for it to make this connection.
+The app comes up by default in full screen mode.  Press F11 to get out of full screen mode.
+
+This page is the default and provides access to the beautiful blog on Ada detailing the design
+concepts and construction effort.  This app connects to Ada via the very cool new [Azure Web Pub Sub service](https://azure.microsoft.com/en-us/services/web-pubsub/), and connects via an environment variable called ADA_WEBPUBSUB_CONNECTION_STRING for it to make this
+connection.  It also auto-updates via the [AdaKioskService](../AdaKioskService/readme.md).
 
 ![image](images/home.png)
 
@@ -48,4 +49,6 @@ led indexes, including an led range, like this "1,2-5,8,10-20"
 
 ## Debug
 
-This is an advanced page for debugging individual LED's on Ada.
+This is an advanced page for testing individual LED's on Ada.
+This page is only made visible when a /debug/true message is sent
+to the Kiosk.
