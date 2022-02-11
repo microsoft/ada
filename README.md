@@ -22,6 +22,9 @@ This is especially important because Teensy boards do not support debugging.
 - [AdaKiosk](AdaKiosk/readme.md) a C# WPF app that simulates and controls Ada designed for a kiosk tablet device.
 - [AdaKioskUnitTest](AdaKioskUnitTest/readme.md) a C# WPF app that simply prints all Web Pub Sub messages going on between
 the kiosk and the Ada Server.
+- [AdaKioskService](AdaKioskService/readme.md) a C# app runs as a system service
+on the AdaKiosk to perform auto-updating of the AdaKiosk app.
+the kiosk and the Ada Server.
 - [PiBridge](PiBridge/readme.md) the Raspberry Pi Zero Wifi bridge to the Kasa Power switches.
 - **HistoricalData** Some *.csv files that capture some historical data
 from cosmos which can be used in "replay mode" by the Server.
