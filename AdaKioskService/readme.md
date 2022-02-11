@@ -77,8 +77,8 @@ here](https://www.techjunkie.com/setup-auto-login-windows-10/). Once auto-login 
 need is to setup multi-app assigned access, which will lock down the device and restrict allowed
 apps and make it run automatically on reboot.
 
-This is achieved with the `Setup\AssignedAccessProfile.xml` profile which configures a Windows 10
-feature called [Multi-app
+This is achieved with the [AssignedAccessProfile.xml](Setup\AssignedAccessProfile.xml)
+profile which configures a Windows 10 feature called [Multi-app
 AssignedAccess](https://docs.microsoft.com/en-us/windows/configuration/lock-down-windows-10-to-specific-apps).
 But first we need to place the AdaKiosk binaries in the right place as follows:
 
@@ -88,8 +88,8 @@ cd c:\AdaKiosk\App
 xcopy /s c:\temp\AdaKiosk\*.* .
 ```
 
-Now open the `c:\AdaKiosk\App` folder and make a shortcut for AdaKiosk.exe named
-AdaKioskShortcut.lnk using the Windows Explorer, right click, "Create shortcut"
+Now open the `c:\AdaKiosk\App` folder and make a shortcut for `AdaKiosk.exe` named
+`AdaKioskShortcut.lnk` using the Windows Explorer, right click, "Create shortcut"
 
 Make sure the App runs by running the `AdaKiosk.exe` there.  You may need to install .NET 5.0
 runtime if it is not already installed on the machine.
@@ -108,8 +108,7 @@ cd c:\temp\Scripts
 powershell -f SetupAssignedAccess.ps1
 ```
 
-
-That's it!  You should now be able to reboot the tablet and have it autostart the AdaKiosk.exe app
+That's it!  You should now be able to reboot the tablet and have it autostart the `AdaKiosk.exe` app
 in locked down mode so you can place the device out there in the real world to complete the Ada
 show.
 
