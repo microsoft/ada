@@ -82,7 +82,7 @@ class WebPubSubGroup:
         while not self.closed:
             try:
                 if not self.web_socket:
-                    self.connect()  # auto-reconnect!
+                    await self.connect()  # auto-reconnect!
                 async for message in self.web_socket:
                     self._handle_message(message)
             except Exception as e:
