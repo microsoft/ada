@@ -1,6 +1,7 @@
 ﻿using AdaSimulation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -35,7 +36,8 @@ namespace AdaKiosk.Utilities
 
         async void CheckIpAddress()
         {
-            int delay = pingDelaySeconds;
+            bool hasInternet = false;
+
             try
             {
                 if (closed) return;
@@ -51,32 +53,53 @@ namespace AdaKiosk.Utilities
                 // this is a way to find a good local ip address that can reach the internet.
                 using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 var targets = Dns.GetHostAddresses("www.bing.com");
-                await socket.ConnectAsync(new IPEndPoint(targets[0], 80));
-                var localEndPoint = socket.LocalEndPoint as IPEndPoint;
-                if (localEndPoint != null)
+                foreach (var addr in from t in targets where t.AddressFamily == AddressFamily.InterNetwork select t) 
                 {
-                    var ip = localEndPoint.Address.ToString();
-                    if (ip != IpAddress) {
-                        IpAddress = ip;
-                        NetworkAvailable = true;
-                        actions.StartDelayedAction("notify", FireEvent, TimeSpan.FromMilliseconds(0));
+                    await socket.ConnectAsync(new IPEndPoint(addr, 80));
+                    try
+                    {
+                        var localEndPoint = socket.LocalEndPoint as IPEndPoint;
+                        if (localEndPoint != null)
+                        {
+                            var ip = localEndPoint.Address.ToString();
+                            if (ip != IpAddress)
+                            {
+                                hasInternet = true;
+                                IpAddress = ip;
+                                NetworkAvailable = true;
+                                actions.StartDelayedAction("notify", FireEvent, TimeSpan.FromMilliseconds(0));
+                            }
+                        }
+                        socket.Close();
+                        break;
                     }
-                    // now that we have a network we can check less frequently.
-                    delay = monitorDelaySeconds;
+                    catch (Exception ex)
+                    {
+                        // try one of the other target addresses...
+                        Debug.WriteLine(ex.Message);
+                    }
                 }
-                socket.Close();
             }
-            catch (Exception)
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+
+            if (!hasInternet)
             {
                 if (IpAddress != null)
                 {
                     IpAddress = null;
                     NetworkAvailable = false;
                     actions.StartDelayedAction("notify", FireEvent, TimeSpan.FromMilliseconds(0));
-                }                
+                }
+                actions.StartDelayedAction("connect", Start, TimeSpan.FromSeconds(pingDelaySeconds));
             }
-
-            actions.StartDelayedAction("connect", Start, TimeSpan.FromSeconds(pingDelaySeconds));
+            else
+            {
+                // now that we have a network we can check less frequently.
+                actions.StartDelayedAction("connect", Start, TimeSpan.FromSeconds(monitorDelaySeconds));
+            }
         }
 
         void FireEvent()
