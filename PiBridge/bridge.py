@@ -98,8 +98,8 @@ class TplinkServer:
         for local_ip, switch_ip in self.plugs:
             plug = TplinkSmartPlug(local_ip, switch_ip)
             plug.get_info()
-            print("Plug {} is {}".format(addr, plug.is_on == 1), flush=True)
-            status += ["{}:{}".format(addr, plug.is_on == 1)]
+            print("Plug {} is {}".format(switch_ip, plug.is_on == 1), flush=True)
+            status += ["{}:{}".format(switch_ip, plug.is_on == 1)]
         return ",".join(status)
 
 
