@@ -26,25 +26,30 @@ class WebPubSubGroup:
         self.listeners += [handler]
 
     async def connect(self):
-        self.client = WebPubSubServiceClient.from_connection_string(
-            connection_string=self.webpubsub_constr, hub=self.hub_name)
-        self.closed = False
-        token = self.client.get_client_access_token(
-            user_id=self.user_name,
-            roles=[f"webpubsub.joinLeaveGroup.{self.group_name}",
-                   f"webpubsub.sendToGroup.{self.group_name}"])
-        uri = token['url']
-        self.web_socket = await websockets.connect(
-            uri, subprotocols=['json.webpubsub.azure.v1'])
-        response = await self._send_receive({
-            "type": "joinGroup",
-            "ackId": self.ack_id,
-            "group": self.group_name})
-        self.ack_id += 1
-        # now we should have the connection id and an idea of success
-        if "event" in response and response["event"] == "connected":
-            self.connection_id = response["connectionId"]
-        print("WebSocket connected")
+        try:
+            self.client = WebPubSubServiceClient.from_connection_string(
+                connection_string=self.webpubsub_constr, hub=self.hub_name)
+            self.closed = False
+            token = self.client.get_client_access_token(
+                user_id=self.user_name,
+                roles=[f"webpubsub.joinLeaveGroup.{self.group_name}",
+                    f"webpubsub.sendToGroup.{self.group_name}"])
+            uri = token['url']
+            self.web_socket = await websockets.connect(
+                uri, subprotocols=['json.webpubsub.azure.v1'])
+            response = await self._send_receive({
+                "type": "joinGroup",
+                "ackId": self.ack_id,
+                "group": self.group_name})
+            self.ack_id += 1
+            # now we should have the connection id and an idea of success
+            if "event" in response and response["event"] == "connected":
+                self.connection_id = response["connectionId"]
+            print("WebSocket connected")
+        except Exception as e:
+            print("### web socket connect failed: " + e)
+            self.web_socket = None
+            await asyncio.sleep(10)
         return
 
     def send(self, msg):
@@ -65,9 +70,15 @@ class WebPubSubGroup:
                 if self.web_socket:
                     if message:
                         data = json.dumps(message)
-                        await self.web_socket.send(data)
+                        try:
+                            await self.web_socket.send(data)
+                        except:
+                            # websocket has been closed.
+                            self.web_socket = None
+                            await asyncio.sleep(1)
+                            print("### websocket send error: ", e)
                 else:
-                    await asyncio.sleep(1)
+                    await self.connect()  # auto-reconnect!
             else:
                 await asyncio.sleep(0.1)
 
@@ -89,7 +100,7 @@ class WebPubSubGroup:
                 # websocket has been closed.
                 self.web_socket = None
                 await asyncio.sleep(1)
-                print("### websocket error: ", e)
+                print("### websocket receive error: ", e)
         print("Stopped listening to WebSocket.")
 
     def _handle_message(self, data):
