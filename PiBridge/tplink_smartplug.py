@@ -99,10 +99,10 @@ class TplinkSmartPlug(object):
                                         ip = addr[0]
                                         if ip not in result:
                                             result += [ip]
-            except socket.timeout:     
+            except socket.timeout:
                 # send another one in case a switch missed the previous UDP broadcast.
                 broadcast_sock.sendto(hello, ('<broadcast>', 9999))
-                
+
         broadcast_sock.close()
         return result
 
@@ -163,6 +163,7 @@ class TplinkSmartPlug(object):
 if __name__ == '__main__':
     # Parse commandline arguments
     parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug")
+    parser.add_argument("-l", "--local", metavar="<ipaddress>", help="Override for local IP address to use")
     parser.add_argument("-t", "--target", metavar="<hostname>", help="Target hostname or IP address", default="localhost")
     parser.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(_commands), choices=_commands)
     parser.add_argument("-f", "--find", help="Find local HS105 devices", action="store_true")
@@ -170,13 +171,19 @@ if __name__ == '__main__':
 
     # Set target IP, port and command to send
     ip = args.target
-    plug = TplinkSmartPlug(ip)
+    local_ip = args.local
+    plug = TplinkSmartPlug(ip, None)
 
     if args.find:
-        local_ip = TplinkSmartPlug.getLocalIpAddress()
+        if not local_ip:
+            local_ip = TplinkSmartPlug.getLocalIpAddress()
         print("Looking for HS105 devices on network {}".format(local_ip))
+        found = False
         for addr in TplinkSmartPlug.findHS105Devices(local_ip, 5):
+            found = True
             print("Found device at {}".format(addr))
+        if not found:
+            print("Nothing found.")
     else:
         response = plug.send_command(args.command)
         print(response)
