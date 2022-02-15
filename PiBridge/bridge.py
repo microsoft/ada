@@ -67,7 +67,7 @@ class TplinkServer:
                 plug.get_info()
                 if not plug.is_on:
                     all_on = False
-                    print("Turning on {}...".format(addr), flush=True)
+                    print("Turning on {}...".format(switch_ip), flush=True)
                     plug.turn_on()
                     time.sleep(1)  # do not switch them all at the same time
             if all_on:
@@ -85,7 +85,7 @@ class TplinkServer:
                 plug.get_info()
                 if plug.is_on:
                     all_off = False
-                    print("Turning off {}...".format(addr), flush=True)
+                    print("Turning off {}...".format(switch_ip), flush=True)
                     plug.turn_off()
                     time.sleep(1)  # do not switch them all at the same time
             if all_off:
