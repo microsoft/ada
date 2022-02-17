@@ -72,7 +72,7 @@ class WebPubSubGroup:
                         data = json.dumps(message)
                         try:
                             await self.web_socket.send(data)
-                        except:
+                        except Exception as e:
                             # websocket has been closed.
                             self.web_socket = None
                             await asyncio.sleep(1)
