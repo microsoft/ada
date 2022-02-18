@@ -25,7 +25,7 @@ class LightingDesigner:
         self.config = config
         self.msgbus = msgbus
         msgbus.add_listener(self.onmessage)
-        self.last_message_received = 0
+        self.entered_custom_state = 0
         self.msgqueue = PriorityQueue()
         self.lights_on = None
         self.server = server
@@ -151,7 +151,6 @@ class LightingDesigner:
         if user == 'server':
             # ignore our own messages.
             return
-        self.last_message_received = time.time()
         self.msgqueue.enqueue(0, msg)
 
     def _set_power_state(self, option):
@@ -181,9 +180,10 @@ class LightingDesigner:
         elif option == "custom":
             # user is doing a custom control, so keep or turn the lights on
             # to show this custom animation.  The this custom state will
-            # remain until some timeout past self.last_message_received.
+            # remain until some timeout past self.entered_custom_state.
             self.power_on_override = True
             self.power_off_override = False
+            self.entered_custom_state = time.time()
         else:
             print("error: invalid power state: /power/{}".format(option))
 
@@ -308,6 +308,7 @@ class LightingDesigner:
                         self._set_power_state("custom")
             elif cmd == "pixels":
                 self._set_pixels(msg)
+                self._set_power_state("custom")
 
     def _set_pixels(self, cmd):
         s = cmd.split('/')
@@ -363,7 +364,7 @@ class LightingDesigner:
                 print("error with process_next_message: " + str(e))
 
             if self.power_state == "custom" and \
-               time.time() > self.last_message_received + self.config.custom_animation_timeout:
+               time.time() > self.entered_custom_state + self.config.custom_animation_timeout:
                 # timeout custom animations and go back to normal "run" mode so Ada can go to sleep
                 # if necessary.
                 self._set_power_state("run")
