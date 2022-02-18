@@ -31,6 +31,7 @@ namespace AdaKiosk
         int pongTick = 0;
         bool offline = false;
         const int PingTimeout = 15; // minutes;
+        const int PongTimeout = 30; // seconds.
 
         enum ViewType
         {
@@ -168,7 +169,7 @@ namespace AdaKiosk
             this.pingTick = this.pongTick = Environment.TickCount;
             OnSendCommand(this, "ping");
             this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromMinutes(PingTimeout));
-            this.actions.StartDelayedAction("pong", CheckPing, TimeSpan.FromSeconds(30));
+            this.actions.StartDelayedAction("pong", CheckPing, TimeSpan.FromSeconds(PongTimeout));
         }
 
         private void StartDelayedSleep(int seconds)
