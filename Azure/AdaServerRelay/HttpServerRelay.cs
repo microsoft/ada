@@ -105,6 +105,17 @@ namespace Ada.Function
             {
                 message = GetValidJson(message);
                 var response = await this._pubSubService.SendAndWaitAsync(message, TimeSpan.FromSeconds(5));
+                if (response is ErrorMessage em)
+                {
+                    if (em.type == "disconnected")
+                    {
+                        // try reconnecting!
+                        string connectionString = Environment.GetEnvironmentVariable("AdaWebPubSubConnectionString");
+                        await _pubSubService.Connect(connectionString, hub, user, group, TimeSpan.FromSeconds(10));
+                        // now try again on a fresh connection
+                        response = await this._pubSubService.SendAndWaitAsync(message, TimeSpan.FromSeconds(5));
+                    }
+                }
                 while (response is AckMessage)
                 {
                     // wait for one more out of band response which is the real payload we are looking for

@@ -82,6 +82,7 @@ namespace AdaServerRelay
 
         public async Task Connect(string connectionString, string hubName, string userId, string groupName, TimeSpan timeout)
         {
+            this.Close();
             this.hubName = hubName;
             this.groupName = groupName;
             this.userId = userId;
@@ -190,7 +191,15 @@ namespace AdaServerRelay
                 int ackId = this.ackId++;
                 string groupMessage = "{\"type\": \"sendToGroup\", \"group\": \"" + groupName + "\", \"dataType\": \"json\", \"data\": " +
                     json + ", \"ackId\": " + ackId.ToString() + "}";
-                client.Send(groupMessage);
+                try
+                {
+                    client.Send(groupMessage);
+                } 
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("SendMessage: " + ex.Message);
+                    IsConnected = false;
+                }
             }
             return Task.CompletedTask;
         }
@@ -209,6 +218,7 @@ namespace AdaServerRelay
                 }
                 catch { }
             }
+            this.IsConnected = false;
         }
         
         public async Task<BaseMessage> ReceiveAsync(TimeSpan timeout)
@@ -232,7 +242,16 @@ namespace AdaServerRelay
         {
             var pending = new TaskCompletionSource<BaseMessage>();
             this.pending = pending;
-            client.Send(message);
+            try
+            {
+                client.Send(message);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("SendMessage: " + ex.Message);
+                IsConnected = false;
+                return new ErrorMessage { type = "disconnected" };
+            }
             var tasks = new Task[1];
             tasks[0] = this.pending.Task;
             return await Task.Run(() =>
