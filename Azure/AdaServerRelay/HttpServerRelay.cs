@@ -114,14 +114,14 @@ namespace Ada.Function
                 {
                     responseText = System.Text.Json.JsonSerializer.Serialize(gm);
                 }
-                else if (response == null)
+                else 
                 {
-                    responseText = "\"timeout\"";
+                    responseText = System.Text.Json.JsonSerializer.Serialize(new ErrorMessage() { type = "timeout" });
                 }
             }
             else
             {
-                responseText = "\"Hub not connected\"";
+                responseText = System.Text.Json.JsonSerializer.Serialize(new ErrorMessage() { type = "error", reason= "Hub not connected" });
             }
 
             var httpResponse = new HttpResponseMessage(HttpStatusCode.OK);

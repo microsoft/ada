@@ -224,7 +224,7 @@ namespace AdaKiosk.Utilities
                 {
                     return pending.Task.Result;
                 }
-                return null;
+                return new ErrorMessage { type = "timeout" };
             });
         }
 

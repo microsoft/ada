@@ -422,11 +422,11 @@ class LightingDesigner:
                             on_hour, on_minute))
                     else:
                         # let the lights cool down for 3 minutes before turning them off.
-                        time.sleep(1)
+                        time.sleep(0.1)
                         continue
 
                 self.server.camera_off()
-                time.sleep(1)
+                time.sleep(0.1)
                 self.server.clear_queue()
                 continue  # wait for power to go on again tomorrow.
 
