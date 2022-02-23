@@ -10,61 +10,15 @@ using Websocket.Client;
 
 namespace AdaServerRelay
 {
-
-    public class BaseMessage
-    {
-        public string type { get; set; }
-    }
-
-    public class ErrorMessage : BaseMessage
-    {
-        public string reason { get; set; }
-    }
-
-    public class AckMessage : BaseMessage
-    {
-        public int ackId { get; set; }
-        public bool success { get; set; }
-    }
-
-    public class SystemMessage : BaseMessage
-    {
-        public string @event { get; set; }
-        public string userId { get; set; }
-        public string connectionId { get; set; }
-    }
-
-    public class GroupMessage : BaseMessage
-    {
-        public string from { get; set; }
-        public string fromUserId { get; set; }
-        public string group { get; set; }
-        public string dataType { get; set; }
-        public string data { get; set; }
-    }
-
-    public interface IWebPubSubGroup
-    {
-        bool IsConnected { get; }
-        public string GroupName { get; }
-        public string HubName { get; }
-        public int NextId { get; set; }
-        Task Connect(string connectionString, string hubName, string userId, string groupName, TimeSpan timeout);
-        Task SendMessage(string json);
-        Task JoinGroup(string group, TimeSpan timeout);
-        Task<BaseMessage> SendAndWaitAsync(string message, TimeSpan timeout);
-        Task<BaseMessage> ReceiveAsync(TimeSpan timeout);
-        event EventHandler<GroupMessage> MessageReceived;
-    }
-
-    class WebPubSubGroup : IWebPubSubGroup
+    class WebPubSubGroup
     {
         private WebsocketClient client;
         private int ackId = 1;
-        TaskCompletionSource<BaseMessage> pending;
+        TaskCompletionSource<Message> pending;
         private string hubName;
         private string connectionId;
         private string groupName;
+        private bool groupJoined;
         private string userId;
 
         public int NextId { get => ackId; set => ackId = value; }
@@ -82,7 +36,7 @@ namespace AdaServerRelay
 
         public async Task Connect(string connectionString, string hubName, string userId, string groupName, TimeSpan timeout)
         {
-            this.Close();
+            await this.Close();
             this.hubName = hubName;
             this.groupName = groupName;
             this.userId = userId;
@@ -103,15 +57,15 @@ namespace AdaServerRelay
             client.MessageReceived.Subscribe(msg => {
                 HandleMessage(msg);
             });
-            var src = new TaskCompletionSource<BaseMessage>();
+            var src = new TaskCompletionSource<Message>();
             this.pending = src;
             await client.Start();
             var response = await src.Task;
-            if (response is SystemMessage sys)
+            if (response != null && response.Type == "system")
             {
-                if (sys.@event == "connected")
+                if (response.Event == "connected")
                 {
-                    this.connectionId = sys.connectionId;
+                    this.connectionId = response.ConnectionId;
                 }
             }
             Debug.WriteLine("WebSocket Connected.");
@@ -119,54 +73,27 @@ namespace AdaServerRelay
             this.IsConnected = true;
         }
 
-        public event EventHandler<GroupMessage> MessageReceived;
+        public event EventHandler<Message> MessageReceived;
 
         void HandleMessage(ResponseMessage msg)
         {
-            Debug.WriteLine(msg.Text);
-            BaseMessage bm = null;
+            Debug.WriteLine("Received: " + msg.Text);
+            Message m = Message.FromJson(msg.Text);
 
-            if (msg.Text.StartsWith("{\"type\":\"ack\""))
+            if (m == null || m.FromUserId == this.userId)
             {
-                AckMessage sys = JsonSerializer.Deserialize<AckMessage>(msg.Text);
-                if (sys.success)
-                {
-                    Debug.WriteLine("Previous op was a success!");
-                    // todo: handle failures via pending.SetException?
-                }
-                bm = sys;
+                return;
             }
-            else if (msg.Text.StartsWith("{\"type\":\"message\""))
+
+            if (MessageReceived != null)
             {
-                // received a message to the group!
-                GroupMessage gm = JsonSerializer.Deserialize<GroupMessage>(msg.Text);
-                if (gm.fromUserId == this.userId)
-                {
-                    // ignore messages to the group that we sent!
-                    return;
-                }
-                Debug.WriteLine("Group Message: " + msg.Text);
-                if (MessageReceived != null)
-                {
-                    MessageReceived(this, gm);
-                }
-                bm = gm;
+                MessageReceived(this, m);
             }
-            else if (msg.Text.StartsWith("{\"type\":\"system\""))
+
+            if (this.pending != null)
             {
-                bm = JsonSerializer.Deserialize<SystemMessage>(msg.Text);
-            }
-            else
-            {
-                Debug.WriteLine("???");
-            }
-            if (bm != null)
-            {
-                if (this.pending != null)
-                {
-                    this.pending.SetResult(bm);
-                    this.pending = null;
-                }
+                this.pending.SetResult(m);
+                this.pending = null;
             }
         }
 
@@ -180,8 +107,24 @@ namespace AdaServerRelay
             });
 
             var resp = await this.InternalSendAndWaitAsync(joinGroup, timeout);
+            this.groupJoined = true;
             // check ack response.
             Debug.WriteLine("Joined group.");
+        }
+
+        public async Task LeaveGroup(string group, TimeSpan timeout)
+        {
+            string leaveGroup = JsonSerializer.Serialize(new
+            {
+                type = "leaveGroup",
+                group = group,
+                ackId = this.ackId++
+            });
+
+            var resp = await this.InternalSendAndWaitAsync(leaveGroup, timeout);
+            this.groupJoined = false;
+            // check ack response.
+            Debug.WriteLine("Left group.");
         }
 
         public Task SendMessage(string json)
@@ -193,6 +136,7 @@ namespace AdaServerRelay
                     json + ", \"ackId\": " + ackId.ToString() + "}";
                 try
                 {
+                    Console.WriteLine("Sending: " + groupMessage);
                     client.Send(groupMessage);
                 } 
                 catch (Exception ex)
@@ -204,8 +148,13 @@ namespace AdaServerRelay
             return Task.CompletedTask;
         }
 
-        internal void Close()
+        public async Task Close()
         {
+            if (this.groupJoined)
+            {
+                await this.LeaveGroup(this.groupName, TimeSpan.FromSeconds(10));
+            }
+
             if (this.pending != null)
             {
                 this.pending.SetCanceled();
@@ -221,9 +170,9 @@ namespace AdaServerRelay
             this.IsConnected = false;
         }
         
-        public async Task<BaseMessage> ReceiveAsync(TimeSpan timeout)
+        public async Task<Message> ReceiveAsync(TimeSpan timeout)
         {
-            var pending = new TaskCompletionSource<BaseMessage>();
+            var pending = new TaskCompletionSource<Message>();
             this.pending = pending;
             var tasks = new Task[1];
             tasks[0] = this.pending.Task;
@@ -238,22 +187,23 @@ namespace AdaServerRelay
             });
         }
 
-        private async Task<BaseMessage> InternalSendAndWaitAsync(string message, TimeSpan timeout)
+        private async Task<Message> InternalSendAndWaitAsync(string message, TimeSpan timeout)
         {
-            var pending = new TaskCompletionSource<BaseMessage>();
+            var pending = new TaskCompletionSource<Message>();
             this.pending = pending;
             try
             {
+                Console.WriteLine("Sending: " + message);
                 client.Send(message);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("SendMessage: " + ex.Message);
                 IsConnected = false;
-                return new ErrorMessage { type = "disconnected" };
+                return new Message { Type = "error", Data = "disconnected" };
             }
             var tasks = new Task[1];
-            tasks[0] = this.pending.Task;
+            tasks[0] = pending.Task;
             return await Task.Run(() =>
             {
                 int index = Task.WaitAny(tasks, timeout);
@@ -261,11 +211,11 @@ namespace AdaServerRelay
                 {
                     return pending.Task.Result;
                 }
-                return new ErrorMessage { type = "timeout" };
+                return new Message { Type = "timeout" };
             });
         }
 
-        public async Task<BaseMessage> SendAndWaitAsync(string json, TimeSpan timeout)
+        public async Task<Message> SendAndWaitAsync(string json, TimeSpan timeout)
         {
             int ackId = this.ackId++;
             string groupMessage = "{\"type\": \"sendToGroup\", \"group\": \"" + groupName + "\", \"dataType\": \"json\", \"data\": " +

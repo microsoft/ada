@@ -14,7 +14,8 @@ namespace AdaServerRelay
     {
         public void Configure(IWebJobsBuilder builder)
         {
-            builder.Services.Add(ServiceDescriptor.Singleton<IWebPubSubGroup>(new WebPubSubGroup()));
+            // this doesn't work long term for some reason.
+            // builder.Services.Add(ServiceDescriptor.Singleton<IWebPubSubGroup>(new WebPubSubGroup()));
         }
     }
 }

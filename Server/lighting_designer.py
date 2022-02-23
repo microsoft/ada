@@ -222,20 +222,26 @@ class LightingDesigner:
             return
 
         _, msg = item
+        pingPrefix = ''
+        # if we are replying to specific user ping, then prefix the
+        # reply with that user's name so they know the reply is for them.
+        if "fromUserId" in msg:
+            fromUser = msg["fromUserId"]
+            pingPrefix = f"{fromUser}:"
         msg = msg['data']
         if msg.startswith('/'):
             msg = msg[1:]
         parts = msg.split("/")
         if len(parts) < 2:
             if parts[0] == "ping":
-                self.msgbus.send("/state/" + self.power_state)
+                self.msgbus.send(f"{pingPrefix}/state/{self.power_state}")
             elif parts[0] == "bridge":
                 if not self.bridge:
-                    self.msgbus.send("/bridge/disconnected")
+                    self.msgbus.send(f"{pingPrefix}/bridge/disconnected")
                 elif self.bridge_error:
-                    self.msgbus.send("/bridge/" + self.bridge_error)
+                    self.msgbus.send(f"{pingPrefix}/bridge/{self.bridge_error}")
                 else:
-                    self.msgbus.send("/bridge/ok")
+                    self.msgbus.send(f"{pingPrefix}/bridge/ok")
             else:
                 print("### ignoring message:", msg)
         else:

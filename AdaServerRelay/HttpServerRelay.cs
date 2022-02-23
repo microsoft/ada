@@ -1,24 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
 using AdaServerRelay;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -28,13 +24,9 @@ namespace Ada.Function
     {
         const string user = "gateway"; // for now we only have one user!
 
-        private readonly IWebPubSubGroup _pubSubService;
-
-        public HttpServerRelay(IWebPubSubGroup pubSubService)
+        public HttpServerRelay()
         {
-            this._pubSubService = pubSubService;
         }
-
 
         [FunctionName("server")]
         [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
@@ -83,7 +75,7 @@ namespace Ada.Function
         {
             try
             {
-                var obj = JToken.Parse(message);
+                JToken.Parse(message);
                 return message;
             }
             catch (Exception) //some other exception
@@ -94,47 +86,41 @@ namespace Ada.Function
 
         public async Task<HttpResponseMessage> Post(string hub, string group, string message, ILogger log)
         {
-            if (!_pubSubService.IsConnected || _pubSubService.HubName != hub || _pubSubService.GroupName != group)
+            Message response = null;
+            var pubSubService = new WebPubSubGroup();
+            try
             {
                 string connectionString = Environment.GetEnvironmentVariable("AdaWebPubSubConnectionString");
-                await _pubSubService.Connect(connectionString, hub, user, group, TimeSpan.FromSeconds(10));
-            }
-
-            string responseText = null;
-            if (this._pubSubService.IsConnected)
-            {
-                message = GetValidJson(message);
-                var response = await this._pubSubService.SendAndWaitAsync(message, TimeSpan.FromSeconds(5));
-                if (response is ErrorMessage em)
+                await pubSubService.Connect(connectionString, hub, user, group, TimeSpan.FromSeconds(10));
+                if (pubSubService.IsConnected)
                 {
-                    if (em.type == "disconnected")
+                    message = GetValidJson(message);
+                    response = await pubSubService.SendAndWaitAsync(message, TimeSpan.FromSeconds(5));
+                    while (response != null && response.Type == "ack")
                     {
-                        // try reconnecting!
-                        string connectionString = Environment.GetEnvironmentVariable("AdaWebPubSubConnectionString");
-                        await _pubSubService.Connect(connectionString, hub, user, group, TimeSpan.FromSeconds(10));
-                        // now try again on a fresh connection
-                        response = await this._pubSubService.SendAndWaitAsync(message, TimeSpan.FromSeconds(5));
+                        // wait for one more out of band response which is the real payload we are looking for
+                        response = await pubSubService.ReceiveAsync(TimeSpan.FromSeconds(10));
                     }
                 }
-                while (response is AckMessage)
+                else
                 {
-                    // wait for one more out of band response which is the real payload we are looking for
-                    response = await this._pubSubService.ReceiveAsync(TimeSpan.FromSeconds(10));
+                    response = new Message() { Type = "error", Data = "Hub not connected" };
                 }
-                if (response is GroupMessage gm)
-                {
-                    responseText = System.Text.Json.JsonSerializer.Serialize(gm);
-                }
-                else 
-                {
-                    responseText = System.Text.Json.JsonSerializer.Serialize(new ErrorMessage() { type = "timeout" });
-                }
-            }
-            else
+
+                // cleanup so we don't accumulate group memberships.
+                await pubSubService.Close();
+            } 
+            catch (Exception ex)
             {
-                responseText = System.Text.Json.JsonSerializer.Serialize(new ErrorMessage() { type = "error", reason= "Hub not connected" });
+                response = new Message() { Type = "error", Data = ex.Message };
             }
 
+            if (response == null)
+            {
+                response = new Message() { Type = "timeout" };
+            }
+
+            var responseText = JsonConvert.SerializeObject(response);
             var httpResponse = new HttpResponseMessage(HttpStatusCode.OK);
             httpResponse.Content = new StringContent(responseText);
             httpResponse.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
