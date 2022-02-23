@@ -95,12 +95,7 @@ namespace Ada.Function
                 if (pubSubService.IsConnected)
                 {
                     message = GetValidJson(message);
-                    response = await pubSubService.SendAndWaitAsync(message, TimeSpan.FromSeconds(5));
-                    while (response != null && response.Type == "ack")
-                    {
-                        // wait for one more out of band response which is the real payload we are looking for
-                        response = await pubSubService.ReceiveAsync(TimeSpan.FromSeconds(10));
-                    }
+                    response = await pubSubService.SendReceiveAsync(message, TimeSpan.FromSeconds(5));
                 }
                 else
                 {

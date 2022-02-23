@@ -14,7 +14,8 @@ namespace AdaServerRelay
     {
         private WebsocketClient client;
         private int ackId = 1;
-        TaskCompletionSource<Message> pending;
+        TaskCompletionSource<Message> pendingAck;
+        TaskCompletionSource<Message> pendingOther;
         private string hubName;
         private string connectionId;
         private string groupName;
@@ -58,7 +59,7 @@ namespace AdaServerRelay
                 HandleMessage(msg);
             });
             var src = new TaskCompletionSource<Message>();
-            this.pending = src;
+            this.pendingOther = src;
             await client.Start();
             var response = await src.Task;
             if (response != null && response.Type == "system")
@@ -90,10 +91,17 @@ namespace AdaServerRelay
                 MessageReceived(this, m);
             }
 
-            if (this.pending != null)
+            var p = this.pendingAck;
+            if (p != null && m.Type == "ack")
             {
-                this.pending.SetResult(m);
-                this.pending = null;
+                p.SetResult(m);
+                this.pendingAck = null;
+            }
+            p = this.pendingOther;
+            if (p != null && m.Type != "ack")
+            {
+                p.SetResult(m);
+                this.pendingOther = null;
             }
         }
 
@@ -106,7 +114,7 @@ namespace AdaServerRelay
                 ackId = this.ackId++
             });
 
-            var resp = await this.InternalSendAndWaitAsync(joinGroup, timeout);
+            var resp = await this.InternalSendAndWaitAsync(joinGroup, true, timeout);
             this.groupJoined = true;
             // check ack response.
             Debug.WriteLine("Joined group.");
@@ -121,7 +129,7 @@ namespace AdaServerRelay
                 ackId = this.ackId++
             });
 
-            var resp = await this.InternalSendAndWaitAsync(leaveGroup, timeout);
+            var resp = await this.InternalSendAndWaitAsync(leaveGroup, true, timeout);
             this.groupJoined = false;
             // check ack response.
             Debug.WriteLine("Left group.");
@@ -155,10 +163,20 @@ namespace AdaServerRelay
                 await this.LeaveGroup(this.groupName, TimeSpan.FromSeconds(10));
             }
 
-            if (this.pending != null)
+            var p = this.pendingAck;
+            if (p != null)
             {
-                this.pending.SetCanceled();
+                p.SetCanceled();
+                this.pendingAck = null;
             }
+
+            p = this.pendingOther;
+            if (p != null)
+            {
+                p.SetCanceled();
+                this.pendingOther = null;
+            }
+
             if (this.client != null)
             {
                 try
@@ -173,9 +191,9 @@ namespace AdaServerRelay
         public async Task<Message> ReceiveAsync(TimeSpan timeout)
         {
             var pending = new TaskCompletionSource<Message>();
-            this.pending = pending;
+            this.pendingOther = pending;
             var tasks = new Task[1];
-            tasks[0] = this.pending.Task;
+            tasks[0] = pending.Task;
             return await Task.Run(() =>
             {
                 int index = Task.WaitAny(tasks, timeout);
@@ -187,10 +205,17 @@ namespace AdaServerRelay
             });
         }
 
-        private async Task<Message> InternalSendAndWaitAsync(string message, TimeSpan timeout)
+        private async Task<Message> InternalSendAndWaitAsync(string message, bool waitForAckOnly, TimeSpan timeout)
         {
             var pending = new TaskCompletionSource<Message>();
-            this.pending = pending;
+            if (waitForAckOnly)
+            {
+                this.pendingAck = pending;
+            }
+            else
+            {
+                this.pendingOther = pending;
+            }
             try
             {
                 Console.WriteLine("Sending: " + message);
@@ -215,12 +240,13 @@ namespace AdaServerRelay
             });
         }
 
-        public async Task<Message> SendAndWaitAsync(string json, TimeSpan timeout)
+        public async Task<Message> SendReceiveAsync(string json, TimeSpan timeout)
         {
             int ackId = this.ackId++;
             string groupMessage = "{\"type\": \"sendToGroup\", \"group\": \"" + groupName + "\", \"dataType\": \"json\", \"data\": " +
                 json + ", \"ackId\": " + ackId.ToString() + "}";
-            return await InternalSendAndWaitAsync(groupMessage, timeout);
+
+            return await InternalSendAndWaitAsync(groupMessage, false, timeout);
         }
     }
 
