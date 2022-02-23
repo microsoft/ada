@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Websocket.Client;
 
-namespace AdaKiosk.Utilities
+namespace AdaServerRelay
 {
 
     public class BaseMessage

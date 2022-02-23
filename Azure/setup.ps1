@@ -2,15 +2,24 @@
 #
 #    az login
 #    az account set --subscription id
+#    pwsh -c "Install-Module Newtonsoft.Json"
 #
 # This script does NOT deploy the code, it just creates all the Azure resources we need to
 # deploy the code.  Deploying the code is done after this script completes using Visual Studio Code.
+Import-Module Newtonsoft.Json
 
 $resource_group = "ada-server-rg"
 $plan_location = "westus2"
 
 $storage_account_name = "adaserverstorage"
 $webpubsub = "AdaPubSubService"
+
+# the azure function for doing 3d reconstruction
+$functions_service_plan = "ada-server-plan"
+$function_app_sku = "S1"
+$function_app = "ada-server-functions"
+$function_runtime = "dotnet"
+$functions_version = "3.1"
 
 Set-Location $PSScriptRoot
 
@@ -65,6 +74,20 @@ function Set-JToken($jobject, $name, $value)
         $v.Value = $value
     }
 }
+function AddHostSettings($filename, $name, $value)
+{
+    Write-Host "Updating $filename"
+    if (-not (Test-Path -Path $filename)) {
+        $json = "{ ""IsEncrypted"": false, ""Values"": { } }";
+    } else {
+        $json = Get-Content -Path $filename
+    }
+    $hostsettings = [Newtonsoft.Json.JsonConvert]::DeserializeObject($json)
+    $values = $hostsettings.GetValue("Values")
+    Set-JToken -jobject $values -name $name -value $value
+    $json = [Newtonsoft.Json.JsonConvert]::SerializeObject($hostsettings, [Newtonsoft.Json.Formatting]::Indented)
+    Set-Content -Path "$filename" -Value $json
+}
 
 Write-Host "Checking resource group $resource_group"
 $output = &az group show --name $resource_group 2>&1
@@ -88,8 +111,8 @@ if ($ec -eq 3) {
     $output = az webpubsub create --name $webpubsub --resource-group $resource_group --sku Standard_S1
 }
 $info = $output | ConvertFrom-Json
-$webpubsub_hostname = $info.hostName
 $webpubsub_connstr = &az webpubsub key show --name $webpubsub --resource-group $resource_group --query primaryConnectionString
+$webpubsub_connstr = $webpubsub_connstr.Trim('"')
 
 # create storage account
 Write-Host "Checking storage account..."
@@ -98,9 +121,43 @@ if ($null -eq $storageAcct) {
     $output = Invoke-Tool -prompt "Creating storage account..." -command "az storage account create --name $storage_account_name --resource-group $resource_group --location $plan_location --kind StorageV2 --sku Standard_LRS"
 }
 
+# create function app service plan.
+$output = Invoke-Tool -prompt "Checking functions app service plan..." -command "az appservice plan show --name $functions_service_plan --resource-group $resource_group"
+if ($null -eq $output)
+{
+    $output  = Invoke-Tool -prompt "Creating functions app service plan $functions_service_plan (windows, sku $function_app_sku)..." -command "az appservice plan create --resource-group $resource_group --name $functions_service_plan --sku $function_app_sku --location $plan_location"
+} else {
+    PrintJsonStatus -prompt "Service plan $functions_service_plan" -obj $output -name "status"
+}
+
+Write-Host "Checking function app setup..."
+$output = &az functionapp show --name $function_app --resource-group $resource_group 2>&1
+$ec = $LastExitCode
+if ($ec -eq 3)
+{
+    $output = Invoke-Tool -prompt "Creating function app $function_app..." -command "az functionapp create --resource-group $resource_group --plan $functions_service_plan --storage-account $storage_account_name --name $function_app --runtime $function_runtime --functions-version $functions_version "
+}
+elseif ($ec -ne 0)
+{
+    Write-Host "### Error $ec looking for function app '$function_app' in resource group $resource_group" -ForegroundColor Red
+    write-Host $output
+    Exit-PSSession
+} else {
+    PrintJsonStatus -prompt "Function $function_app" -obj $output -name "state"
+}
+
 $storage_connection = GetConnectionString
+
+$output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaWebPubSubConnectionString=$webpubsub_connstr`""
+$output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaStorageConnectionString=$storage_connection`""
+
+Write-Host "copy strings to local.settings.json"
+AddHostSettings -filename "AdaServerRelay\local.settings.json" -name AdaWebPubSubConnectionString -value $webpubsub_connstr
+AddHostSettings -filename "AdaServerRelay\local.settings.json" -name AdaStorageConnectionString -value $storage_connection
+
 Write-Host "Please set ADA_STORAGE_CONNECTION_STRING to the following connection string (without the double quotes)"
 Write-Host $storage_connection
+Write-Host "Please use VS Code to publish the AdaServerRelay to resource group $resource_group app service $app_service"
 
 Write-Host ""
 

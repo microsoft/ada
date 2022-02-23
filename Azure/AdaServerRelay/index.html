@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Ada</title>
+</head>
+<style type="text/css">
+    p { margin: 0px; padding: 0px; }
+</style>
+<body>
+    <h4>Enter a message</h4>
+
+    <table>
+        <tr><td>Hub name</td><td><input type="text" id="hub_name" size="100" value="AdaKiosk" /> </td></tr>
+        <tr><td>Group name</td><td><input type="text" id="group_name" size="100" value="demogroup" /> </td></tr>
+        <tr><td>Message</td><td><input type="text" id="text_input" size="100" value="" /> </td></tr>
+    </table>
+
+    <h4>Message log</h4>
+    <div id="message_log"></div>
+</body>
+<script type="text/javascript">
+
+    var endpoint = "@ENDPOINT@";
+
+    function logMessage(msg) {
+        var log = document.getElementById('message_log');
+        var p = document.createElement("p");
+        p.innerText = msg;
+        log.appendChild(p);
+    }
+
+    function sendMessage(e) {
+        if (e.key == 'Enter') {
+
+            var hub = document.getElementById('hub_name').value;
+            var group = document.getElementById('group_name').value;
+            var message = document.getElementById('text_input').value;
+            console.log("Send to 'log' hub: " + message);
+            try {
+                // our signalr service is running in "serverless" mode so this send
+                // method will not work.  Instead we have to route the message through
+                // our http function.
+                // var rc = await signalr_connection.invoke("log", user, message);
+                let xhr = new XMLHttpRequest();
+                xhr.open("POST", "/api/" + hub + "/" + group);
+                var data = JSON.stringify(message);
+                xhr.send(data);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        if (xhr.status != 200) {
+                            logMessage(xhr.statusText);
+                        } else {
+                            logMessage(xhr.responseText);
+                        }
+                    }
+                };
+
+            } catch (err) {
+                console.log("error sending:" + err);
+            }
+        }
+    }
+
+    window.addEventListener('load', (event) => {
+        var text = document.getElementById('text_input');
+        text.addEventListener('keydown', sendMessage);
+    })
+
+
+</script>
+</html>
