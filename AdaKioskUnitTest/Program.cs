@@ -40,8 +40,11 @@ namespace AdaKioskUnitTest
 
         private void Client_MessageReceived(object sender, string msg)
         {
-            Console.WriteLine(msg);
-            Console.WriteLine("Enter a command to send or 'x' to exit: ");
+            if (!msg.Contains("fromUserId\":\"unittest"))
+            {
+                Console.WriteLine(msg);
+                Console.WriteLine("Enter a command to send or 'x' to exit: ");
+            }
         }
     }
 
