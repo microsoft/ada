@@ -31,6 +31,7 @@ class LightingDesigner:
         self.server = server
         self.sensei = sensei
         self.bridge = None
+        self.bridge_error = None
         self.overlay = None
         self.running = False
         self.thread = None
@@ -112,7 +113,12 @@ class LightingDesigner:
         print("### turning on the lights...", end='', flush=True)
         if self.bridge:
             response = self.send_bridge_command("on")
-            print("{}".format(response))
+            if response != "ok":
+                msg = "Failed to turn on the lights: {}".format(response)
+                print(msg)
+                self.bridge_error = msg
+            else:
+                self.bridge_error = None
         else:
             print("")
         self.lights_on = True
@@ -123,7 +129,12 @@ class LightingDesigner:
         print("### turning off the lights...", end='', flush=True)
         if self.bridge:
             response = self.send_bridge_command("off")
-            print("{}".format(response))
+            if response != "ok":
+                msg = "Failed to turn off the lights: {}".format(response)
+                print(msg)
+                self.bridge_error = msg
+            else:
+                self.bridge_error = None
         self.lights_on = False
         self.server.camera_off()
         self.msgbus.send('/state/off')
@@ -218,6 +229,13 @@ class LightingDesigner:
         if len(parts) < 2:
             if parts[0] == "ping":
                 self.msgbus.send("/state/" + self.power_state)
+            elif parts[0] == "bridge":
+                if not self.bridge:
+                    self.msgbus.send("/bridge/disconnected")
+                elif self.bridge_error:
+                    self.msgbus.send("/bridge/" + self.bridge_error)
+                else:
+                    self.msgbus.send("/bridge/ok")
             else:
                 print("### ignoring message:", msg)
         else:
