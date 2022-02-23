@@ -227,7 +227,7 @@ class LightingDesigner:
         # reply with that user's name so they know the reply is for them.
         if "fromUserId" in msg:
             fromUser = msg["fromUserId"]
-            pingPrefix = f"{fromUser}:"
+            pingPrefix = f"/user/{fromUser}"
         msg = msg['data']
         if msg.startswith('/'):
             msg = msg[1:]

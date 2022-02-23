@@ -43,21 +43,7 @@ namespace AdaKiosk.Utilities
         public string data { get; set; }
     }
 
-    public interface IWebPubSubGroup
-    {
-        bool IsConnected { get; }
-        public string GroupName { get; }
-        public string HubName { get; }
-        public int NextId { get; set; }
-        Task Connect(string connectionString, string hubName, string userId, string groupName, TimeSpan timeout);
-        Task SendMessage(string json);
-        Task JoinGroup(string group, TimeSpan timeout);
-        Task<BaseMessage> SendAndWaitAsync(string message, TimeSpan timeout);
-        Task<BaseMessage> ReceiveAsync(TimeSpan timeout);
-        event EventHandler<GroupMessage> MessageReceived;
-    }
-
-    class WebPubSubGroup : IWebPubSubGroup
+    class WebPubSubGroup 
     {
         private WebsocketClient client;
         private int ackId = 1;
@@ -118,7 +104,7 @@ namespace AdaKiosk.Utilities
             this.IsConnected = true;
         }
 
-        public event EventHandler<GroupMessage> MessageReceived;
+        public event EventHandler<string> MessageReceived;
 
         void HandleMessage(ResponseMessage msg)
         {
@@ -138,8 +124,8 @@ namespace AdaKiosk.Utilities
             else if (msg.Text.StartsWith("{\"type\":\"message\""))
             {
                 // received a message to the group!
-                GroupMessage gm = JsonSerializer.Deserialize<GroupMessage>(msg.Text);
-                if (gm.fromUserId == this.userId)
+                var ours = string.Format("fromUserId\":\"{0}", this.userId);
+                if (msg.Text.Contains(ours))
                 {
                     // ignore messages to the group that we sent!
                     return;
@@ -147,9 +133,8 @@ namespace AdaKiosk.Utilities
                 Debug.WriteLine("Group Message: " + msg.Text);
                 if (MessageReceived != null)
                 {
-                    MessageReceived(this, gm);
+                    MessageReceived(this, msg.Text);
                 }
-                bm = gm;
             }
             else if (msg.Text.StartsWith("{\"type\":\"system\""))
             {

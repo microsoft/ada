@@ -4,6 +4,7 @@ using AdaKiosk.Controls;
 using AdaKiosk.Utilities;
 using AdaSimulation;
 using System;
+using System.Linq;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
@@ -113,7 +114,7 @@ namespace AdaKiosk
                 try
                 {
                     this.bus = new WebPubSubGroup();
-                    await bus.Connect(connectionString, hubName, userName, groupName);
+                    await bus.Connect(connectionString, hubName, userName, groupName, TimeSpan.FromSeconds(30));
                     this.bus.MessageReceived += OnMessageReceived; 
                     SendVersionInfo();
                     this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromSeconds(1));
@@ -243,7 +244,13 @@ namespace AdaKiosk
                 var simpleMessage = message.Text;
                 if (!string.IsNullOrEmpty(simpleMessage))
                 {
-                    if (simpleMessage.StartsWith("/state"))
+                    string[] parts = simpleMessage.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts[0] == "user")
+                    {
+                        // strip off the user prefix.
+                        message.Text = simpleMessage = "/" + string.Join('/', parts.Skip(2));
+                    }
+                    if (simpleMessage.StartsWith("/state/"))
                     {
                         UpdateState(simpleMessage);
                     }
