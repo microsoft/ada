@@ -12,8 +12,9 @@
     <h4>Enter a message</h4>
 
     <table>
-        <tr><td>Hub name</td><td><input type="text" id="hub_name" size="100" value="AdaKiosk" /> </td></tr>
-        <tr><td>Group name</td><td><input type="text" id="group_name" size="100" value="demogroup" /> </td></tr>
+        <tr><td>Api Key</td><td><input type="text" id="text_key" size="100" value="" /> </td></tr>
+        <tr><td>Hub name</td><td><input type="text" id="hub_name" size="100" value="" /> </td></tr>
+        <tr><td>Group name</td><td><input type="text" id="group_name" size="100" value="" /> </td></tr>
         <tr><td>Message</td><td><input type="text" id="text_input" size="100" value="" /> </td></tr>
     </table>
 
@@ -34,6 +35,7 @@
     function sendMessage(e) {
         if (e.key == 'Enter') {
 
+            var key = document.getElementById('text_key').value;
             var hub = document.getElementById('hub_name').value;
             var group = document.getElementById('group_name').value;
             var message = document.getElementById('text_input').value;
@@ -44,8 +46,13 @@
                 // our http function.
                 // var rc = await signalr_connection.invoke("log", user, message);
                 let xhr = new XMLHttpRequest();
-                xhr.open("POST", "/api/" + hub + "/" + group);
-                var data = JSON.stringify(message);
+                xhr.open("POST", "/api/gateway");
+                var data = JSON.stringify({
+                    key: key,
+                    hub: hub,
+                    group: group,
+                    data: message
+                });
                 xhr.send(data);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {

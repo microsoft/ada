@@ -28,25 +28,29 @@ namespace Ada.Function
         {
         }
 
-        [FunctionName("server")]
+        [FunctionName("gateway")]
         [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "{hub}/{group}")] HttpRequest req,
-            string hub, string group,
-            ILogger log)
+        public async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req, ILogger log)
         {
-            if (!string.IsNullOrEmpty(hub) && !string.IsNullOrEmpty(group))
+            if (req.Method == "POST")
             {
-                string message = req.Query["message"];
-                if (string.IsNullOrEmpty(message) && req.Method == "POST")
-                {
-                    message = await new StreamReader(req.Body).ReadToEndAsync();
-                }
+                var message = await new StreamReader(req.Body).ReadToEndAsync();
                 if (!string.IsNullOrEmpty(message))
                 {
-                    return await Post(hub, group, message, log);
+                    string apiKey = Environment.GetEnvironmentVariable("AdaWebPubSubApiKey");
+                    var m = Message.FromJson(message);
+                    if (m != null && m.Key == apiKey && !string.IsNullOrEmpty(m.Hub) && !string.IsNullOrEmpty(m.Group) &&
+                        !string.IsNullOrEmpty(m.Data))
+                    {
+                        var hub = m.Hub;
+                        var group = m.Group;
+                        m.Hub = null;
+                        m.Group = null;
+                        m.Key = null;
+                        return await Post(hub, group, m.Data, log);
+                    }
                 }
             }
 

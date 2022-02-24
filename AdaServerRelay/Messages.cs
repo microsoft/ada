@@ -21,10 +21,14 @@ namespace AdaServerRelay
         public string Data { get; set; }
         [DataMember(Name = "fromGroup")]
         public string FromGroup { get; set; }
+        [DataMember(Name = "hub")]
+        public string Hub { get; set; }
         [DataMember(Name = "group")]
         public string Group { get; set; }
         public string Event { get; set; }
         public string ConnectionId { get; set; }
+        [DataMember(Name = "key")]
+        public string Key { get; set; }
         public Command[] commands { get; set; }
 
         public static Message FromJson(string json)
@@ -83,6 +87,14 @@ namespace AdaServerRelay
                             else if (name == "group")
                             {
                                 result.Group = value;
+                            }
+                            else if (name == "hub")
+                            {
+                                result.Hub = value;
+                            }
+                            else if (name == "key")
+                            {
+                                result.Key = value;
                             }
                             else if (name == "event")
                             {
