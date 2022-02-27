@@ -172,7 +172,7 @@ if __name__ == '__main__':
     # Set target IP, port and command to send
     ip = args.target
     local_ip = args.local
-    plug = TplinkSmartPlug(ip, None)
+    plug = TplinkSmartPlug(local_ip, ip)
 
     if args.find:
         if not local_ip:
