@@ -166,7 +166,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--local", metavar="<ipaddress>", help="Override for local IP address to use")
     parser.add_argument("-t", "--target", metavar="<hostname>", help="Target hostname or IP address", default="localhost")
     parser.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(_commands), choices=_commands)
-    parser.add_argument("-f", "--find", help="Find local HS105 devices", action="store_true")
+    parser.add_argument("-f", "--find", help="Find local HS105, HS103, and EP10 devices", action="store_true")
     args = parser.parse_args()
 
     # Set target IP, port and command to send
@@ -177,7 +177,7 @@ if __name__ == '__main__':
     if args.find:
         if not local_ip:
             local_ip = TplinkSmartPlug.getLocalIpAddress()
-        print("Looking for HS105 devices on network {}".format(local_ip))
+        print("Looking for HS105, HS103, and EP10 devices on network {}".format(local_ip))
         found = False
         for addr in TplinkSmartPlug.findHS105Devices(local_ip, 5):
             found = True
