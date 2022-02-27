@@ -106,7 +106,7 @@ class TplinkServer:
 def find_local_ips(local_ip, server_name, server_port):
     server_addresses = socket.gethostbyname_ex(server_name)[2]
     hostname = socket.gethostname()
-    addresses =  socket.gethostbyname_ex(hostname + ".local")[2]
+    addresses = socket.gethostbyname_ex(hostname + ".local")[2]
     if local_ip:
         addresses = [local_ip]
         if server_name.startswith("127.") or server_name == "localhost":
@@ -118,7 +118,7 @@ def find_local_ips(local_ip, server_name, server_port):
     for ip in [a for a in addresses if not a.startswith("127.")]:
         for server_ip in [a for a in server_addresses if not a.startswith("127.")]:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.bind((ip,0))
+            s.bind((ip, 0))
             try:
                 s.connect((server_ip, server_port))
                 local = s.getsockname()[0]
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     parser.add_argument("--host", help="Name of Ada server we want to connect to.", default="ada-core")
     parser.add_argument("--local", help="Override the local ipaddress to use.")
     parser.add_argument("--port", type=int, help="Port we want to connect to on that server", default=12345)
-    parser.add_argument("--server", type=int, help="Server ip address to use", default=None)
+    parser.add_argument("--server", help="Server ip address to use", default=None)
     args = parser.parse_args()
 
     # Set target IP, port and command to send
@@ -155,7 +155,8 @@ if __name__ == '__main__':
             for local_ip, server_ip in find_local_ips(args.local, args.host, args.port):
                 print("Searching network from ip address: {} ...".format(local_ip))
                 for addr in TplinkSmartPlug.findHS105Devices(local_ip):
-                    found_server_ip = server_ip
+                    if not server_ip:
+                        found_server_ip = server_ip
                     if (local_ip, addr) not in switches:
                         switches += [(local_ip, addr)]
 

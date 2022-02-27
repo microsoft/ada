@@ -70,7 +70,7 @@ class TplinkSmartPlug(object):
         return addr
 
     @staticmethod
-    def findHS105Devices(local_ip, timeout=5):
+    def findHS105Devices(local_ip, timeout=10):
         # this should also work, but it doesn't seem to when raspberry pi is an access point.
         broadcast_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         broadcast_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)

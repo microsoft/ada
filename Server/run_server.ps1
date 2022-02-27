@@ -4,6 +4,9 @@ $local_addr = Get-NetIPAddress -AddressFamily IPv4 | Where-Object -FilterScript 
 if ($addr -eq $null) {
     $addr = $local_addr
 }
+if ($local_addr.GetType().IsArray){
+    $local_addr = $local_addr[0]
+}
 Write-Host Running Server on $local_addr
 Write-Host Hosting Web site on on $addr
 # ensure C:\Users\Administrator\.conda\envs\ada\ is in the path
