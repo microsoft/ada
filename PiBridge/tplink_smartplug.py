@@ -95,7 +95,7 @@ class TplinkSmartPlug(object):
                             if info is not None and "model" in info:
                                 model = info["model"]
                                 if model is not None:
-                                    if "HS105" in model or "HS103" in model:
+                                    if "HS105" in model or "HS103" in model or "EP10" in model:
                                         ip = addr[0]
                                         if ip not in result:
                                             result += [ip]

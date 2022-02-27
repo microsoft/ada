@@ -113,6 +113,8 @@ def find_local_ips(local_ip, server_name, server_port):
             return [(local_ip, "127.0.0.1")]
     good = []
     bad_ip = []
+    if local_ip in server_addresses:
+        return [(local_ip, local_ip)]
     for ip in [a for a in addresses if not a.startswith("127.")]:
         for server_ip in [a for a in server_addresses if not a.startswith("127.")]:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -142,18 +144,20 @@ if __name__ == '__main__':
     parser.add_argument("--host", help="Name of Ada server we want to connect to.", default="ada-core")
     parser.add_argument("--local", help="Override the local ipaddress to use.")
     parser.add_argument("--port", type=int, help="Port we want to connect to on that server", default=12345)
+    parser.add_argument("--server", type=int, help="Server ip address to use", default=None)
     args = parser.parse_args()
 
     # Set target IP, port and command to send
     while True:
         try:
             switches = []
-            found_server_ip = None
+            found_server_ip = args.server
             for local_ip, server_ip in find_local_ips(args.local, args.host, args.port):
                 print("Searching network from ip address: {} ...".format(local_ip))
                 for addr in TplinkSmartPlug.findHS105Devices(local_ip):
                     found_server_ip = server_ip
-                    switches += [(local_ip, addr)]
+                    if (local_ip, addr) not in switches:
+                        switches += [(local_ip, addr)]
 
             if len(switches) == 0:
                 print("Could not find your local HS105 switches", flush=True)
