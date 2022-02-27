@@ -16,7 +16,7 @@ This is especially important because Teensy boards do not support debugging.
 - [DmxController](DmxController/README.md) the python app that controls the big DMX par lights on the floor.  This gets commands from the Server.
 - [RpiController](RpiController/readme.md) the C++ app that runs on the Raspberry Pis bridging the Server on the PC to the Teensys.  Also provides some handy test menu options for manually setting colors and animations.
 - [Server](Server/readme.md) the Python app that runs on the Server PC on the 3rd floor, pushes to the RpiController and DMX controller and retrieves Sensei data from cosmosdb, and the Ada camera.
-- [Azure](Azure/readme.md) a scrip for setting up your Azure Web Pub Sub service.
+- [Azure](Azure/readme.md) a script for setting up your Azure Web Pub Sub service.
 - [EmotionDetector](EmotionDetector/readme.md) a C# project that wraps the emotion detector model, providing a COM object that is used by IPCameraGUI.
 - [IPCameraGUI](IPCameraGUI/readme.md) reads the RTSP stream from the Ada Camera and performs movement detection, face detection and EmotionDetection, sending detections to the Server.
 - [AdaKiosk](AdaKiosk/readme.md) a C# WPF app that simulates and controls Ada designed for a kiosk tablet device.
@@ -24,7 +24,6 @@ This is especially important because Teensy boards do not support debugging.
 the kiosk and the Ada Server.
 - [AdaKioskService](AdaKioskService/readme.md) a C# app runs as a system service
 on the AdaKiosk to perform auto-updating of the AdaKiosk app.
-the kiosk and the Ada Server.
 - [AdaServerRelay](AdaServerRelay/readme.md) an Azure Function used together with an Azure Logic App
 to use the Azure Web Pub Sub service to monitor the status of the Ada Server and the KasaBridge, sending emails if things
 are not running smoothly.
