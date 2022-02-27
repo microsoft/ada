@@ -147,13 +147,17 @@ elseif ($ec -ne 0)
 }
 
 $storage_connection = GetConnectionString
+$apiKey = (New-Guid).ToString()
 
 $output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaWebPubSubConnectionString=$webpubsub_connstr`""
 $output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaStorageConnectionString=$storage_connection`""
+$output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaWebPubSubApiKey=$apiKey`""
+
 
 Write-Host "copy strings to local.settings.json"
-AddHostSettings -filename "AdaServerRelay\local.settings.json" -name AdaWebPubSubConnectionString -value $webpubsub_connstr
-AddHostSettings -filename "AdaServerRelay\local.settings.json" -name AdaStorageConnectionString -value $storage_connection
+AddHostSettings -filename "..\AdaServerRelay\local.settings.json" -name AdaWebPubSubConnectionString -value $webpubsub_connstr
+AddHostSettings -filename "..\AdaServerRelay\local.settings.json" -name AdaStorageConnectionString -value $storage_connection
+AddHostSettings -filename "..\AdaServerRelay\local.settings.json" -name AdaWebPubSubApiKey -value $apiKey
 
 Write-Host "Please set ADA_STORAGE_CONNECTION_STRING to the following connection string (without the double quotes)"
 Write-Host $storage_connection
