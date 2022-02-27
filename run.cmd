@@ -16,3 +16,7 @@ popd
 pushd Server
 start powershell -f run_server.ps1
 popd
+
+pushd KasaBridge
+start powershell -f run_bridge.ps1
+popd
