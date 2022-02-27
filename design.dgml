@@ -14,7 +14,7 @@
     <Node Id="KasaHS105's" Bounds="-1219.03166666667,-248.02,89.71,25.96" Label="Kasa HS105's" UseManualLocation="True" />
     <Node Id="KitchenCameras" Bounds="-1221.13539957682,-494.313909490967,106.256666666667,25.96" Label="Kitchen cameras" UseManualLocation="True" />
     <Node Id="LightingDesigner" Bounds="-1033.70540853232,-329.509541015624,110.24,25.96" UseManualLocation="True" />
-    <Node Id="PiBridge(pi0)" Bounds="-1219.31914957866,-324.963191012573,90.9533333333334,25.96" Label="PiBridge (pi0)" UseManualLocation="True" />
+    <Node Id="PiBridge(pi0)" Bounds="-1219.31914957866,-324.963191012573,90.9533333333334,25.96" Label="KasaBridge" UseManualLocation="True" />
     <Node Id="RpiController" Bounds="-748.57956624329,-486.542077026367,89.9200000000001,41.9200000000001" Label="RpiController&#xD;&#xA;'adapi1'" UseManualLocation="True" />
     <Node Id="RpiController'adapi2'" Bounds="-744.579566243289,-414.621987304688,89.9200000000001,41.9200000000001" Label="RpiController&#xD;&#xA;'adapi2'" UseManualLocation="True" />
     <Node Id="RpiController'adapi3" Bounds="-739.57956624329,-342.701892545573,89.9200000000001,41.9200000000001" Label="RpiController&#xD;&#xA;'adapi3'" UseManualLocation="True" />

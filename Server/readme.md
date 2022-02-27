@@ -27,7 +27,7 @@ Add the `--web` option to start a web server on the ada-core machine that
 provide a convenient web page for overriding the Ada colors.
 
 It provides a TCP server that the RaspberryPi's and the IPCameraGUI, the DMX Controller and the
-PiBridge connect to to send/receive commands.
+KasaBridge connect to to send/receive commands.
 
 ## Config
 
@@ -52,8 +52,8 @@ so you don't confuse any production Ada servers.
 - `on_time` - time the lights turn on in the morning.
 - `off_time` - time the lights turn off at night.
 - `turn_off_timeout` - cool down period for the power supplies before power off
-- `tplink_bridge_address` - address of the raspberry pi zero "pibridge" device.
-- `tplink_bridge_port` - port that the pibridge is listening on for commands from the server.
+- `tplink_bridge_address` - address of the raspberry pi zero "KasaBridge" device.
+- `tplink_bridge_port` - port that the KasaBridge is listening on for commands from the server.
 - `zone_maps` - the mapping from raspberry pi name to the zone map used for that pi.
 - `history_dir` - location of historical sensei data used in `--loop` mode.
 - `playback_delay` - delay between each row of historical data.

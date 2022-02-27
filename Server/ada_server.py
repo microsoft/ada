@@ -17,9 +17,9 @@ from messagebus import WebPubSubGroup
 import asyncio
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path += [os.path.join(script_dir, "../PiBridge")]
+sys.path += [os.path.join(script_dir, "../KasaBridge")]
 
-from bridge_client import PiBridgeClient
+from bridge_client import KasaBridgeClient
 from lighting_designer import LightingDesigner
 
 
@@ -382,7 +382,7 @@ class AdaServer:
 
     def handle_switches(self, client, address, name):
         print("HS105 bridge connected from {}: {}".format(address, name))
-        self.bridge = PiBridgeClient(name, client, address)
+        self.bridge = KasaBridgeClient(name, client, address)
         try:
             self.bridge.send_command("connected")
         except:
@@ -392,7 +392,7 @@ class AdaServer:
         return self.bridge
 
     def on_bridge_error(self):
-        # assume it's gone then until we get another HS105Switches call.
+        # assume it's gone then until we get another HS105Switch call.
         print("HS105 bridge is disconnected")
         self.bridge = None
 

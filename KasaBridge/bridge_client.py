@@ -6,7 +6,7 @@ import time
 
 _commands = ["list", "on", "off", "status"]
 
-class PiBridgeClient:
+class KasaBridgeClient:
     def __init__(self, name, client, address):
         self.name = name
         self.client = client

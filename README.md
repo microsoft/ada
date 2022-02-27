@@ -26,9 +26,10 @@ the kiosk and the Ada Server.
 on the AdaKiosk to perform auto-updating of the AdaKiosk app.
 the kiosk and the Ada Server.
 - [AdaServerRelay](AdaServerRelay/readme.md) an Azure Function used together with an Azure Logic App
-to use the Azure Web Pub Sub service to monitor the status of the Ada Server and the Raspberry Pi Bridge, sending emails if things
+to use the Azure Web Pub Sub service to monitor the status of the Ada Server and the KasaBridge, sending emails if things
 are not running smoothly.
-- [PiBridge](PiBridge/readme.md) the Raspberry Pi Zero Wifi bridge to the Kasa Power switches.
+- [KasaBridge](KasaBridge/readme.md) A bridge to the Kasa Power switches.  This bridge runs on a device that has
+wifi connectivity to the Kasa Power Switches.
 - **HistoricalData** Some *.csv files that capture some historical data
 from cosmos which can be used in "replay mode" by the Server.
 

@@ -1,4 +1,4 @@
-## PiBridge
+## Kasa Bridge
 
 There is a Raspberry Pi Zero running as a "Wifi Access Point" inside the Server panel in a red and white plastic case:
 
