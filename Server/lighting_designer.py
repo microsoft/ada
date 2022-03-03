@@ -4,7 +4,6 @@ import datetime
 import json
 import random
 import time
-import numpy as np
 from threading import Thread
 from collections import Counter
 from suntime import Sun
@@ -27,11 +26,8 @@ class LightingDesigner:
         msgbus.add_listener(self.onmessage)
         self.entered_custom_state = 0
         self.msgqueue = PriorityQueue()
-        self.lights_on = None
         self.server = server
         self.sensei = sensei
-        self.bridge = None
-        self.bridge_error = None
         self.overlay = None
         self.running = False
         self.thread = None
@@ -57,28 +53,6 @@ class LightingDesigner:
             # if server is started when we are already into cool animation time, so ensure this happens.
             self.last_cool_animation = 0
 
-    def update_tplink_status(self):
-        if not self.bridge:
-            return
-
-        result = self.send_bridge_command("status")
-        if result:
-            parts = result.split(',')
-            states = []
-            for device in parts:
-                pair = device.split(":")
-                if len(pair) == 2:
-                    is_on = pair[1] == "True"
-                    print("tplink device at {} is {}".format(pair[0], is_on))
-                    states += [is_on]
-            if np.all(states):
-                self.lights_on = True
-            elif np.all([not x for x in states]):
-                self.lights_on = False
-            else:
-                # mixed states needs to be corrected later
-                self.lights_on = None
-
     def start(self):
         if not self.running:
             self.running = True
@@ -101,41 +75,19 @@ class LightingDesigner:
         self.server.queue_command(0, [{"command": "StopRain"},
                                       {"command": "sensei", "seconds": 2, "colors": [[0, 0, 0]]}])
 
-    def send_bridge_command(self, command):
-        try:
-            return self.bridge.send_command(command)
-        except:
-            self.server.on_bridge_error()
-            self.bridge = None
-            return "error"
-
     def _master_power_on(self):
-        print("### turning on the lights...", end='', flush=True)
-        if self.bridge:
-            response = self.send_bridge_command("on")
-            if response != "ok":
-                msg = "Failed to turn on the lights: {}".format(response)
-                print(msg)
-                self.bridge_error = msg
-            else:
-                self.bridge_error = None
-        else:
-            print("")
-        self.lights_on = True
+        print("### turning on the lights...")
+        bridge = self.server.get_bridge()
+        if bridge:
+            bridge.turn_on_lights()
         self.server.camera_on()
         self.msgbus.send('/state/on')
 
     def _master_power_off(self):
-        print("### turning off the lights...", end='', flush=True)
-        if self.bridge:
-            response = self.send_bridge_command("off")
-            if response != "ok":
-                msg = "Failed to turn off the lights: {}".format(response)
-                print(msg)
-                self.bridge_error = msg
-            else:
-                self.bridge_error = None
-        self.lights_on = False
+        print("### turning off the lights...")
+        bridge = self.server.get_bridge()
+        if bridge:
+            bridge.turn_off_lights()
         self.server.camera_off()
         self.msgbus.send('/state/off')
 
@@ -236,10 +188,11 @@ class LightingDesigner:
             if parts[0] == "ping":
                 self.msgbus.send(f"{pingPrefix}/state/{self.power_state}")
             elif parts[0] == "bridge":
-                if not self.bridge:
+                bridge = self.server.get_bridge()
+                if not bridge:
                     self.msgbus.send(f"{pingPrefix}/bridge/disconnected")
-                elif self.bridge_error:
-                    self.msgbus.send(f"{pingPrefix}/bridge/{self.bridge_error}")
+                elif bridge.bridge_error:
+                    self.msgbus.send(f"{pingPrefix}/bridge/{bridge.bridge_error}")
                 else:
                     self.msgbus.send(f"{pingPrefix}/bridge/ok")
             else:
@@ -376,9 +329,9 @@ class LightingDesigner:
                 next_sunrise_check = time.time() + 3600
 
             bridge = self.server.get_bridge()
-            if bridge != self.bridge:
-                self.bridge = bridge
-                self.update_tplink_status()
+            if bridge:
+                # a kind of heart beat to keep the bridge socket alive.
+                bridge.update_switch_status()
             new_clients = self.server.get_stale_clients()
             has_new_clients = len(new_clients) > 0
 
@@ -396,7 +349,8 @@ class LightingDesigner:
             # highest priority is the master power schedule
             master_power_state = self._get_master_power_state()
             if master_power_state or self.power_on_override:
-                if self.lights_on is None or not self.lights_on:
+                if bridge and (bridge.lights_on is None or not bridge.lights_on):
+                    # looks like we need to turn the lights on
                     self._master_power_on()
                     # if we just did a power cycle then reset any previous color overrides.
                     self.color_override = False
@@ -407,7 +361,8 @@ class LightingDesigner:
                     self.sensei.start()
                 self.server.camera_on()
             elif not master_power_state or self.power_off_override:
-                if self.lights_on is None or self.lights_on or has_new_clients:
+                if bridge and (bridge.lights_on is None or bridge.lights_on or has_new_clients):
+                    # looks like we need to turn the lights off
                     if self.turn_off_time is None or has_new_clients:
                         print("### cooling down for {} seconds".format(self.config.turn_off_timeout))
                         self.turn_off_time = time.time() + self.config.turn_off_timeout

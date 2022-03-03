@@ -3,8 +3,10 @@
 import argparse
 import socket
 import time
+import sys
 import _thread
 from tplink_smartplug import TplinkSmartPlug
+
 
 class TplinkServer:
     def __init__(self, local_ip, server_ip, server_port):
@@ -24,37 +26,38 @@ class TplinkServer:
         while not self.closed:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.bind((self.local_ip,0))
+                s.bind((self.server_endpoint[0], 0))
+                s.settimeout(5)
                 s.connect(self.server_endpoint)
                 s.sendall(bytes("HS105Switches", 'utf-8'))
-                last_ping = time.time()
                 while True:
-                    request = s.recv(16000)
-                    if request is not None:
-                        msg = request.decode("utf-8")
-                        print("Bridge received command: {}".format(msg))
-                        parts = msg.split(":")
-                        command = parts[0]
-                        if command == "list":
-                            # return list of known tplink devices
-                            response = "{}".format(self.plugs)
-                        elif command == "on":
-                            # turn on all devices
-                            response = self.turn_all_on()
-                        elif command == "off":
-                            # turn off all devices
-                            response = self.turn_all_off()
-                        elif command == "status":
-                            response = self.get_status()
-                        elif command == "connected":
-                            print("Connected to ada server")
-                            response = "ok"
-                        else:
-                            response = "unknown request: " + request
-                        s.sendall(bytes(response, 'utf-8'))
+                    try:
+                        request = s.recv(16000)
+                        if request is not None:
+                            msg = request.decode("utf-8")
+                            print("Bridge received command: {}".format(msg))
+                            parts = msg.split(":")
+                            command = parts[0]
+                            if command == "list":
+                                # return list of known tplink devices
+                                response = "{}".format(self.plugs)
+                            elif command == "on":
+                                # turn on all devices
+                                response = self.turn_all_on()
+                            elif command == "off":
+                                # turn off all devices
+                                response = self.turn_all_off()
+                            elif command == "status":
+                                response = self.get_status()
+                            else:
+                                response = "unknown request: " + request
+                            s.sendall(bytes(response, 'utf-8'))
+                    except socket.timeout as err:
+                        # totally normal, since out socket has a timeout value of 1 minute.
+                        time.sleep(1)
 
             except Exception as e:
-                print("## server terminating with exception: {}".format(e), flush=True)
+                print("## bridge exception: {}".format(e), flush=True)
                 time.sleep(5)
 
     def turn_all_on(self):
@@ -145,6 +148,7 @@ if __name__ == '__main__':
     parser.add_argument("--local", help="Override the local ipaddress to use.")
     parser.add_argument("--port", type=int, help="Port we want to connect to on that server", default=12345)
     parser.add_argument("--server", help="Server ip address to use", default=None)
+    parser.add_argument("--test", help="Protend we did find some switches", action="store_true")
     args = parser.parse_args()
 
     # Set target IP, port and command to send
@@ -152,13 +156,19 @@ if __name__ == '__main__':
         try:
             switches = []
             found_server_ip = args.server
-            for local_ip, server_ip in find_local_ips(args.local, args.host, args.port):
-                print("Searching network from ip address: {} ...".format(local_ip))
-                for addr in TplinkSmartPlug.findHS105Devices(local_ip):
-                    if not server_ip:
-                        found_server_ip = server_ip
-                    if (local_ip, addr) not in switches:
-                        switches += [(local_ip, addr)]
+            if args.test and (not found_server_ip or not args.local):
+                print("### --test requires --server and --local arg to be set")
+                sys.exit(1)
+            if args.test:
+                switches += [(args.local, "192.168.1.199")]
+            else:
+                for local_ip, server_ip in find_local_ips(args.local, args.host, args.port):
+                    print("Searching network from ip address: {} ...".format(local_ip))
+                    for addr in TplinkSmartPlug.findHS105Devices(local_ip):
+                        if not found_server_ip:
+                            found_server_ip = server_ip
+                        if (local_ip, addr) not in switches:
+                            switches += [(local_ip, addr)]
 
             if len(switches) == 0:
                 print("Could not find your local HS105 switches", flush=True)

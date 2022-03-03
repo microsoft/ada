@@ -70,12 +70,11 @@ class TplinkSmartPlug(object):
         return addr
 
     @staticmethod
-    def findHS105Devices(local_ip, timeout=10):
+    def findHS105Devices(local_ip, timeout=60):
         # this should also work, but it doesn't seem to when raspberry pi is an access point.
         broadcast_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         broadcast_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        broadcast_sock.settimeout(1)
-
+        broadcast_sock.settimeout(10)
         broadcast_sock.bind((local_ip, 9999))
         hello = TplinkSmartPlug.encrypt(_commands["info"], False)
 
@@ -101,6 +100,9 @@ class TplinkSmartPlug(object):
                                             result += [ip]
             except socket.timeout:
                 # send another one in case a switch missed the previous UDP broadcast.
+                if len(result) > 0:
+                    break
+                print("### listen timeout, retrying...")
                 broadcast_sock.sendto(hello, ('<broadcast>', 9999))
 
         broadcast_sock.close()
@@ -114,6 +116,8 @@ class TplinkSmartPlug(object):
                 sysinfo = system["get_sysinfo"]
                 if "relay_state" in sysinfo:
                     self.is_on = sysinfo["relay_state"]
+        elif "error" in self.info:
+            self.is_on = None  # don't know!
         return self.info
 
     def turn_on(self):
@@ -143,21 +147,21 @@ class TplinkSmartPlug(object):
 
     def send_receive(self, message):
         # Send command and receive reply
-        while True:
-            try:
-                sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock_tcp.bind((self.local_ip, 0))
-                sock_tcp.connect((self.switch_ip, self.port))
-                sock_tcp.sendall(TplinkSmartPlug.encrypt(message))
-                data = sock_tcp.recv(2048)
-                sock_tcp.close()
-                if len(data) > 4:
-                    return TplinkSmartPlug.decrypt(data[4:])
-                else:
-                    time.sleep(1)
-            except socket.error:
-                print("Could not connect to host {}:{}".format(self.switch_ip, self.port))
+        sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock_tcp.settimeout(10)
+            sock_tcp.bind((self.local_ip, 0))
+            sock_tcp.connect((self.switch_ip, self.port))
+            sock_tcp.sendall(TplinkSmartPlug.encrypt(message))
+            data = sock_tcp.recv(2048)
+            sock_tcp.close()
+            if len(data) > 4:
+                return TplinkSmartPlug.decrypt(data[4:])
+            else:
                 time.sleep(1)
+        except socket.error as e:
+            return '{ "error": "' + str(e) + '" }'
+        sock_tcp.close()
 
 
 if __name__ == '__main__':
@@ -179,7 +183,7 @@ if __name__ == '__main__':
             local_ip = TplinkSmartPlug.getLocalIpAddress()
         print("Looking for HS105, HS103, and EP10 devices on network {}".format(local_ip))
         found = False
-        for addr in TplinkSmartPlug.findHS105Devices(local_ip, 5):
+        for addr in TplinkSmartPlug.findHS105Devices(local_ip):
             found = True
             print("Found device at {}".format(addr))
         if not found:

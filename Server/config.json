@@ -37,6 +37,7 @@
     "on_time": [10, 0],
     "off_time": [ 21, 0 ],
     "turn_off_timeout": 120,
+    "bridge_ping_interval": 60,
 
     "debug": true,
     "debug_commands": false,

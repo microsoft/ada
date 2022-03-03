@@ -382,19 +382,12 @@ class AdaServer:
 
     def handle_switches(self, client, address, name):
         print("HS105 bridge connected from {}: {}".format(address, name))
-        self.bridge = KasaBridgeClient(name, client, address)
-        try:
-            self.bridge.send_command("connected")
-        except:
-            self.bridge = None
+        bridge = KasaBridgeClient(name, client, address, self.config.bridge_ping_interval)
+        bridge.update_switch_status()
+        self.bridge = bridge
 
     def get_bridge(self):
         return self.bridge
-
-    def on_bridge_error(self):
-        # assume it's gone then until we get another HS105Switch call.
-        print("HS105 bridge is disconnected")
-        self.bridge = None
 
 
 def prompt_for_enter(input_queue):
