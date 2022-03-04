@@ -3,6 +3,7 @@
 import argparse
 import socket
 import time
+import datetime
 import sys
 import _thread
 from tplink_smartplug import TplinkSmartPlug
@@ -13,8 +14,12 @@ class TplinkServer:
         self.local_ip = local_ip
         self.server_endpoint = (server_ip, server_port)
 
+    def log(self, msg):
+        timestamp = datetime.datetime.now().strftime("%x %X")
+        print("{}: {}".format(timestamp, msg), flush=True)
+
     def start(self, plugs):
-        print("starting server on : {}".format(self.server_endpoint), flush=True)
+        self.log("starting server on : {}".format(self.server_endpoint))
         self.closed = False
         self.plugs = plugs
         _thread.start_new_thread(self.serve_forever, ())
@@ -35,7 +40,6 @@ class TplinkServer:
                         request = s.recv(16000)
                         if request is not None:
                             msg = request.decode("utf-8")
-                            print("Bridge received command: {}".format(msg))
                             parts = msg.split(":")
                             command = parts[0]
                             if command == "list":
@@ -52,12 +56,12 @@ class TplinkServer:
                             else:
                                 response = "unknown request: " + request
                             s.sendall(bytes(response, 'utf-8'))
-                    except socket.timeout as err:
+                    except socket.timeout:
                         # totally normal, since out socket has a timeout value of 1 minute.
                         time.sleep(1)
 
             except Exception as e:
-                print("## bridge exception: {}".format(e), flush=True)
+                self.log("## bridge exception: {}".format(e))
                 time.sleep(5)
 
     def turn_all_on(self):
@@ -70,7 +74,8 @@ class TplinkServer:
                 plug.get_info()
                 if not plug.is_on:
                     all_on = False
-                    print("Turning on {}...".format(switch_ip), flush=True)
+                    x = datetime.datetime.now().strftime("%x %X")
+                    self.log("{}: Turning on {}...".format(x, switch_ip))
                     plug.turn_on()
                     time.sleep(1)  # do not switch them all at the same time
             if all_on:
@@ -88,7 +93,7 @@ class TplinkServer:
                 plug.get_info()
                 if plug.is_on:
                     all_off = False
-                    print("Turning off {}...".format(switch_ip), flush=True)
+                    self.log("Turning off {}...".format(switch_ip))
                     plug.turn_off()
                     time.sleep(1)  # do not switch them all at the same time
             if all_off:
@@ -101,7 +106,6 @@ class TplinkServer:
         for local_ip, switch_ip in self.plugs:
             plug = TplinkSmartPlug(local_ip, switch_ip)
             plug.get_info()
-            print("Plug {} is {}".format(switch_ip, plug.is_on == 1), flush=True)
             status += ["{}:{}".format(switch_ip, plug.is_on == 1)]
         return ",".join(status)
 
