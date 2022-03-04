@@ -74,8 +74,7 @@ class TplinkServer:
                 plug.get_info()
                 if not plug.is_on:
                     all_on = False
-                    x = datetime.datetime.now().strftime("%x %X")
-                    self.log("{}: Turning on {}...".format(x, switch_ip))
+                    self.log("Turning on {}...".format(switch_ip))
                     plug.turn_on()
                     time.sleep(1)  # do not switch them all at the same time
             if all_on:
