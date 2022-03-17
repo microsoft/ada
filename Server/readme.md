@@ -84,3 +84,20 @@ you will see a rendering of all the colors being set by the `ada_server`.
 
 You can also run the server with an RpiController with [TeensyUnitTest](../TeensyUnitTest/readme.md).
 This provides a way to test everything end to end.
+
+## AutoLogon
+
+It is convenient to have the server perform an auto-logon so Ada keeps running
+after a server restart which happens occasionally on windows updates.
+
+This can be done with some registry settings [Turn on automatic logon in Windows](https://docs.microsoft.com/en-us/troubleshoot/windows-server/user-profiles-and-logon/turn-on-automatic-logon).
+
+Then you can make ada run automatically on login by adding the following:
+
+```reg
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run]
+"ada"="C:\\git\\Ada\\run.cmd"
+
+```
