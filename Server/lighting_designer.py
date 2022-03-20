@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-import datetime
+from datetime import datetime
 import json
 import random
 import time
@@ -102,6 +102,13 @@ class LightingDesigner:
         if setting == "sunset":
             return [sunset.hour, sunset.minute]
         return setting
+
+    def is_on_today(self):
+        run_days = self.config.on_days
+        today = datetime.today().strftime('%A')
+        if today in run_days:
+            return True
+        return False
 
     def _find_animation(self, name):
         for index in range(len(self.config.cool_animations)):
@@ -504,9 +511,11 @@ class LightingDesigner:
             self._blush(None, value, seconds=2, hold=self.config.hold_camera_blush, priority=5)
 
     def _get_master_power_state(self):
+        if not self.is_on_today():
+            return False
         on_hour, on_minute = self.on_time
         off_hour, off_minute = self.off_time
-        now = datetime.datetime.now()
+        now = datetime.now()
         if ((now.hour > on_hour or (now.hour == on_hour and now.minute >= on_minute)) and
            (now.hour < off_hour or (now.hour == off_hour and now.minute < off_minute))):
             return True
@@ -517,7 +526,7 @@ class LightingDesigner:
             return True
 
         on_hour, on_minute = self.config.cool_animation_time
-        now = datetime.datetime.now()
+        now = datetime.now()
         if (now.hour > on_hour or (now.hour == on_hour and now.minute >= on_minute)):
             return True
         return False
