@@ -16,6 +16,7 @@ class PriorityQueue:
             if item[0] > priority:
                 self.queue.insert(i, (priority, data))
                 inserted = True
+                break
         if not inserted:
             self.queue += [(priority, data)]
         self.lock.release()
