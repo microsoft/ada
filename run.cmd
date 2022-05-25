@@ -1,9 +1,9 @@
 pushd %~dp0
 call "C:\ProgramData\Anaconda3\Scripts\activate.bat" Ada
 
-start ssh pi@adapi1 -t /home/pi/git/Ada/RpiController/run.sh
-start ssh pi@adapi2 -t /home/pi/git/Ada/RpiController/run.sh
-start ssh pi@adapi3 -t /home/pi/git/Ada/RpiController/run.sh
+start start powershell -name adapi1
+start start powershell -name adapi2
+start start powershell -name adapi3
 
 REM pushd IPCameraGUI
 REM start cmd /K run_camera.cmd
