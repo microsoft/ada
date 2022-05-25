@@ -38,6 +38,7 @@
     "off_time": [ 21, 0 ],
     "turn_off_timeout": 120,
     "bridge_ping_interval": 600,
+    "on_days": [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
 
     "debug": true,
     "debug_commands": false,
