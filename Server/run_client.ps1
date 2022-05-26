@@ -3,6 +3,7 @@ param (
                 HelpMessage="Name of the raspberry pi to connect to")]
     [string]$name   
 )
+$Host.UI.RawUI.WindowTitle = $name
 
 # wait for DHCP to kick in.
 $addr = $null

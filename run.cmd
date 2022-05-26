@@ -1,9 +1,9 @@
 pushd %~dp0
 call "C:\ProgramData\Anaconda3\Scripts\activate.bat" Ada
 
-start start powershell -name adapi1
-start start powershell -name adapi2
-start start powershell -name adapi3
+start start powershell -f Server\run_client.ps1 -name adapi1
+start start powershell -f Server\run_client.ps1 -name adapi2
+start start powershell -f Server\run_client.ps1 -name adapi3
 
 REM pushd IPCameraGUI
 REM start cmd /K run_camera.cmd
