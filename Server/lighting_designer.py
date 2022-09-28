@@ -35,10 +35,10 @@ class LightingDesigner:
         self.enable_movement = True
         self.movement_latch = TimedLatch(10)
         self.core_is_on = False
-        self.last_change = time.time()
-        self.last_cool_animation = time.time()
+        self.last_change = 0
+        self.last_cool_animation = 0
         self.last_color = None
-        self.last_camera_emotion = time.time()
+        self.last_camera_emotion = 0
         self.turn_off_time = None
         self.animations = None
         self.power_state = "initializing"
@@ -130,6 +130,10 @@ class LightingDesigner:
             self._master_power_on()
             self.power_on_override = True
             self.power_off_override = False
+            self.last_change = 0
+            self.last_camera_emotion = 0
+            self.last_cool_animation = 0
+            self.turn_off_time = None
             self.msgbus.send('/state/on')  # broadcast to all clients
         elif option == "off":
             print("### power off override")
@@ -138,7 +142,7 @@ class LightingDesigner:
             self.color_override = False
             self.animations = None
             self._fade_to_black()
-            self.turn_off_time = time.time() + self.config.turn_off_timeout
+            self.turn_off_time = None
         elif option == "run":
             print("### back to normal operation")
             self.power_on_override = False
@@ -355,7 +359,7 @@ class LightingDesigner:
 
             # highest priority is the master power schedule
             master_power_state = self._get_master_power_state()
-            if master_power_state or self.power_on_override:
+            if (master_power_state or self.power_on_override) and not self.power_off_override:
                 if bridge and (bridge.lights_on is None or not bridge.lights_on):
                     # looks like we need to turn the lights on
                     self._master_power_on()
@@ -364,21 +368,23 @@ class LightingDesigner:
                     self.animations = None
                     print("### back to normal operation")
                     self.power_state = "on"
-                    self.turn_off_time = None
                     self.sensei.start()
                 self.server.camera_on()
-            elif not master_power_state or self.power_off_override:
+            elif (not master_power_state or self.power_off_override) and not self.power_on_override:
                 if bridge and (bridge.lights_on is None or bridge.lights_on or has_new_clients):
                     # looks like we need to turn the lights off
                     if self.turn_off_time is None or has_new_clients:
                         print("### cooling down for {} seconds".format(self.config.turn_off_timeout))
                         self.turn_off_time = time.time() + self.config.turn_off_timeout
+                        self.server.clear_queue()
                         self._fade_to_black()
                         self.color_override = False
                         self.animations = None
                         self.power_state = "cooling"
+                        self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
                         continue
                     elif time.time() > self.turn_off_time:
+                        self.server.clear_queue()
                         self._master_power_off()
                         self.color_override = False
                         self.animations = None
@@ -395,7 +401,6 @@ class LightingDesigner:
 
                 self.server.camera_off()
                 time.sleep(0.1)
-                self.server.clear_queue()
                 continue  # wait for power to go on again tomorrow.
 
             if self.stop_rain_time is not None and time.time() > self.stop_rain_time:

@@ -34,8 +34,8 @@
     "pubsub_group": "demogroup",
     "pubsub_hub": "AdaKiosk",
 
-    "on_time": [10, 0],
-    "off_time": [ 21, 0 ],
+    "on_time": [9, 0],
+    "off_time": [ 20, 0 ],
     "turn_off_timeout": 120,
     "bridge_ping_interval": 600,
     "on_days": [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -76,6 +76,8 @@
     "cool_animations": [
         {
             "Name": "neurons",
+            "Enabled": false,
+            "Reason": "Bad strip looks really ugly with this animation",
             "Commands": [
                 {
                     "command": "NeuralDrop",
@@ -85,6 +87,7 @@
         },
         {
             "Name": "rainbow",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "Rainbow",
@@ -95,6 +98,7 @@
         },
         {
             "Name": "fire",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "Fire",
@@ -106,6 +110,7 @@
         },
         {
             "Name": "red yellow gradient",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "Gradient",
@@ -121,6 +126,7 @@
         },
         {
             "Name": "blue red gradient",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "Gradient",
@@ -135,6 +141,7 @@
         },
         {
             "Name": "yellow green gradient",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "Gradient",
@@ -149,6 +156,7 @@
         },
         {
             "Name": "blue green gradient",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "Gradient",
@@ -163,6 +171,7 @@
         },
         {
             "Name": "diagonal gradient",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "Gradient", "strip": 0, "cps": 2, "seconds": 5,
@@ -172,6 +181,7 @@
         },
         {
             "Name": "moving gradient 1",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "MovingGradient",
@@ -188,6 +198,7 @@
         },
         {
             "Name": "moving gradient 2",
+            "Enabled": true,
             "Commands": [
                 {
                     "command": "MovingGradient",
@@ -203,6 +214,7 @@
         },
         {
             "Name": "gradient cycle",
+            "Enabled": true,
             "repeat": "forever",
             "Commands": [
                 {
@@ -271,6 +283,7 @@
         },
         {
             "Name": "moving gradient cycle",
+            "Enabled": true,
             "repeat": "forever",
             "Commands": [
                 {
@@ -408,6 +421,7 @@
         },
         {
             "Name": "color cycle",
+            "Enabled": true,
             "repeat": "forever",
             "Commands": [
                 {

@@ -431,10 +431,25 @@ async def _main(config, sensei, ip_address):
         msgbus.consume())
 
 
+def removeDisabledAnimations(condig):
+    i = 0
+    while i < len(config.cool_animations):
+        c = config.cool_animations[i]
+        name = c["Name"]
+        if "Enabled" in c and not c["Enabled"]:
+            print(f"Deleting disabled animation '{name}'")
+            del config.cool_animations[i]
+        else:
+            i += 1
+    print(f"Loaded {len(config.cool_animations)} cool animations")
+
+
 if __name__ == '__main__':
     with open(os.path.join(script_dir, "config.json"), "r") as f:
         d = json.load(f)
         config = namedtuple("Config", d.keys())(*d.values())
+
+    removeDisabledAnimations(config)
 
     parser = argparse.ArgumentParser("ada_server makes Sensei database available to the ada raspberry pi devices")
     parser.add_argument("--ip", help="optional IP address of the server (default 'localhost')", default="localhost")
