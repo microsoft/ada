@@ -98,7 +98,7 @@
         },
         {
             "Name": "fire",
-            "Enabled": true,
+            "Enabled": false,
             "Commands": [
                 {
                     "command": "Fire",
