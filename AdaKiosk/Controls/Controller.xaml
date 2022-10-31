@@ -105,12 +105,12 @@
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/rainbow" Background="pink">
                 <TextBlock Style="{StaticResource ControlTextDark}" Text="Rainbow"/>
             </Button>
-            <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/neurons" Background="blue">
+            <!--<Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/neurons" Background="blue">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Neurons"/>
             </Button>
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/fire" Background="#fc2323">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Fire"/>
-            </Button>
+            </Button>-->
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/red yellow gradient" Background="{StaticResource RedYellow}">
                 <TextBlock  Style="{StaticResource ControlTextDark}"  Text="Red Yellow Gradient"/>
             </Button>
