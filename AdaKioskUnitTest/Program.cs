@@ -32,6 +32,11 @@ namespace AdaKioskUnitTest
         async void SocketTest()
         {
             var connectionString = Environment.GetEnvironmentVariable("ADA_WEBPUBSUB_CONNECTION_STRING");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                Console.WriteLine("Please set ADA_WEBPUBSUB_CONNECTION_STRING");
+                return;
+            }
             client = new WebPubSubGroup();
             client.MessageReceived += Client_MessageReceived;
             await client.Connect(connectionString, "AdaKiosk", "unittest", "demogroup", TimeSpan.FromSeconds(30));
