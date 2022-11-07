@@ -9,6 +9,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace AdaKiosk
 {
@@ -64,15 +66,25 @@ namespace AdaKiosk
                 this.sim.Editable = false;
                 this.debugEnabled = false;
             }
+            if (BatteryInfo.GetSystemPowerStatus(out SYSTEM_POWER_STATUS status))
+            {
+                var json = JsonConvert.SerializeObject(status);
+                Debug.WriteLine(json);
+            }
         }
 
         private async void OnSendCommand(object sender, string command)
         {
+            await OnSendMessage("\"" + command + "\"");
+        }
+
+        private async Task OnSendMessage(string json)
+        {
             try
             {
-                if (bus != null) await bus.SendMessage("\"" + command + "\"");
+                if (bus != null) await bus.SendMessage(json);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (this.debugEnabled)
                 {
@@ -210,6 +222,23 @@ namespace AdaKiosk
             }
         }
 
+        private void SendBatteryInfo()
+        {
+
+            if (this.bus != null)
+            {
+                if (BatteryInfo.GetSystemPowerStatus(out SYSTEM_POWER_STATUS status))
+                {
+                    var json = JsonConvert.SerializeObject(status);
+                    _ = this.OnSendMessage(json);
+                }
+            }
+            else
+            {
+                this.OnSendCommand(this, "/kiosk/nobattery/");
+            }        
+        }
+
         private void UpdateState(string message)
         {
             this.pongTick = Environment.TickCount; 
@@ -261,6 +290,10 @@ namespace AdaKiosk
                     else if (simpleMessage.StartsWith("/kiosk/version/?"))
                     {
                         SendVersionInfo();
+                    }
+                    else if (simpleMessage.StartsWith("/kiosk/battery/?"))
+                    {
+                        SendBatteryInfo();
                     }
                     else if (simpleMessage.StartsWith("/kiosk/shutdown"))
                     {
