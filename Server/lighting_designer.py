@@ -178,6 +178,7 @@ class LightingDesigner:
             self.color_override = False
             self.turn_off_time = None
             self.animations = None
+            self.power_state == "on"
             self.msgbus.send('/state/rebooted')
         else:
             print("error: invalid power state: /power/{}".format(option))
@@ -378,7 +379,7 @@ class LightingDesigner:
                 # if necessary.
                 self._set_power_state("run")
 
-            if self.power_state == "reboot" and self.entered_custom_state != 0 and \
+            if self.power_state == "rebooted" and self.entered_custom_state != 0 and \
                time.time() > self.entered_custom_state + self.config.reboot_timeout:
                 self._set_power_state("rebooted")
 
@@ -417,6 +418,7 @@ class LightingDesigner:
                         if self.reboot:
                             # let it be off for config.reboot_timeout seconds, then turn it back on.
                             self.entered_custom_state = time.time()
+                            self.power_state == "rebooted"
                         else:
                             self.power_state = "off"
                             self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
