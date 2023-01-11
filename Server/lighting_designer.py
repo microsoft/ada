@@ -44,6 +44,7 @@ class LightingDesigner:
         self.power_state = "initializing"
         self.power_on_override = None
         self.power_off_override = None
+        self.reboot = False
         self.color_override = None
         self.is_raining = None
         self.stop_rain_time = None
@@ -164,12 +165,14 @@ class LightingDesigner:
             self.power_off_override = True
             self.color_override = False
             self.animations = None
+            self.reboot = True
             self._fade_to_black()
             self.turn_off_time = None
             self.entered_custom_state = 0
             self.msgbus.send('/state/reboot')
         elif option == "rebooted":
             print("### reboot completed")
+            self.reboot = False
             self.power_on_override = False
             self.power_off_override = False
             self.color_override = False
@@ -411,7 +414,7 @@ class LightingDesigner:
                         self.color_override = False
                         self.animations = None
                         self.turn_off_time = None
-                        if self.power_state == "reboot":
+                        if self.reboot:
                             # let it be off for config.reboot_timeout seconds, then turn it back on.
                             self.entered_custom_state = time.time()
                         else:
