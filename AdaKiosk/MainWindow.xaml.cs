@@ -239,11 +239,12 @@ namespace AdaKiosk
             }        
         }
 
-        private void UpdateState(string message)
+        private void UpdateState(string state)
         {
+            ShowStatus(state);
             this.pongTick = Environment.TickCount; 
             this.sim.Offline = false;
-            this.sim.Powered = (message != "/state/off");
+            this.sim.Powered = (state != "off");
             this.ButtonControl.Visibility = Visibility.Visible;
         }
 
@@ -281,7 +282,7 @@ namespace AdaKiosk
                     }
                     if (simpleMessage.StartsWith("/state/"))
                     {
-                        UpdateState(simpleMessage);
+                        UpdateState(simpleMessage.Substring("/state/".Length));
                     }
                     else if (simpleMessage.StartsWith("/debug"))
                     {

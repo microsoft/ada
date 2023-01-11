@@ -158,6 +158,24 @@ class LightingDesigner:
             self.power_on_override = True
             self.power_off_override = False
             self.entered_custom_state = time.time()
+        elif option == "reboot":
+            print("### rebooting...")
+            self.power_on_override = False
+            self.power_off_override = True
+            self.color_override = False
+            self.animations = None
+            self._fade_to_black()
+            self.turn_off_time = None
+            self.entered_custom_state = 0
+            self.msgbus.send('/state/reboot')
+        elif option == "rebooted":
+            print("### reboot completed")
+            self.power_on_override = False
+            self.power_off_override = False
+            self.color_override = False
+            self.turn_off_time = None
+            self.animations = None
+            self.msgbus.send('/state/rebooted')
         else:
             print("error: invalid power state: /power/{}".format(option))
 
@@ -351,11 +369,15 @@ class LightingDesigner:
             except Exception as e:
                 print("error with process_next_message: " + str(e))
 
-            if self.power_state == "custom" and \
+            if self.power_state == "custom"\
                time.time() > self.entered_custom_state + self.config.custom_animation_timeout:
                 # timeout custom animations and go back to normal "run" mode so Ada can go to sleep
                 # if necessary.
                 self._set_power_state("run")
+
+            if self.power_state == "reboot" and self.entered_custom_state != 0 and \
+               time.time() > self.entered_custom_state + self.config.reboot_timeout:
+                self._set_power_state("rebooted")
 
             # highest priority is the master power schedule
             master_power_state = self._get_master_power_state()
@@ -389,11 +411,15 @@ class LightingDesigner:
                         self.color_override = False
                         self.animations = None
                         self.turn_off_time = None
-                        self.power_state = "off"
-                        self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
-                        on_hour, on_minute = self.on_time
-                        print("### lights are off, waiting for wake up time: {}:{}".format(
-                            on_hour, on_minute))
+                        if self.power_state == "reboot":
+                            # let it be off for config.reboot_timeout seconds, then turn it back on.
+                            self.entered_custom_state = time.time()
+                        else:
+                            self.power_state = "off"
+                            self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
+                            on_hour, on_minute = self.on_time
+                            print("### lights are off, waiting for wake up time: {}:{}".format(
+                                on_hour, on_minute))
                     else:
                         # let the lights cool down for 3 minutes before turning them off.
                         time.sleep(0.1)

@@ -66,6 +66,9 @@
             <Button x:Name="ButtonPowerOff" Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/off" Background="#303030">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Off"/>
             </Button>
+            <Button x:Name="ButtonPowerReboot" Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/reboot" Background="#303030">
+                <TextBlock Style="{StaticResource ControlTextLight}" Text="Reboot&#xa;(2 minutes)" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/run" Background="#303030">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Sensei"/>
             </Button>
@@ -105,10 +108,10 @@
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/rainbow" Background="pink">
                 <TextBlock Style="{StaticResource ControlTextDark}" Text="Rainbow"/>
             </Button>
-            <!--<Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/neurons" Background="blue">
+            <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/neurons" Background="blue">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Neurons"/>
             </Button>
-            <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/fire" Background="#fc2323">
+            <!--<Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/fire" Background="#fc2323">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Fire"/>
             </Button>-->
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/animation/red yellow gradient" Background="{StaticResource RedYellow}">
