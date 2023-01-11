@@ -1,12 +1,11 @@
-if (-not(Test-Path "bin\Release\net5.0-windows")) {
-   Write-Host "Please build release version of AdaKiosk"
-   Exit 1
-}
+&msbuild /target:restore AdaKiosk.sln
+&msbuild /p:Configuration=Release "/p:Platform=Any CPU" AdaKiosk.sln
 
+$bits = ".\bin\Release\net7.0-windows"
 if (Test-Path "bin\AdaKiosk.zip") {
     Remove-Item "bin\AdaKiosk.zip"
 }
-Compress-Archive -Path bin\Release\net5.0-windows\* -DestinationPath bin\AdaKiosk.zip
+Compress-Archive -Path $bits\* -DestinationPath bin\AdaKiosk.zip
 $hash = Get-FileHash bin\AdaKiosk.zip -Algorithm SHA256
 if (Test-Path "bin\AdaKiosk.zip.hash") {
     Remove-Item "bin\AdaKiosk.zip.hash"
