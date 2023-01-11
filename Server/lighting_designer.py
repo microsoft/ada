@@ -369,7 +369,7 @@ class LightingDesigner:
             except Exception as e:
                 print("error with process_next_message: " + str(e))
 
-            if self.power_state == "custom"\
+            if self.power_state == "custom" and \
                time.time() > self.entered_custom_state + self.config.custom_animation_timeout:
                 # timeout custom animations and go back to normal "run" mode so Ada can go to sleep
                 # if necessary.
