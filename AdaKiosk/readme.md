@@ -3,6 +3,8 @@
 This is a Windows WPF app that provides a nice Kiosk experience to
 accompany Ada.
 
+Install: [setup.exe](https://adaserverstorage.blob.core.windows.net/adakiosk/ClickOnce/setup.exe)
+
 ![kiosk](images/kiosk.png)
 
 ## Home page
