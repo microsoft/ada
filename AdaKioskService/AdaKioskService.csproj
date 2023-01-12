@@ -121,11 +121,32 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Setup\AdaKioskUnitTest.cmd" />
+    <None Include="Setup\AssignedAccess2020Config.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Setup\AssignedAccessConfig.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Setup\AssignedAccessSchema.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Setup\ClearAssignedAccess.ps1" />
+    <None Include="Setup\DisableAutoUpgrade.reg" />
+    <Content Include="Setup\InstallService.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Setup\PublishBinaries.py" />
+    <None Include="Setup\SetupAssignedAccess.ps1" />
+    <None Include="Setup\sysadmin.cmd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ProjectInstaller.resx">
       <DependentUpon>ProjectInstaller.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Setup\AssignedAccessProfile.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

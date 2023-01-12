@@ -11,6 +11,7 @@ using System.IO.Compression;
 using System.Diagnostics;
 using AdaKioskService;
 using System.Threading;
+using Microsoft.Win32;
 
 namespace AdaKioskUpdater
 {
@@ -49,18 +50,29 @@ namespace AdaKioskUpdater
                 Thread.Sleep(1000);
             }
 
+            ExpandRetry(localZipFile, installFolder);
+        }
+
+        private static void ExpandRetry(string localZipFile, string installFolder)
+        {
             for (int retries = 3; retries > 0; retries--)
             {
                 try
                 {
                     ExpandZip(localZipFile, installFolder);
                     break;
-                } 
+                }
                 catch (Exception)
                 {
                     Thread.Sleep(1000);
                 }
             }
+        }
+
+        public static void DownloadAndUnzip(string connectionString, string containerName, string zipBlobName, string localZipFile, string installFolder)
+        {
+            DownloadZip(connectionString, containerName, zipBlobName, localZipFile);
+            ExpandRetry(localZipFile, installFolder);
         }
 
         public static string DownloadHash(string connectionString, string containerName, string filename)
@@ -108,6 +120,17 @@ namespace AdaKioskUpdater
                 Directory.Delete(folder, true);
             }
             ZipFile.ExtractToDirectory(zipFile, folder);
+        }
+
+        public static void SetupRebootRunAction(string script)
+        {
+            using (var key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+            {
+                if (key != null)
+                {
+                    key.SetValue("AdaKioskService", script);
+                }
+            }
         }
     }
 }
