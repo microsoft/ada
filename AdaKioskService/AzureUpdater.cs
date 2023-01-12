@@ -124,7 +124,7 @@ namespace AdaKioskUpdater
 
         public static void SetupRebootRunAction(string script)
         {
-            using (var key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+            using (var key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce", true))
             {
                 if (key != null)
                 {
