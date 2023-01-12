@@ -10,7 +10,7 @@ $hash = Get-FileHash bin\AdaKiosk.zip -Algorithm SHA256
 if (Test-Path "bin\AdaKiosk.zip.hash") {
     Remove-Item "bin\AdaKiosk.zip.hash"
 }
-Set-Content -Path "bin\AdaKiosk.zip.hash" -Value $hash
+Set-Content -Path "bin\AdaKiosk.zip.hash" -Value $hash.Hash
 
 $result = &az storage container list --connection-string %ADA_STORAGE_CONNECTION_STRING% | ConvertFrom-JSON
 $found = $false
