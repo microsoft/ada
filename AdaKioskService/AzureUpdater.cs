@@ -30,7 +30,7 @@ namespace AdaKioskUpdater
             var hash = DownloadHash(connectionString, containerName, hashBlobName);
             if (File.Exists(localHashFile))
             {
-                string oldHash = File.ReadAllText(localHashFile);
+                string oldHash = File.ReadAllText(localHashFile).Trim();
                 if (oldHash == hash)
                 {
                     // we are up to date!
@@ -85,7 +85,7 @@ namespace AdaKioskUpdater
                 var ms = new MemoryStream();
                 client.DownloadTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
-                var hash = new StreamReader(ms, Encoding.UTF8).ReadToEnd();
+                var hash = new StreamReader(ms, Encoding.UTF8).ReadToEnd().Trim();
                 return hash;
             }
             else
