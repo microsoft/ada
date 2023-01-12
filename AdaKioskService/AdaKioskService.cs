@@ -95,12 +95,12 @@ namespace AdaKioskService
                 var updated = false;
                 if (hash != null)
                 {
-                    log.WriteMessage("AdaKioskService found service update " + hash);
+                    log.WriteMessage("AdaKioskService found service update {0}", hash);
                     var zipFileName = "AdaKioskService.zip";
                     var zipFile = System.IO.Path.Combine(downloadDir, zipFileName);
                     AzureUpdater.DownloadAndUnzip(this.connectionString, containerName, zipFileName, zipFile, serviceTempDir);
 
-                    log.WriteMessage("AdaKioskService new bits installed to: " + serviceTempDir);
+                    log.WriteMessage("AdaKioskService new bits installed to: {0}", serviceTempDir);
                     var updateScript = System.IO.Path.Combine(serviceTempDir, "Setup", "InstallService.ps1");
                     AzureUpdater.SetupRebootRunAction($"c:\\WINDOWS\\WindowsPowerShell\\v1.0\\powershell.exe -f {updateScript}");
 
