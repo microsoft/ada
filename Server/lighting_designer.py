@@ -418,7 +418,7 @@ class LightingDesigner:
                         if self.reboot:
                             # let it be off for config.reboot_timeout seconds, then turn it back on.
                             self.entered_custom_state = time.time()
-                            self.power_state == "rebooted"
+                            self.power_state = "rebooted"
                         else:
                             self.power_state = "off"
                             self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
