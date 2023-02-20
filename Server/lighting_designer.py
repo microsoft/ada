@@ -40,6 +40,7 @@ class LightingDesigner:
         self.last_color = None
         self.last_camera_emotion = 0
         self.turn_off_time = None
+        self.auto_reboot_time = None
         self.animations = None
         self.power_state = "initializing"
         self.power_on_override = None
@@ -142,6 +143,7 @@ class LightingDesigner:
             self.power_off_override = True
             self.color_override = False
             self.animations = None
+            self.auto_reboot_time = None
             self._fade_to_black()
             self.turn_off_time = None
         elif option == "run":
@@ -150,6 +152,7 @@ class LightingDesigner:
             self.power_off_override = False
             self.color_override = False
             self.turn_off_time = None
+            self.auto_reboot_time = time.time() + (self.config.auto_reboot * 3600)
             self.animations = None
             self.msgbus.send('/state/run')  # broadcast to all clients
         elif option == "custom":
@@ -158,11 +161,13 @@ class LightingDesigner:
             # remain until some timeout past self.entered_custom_state.
             self.power_on_override = True
             self.power_off_override = False
+            self.auto_reboot_time = None
             self.entered_custom_state = time.time()
         elif option == "reboot":
             print("### rebooting...")
             self.power_on_override = False
             self.power_off_override = True
+            self.auto_reboot_time = None
             self.color_override = False
             self.animations = None
             self.reboot = True
@@ -383,6 +388,9 @@ class LightingDesigner:
                time.time() > self.entered_custom_state + self.config.reboot_timeout:
                 self._set_power_state("rebooted")
 
+            if self.auto_reboot_time and time.time() > self.auto_reboot_time:
+                self._set_power_state("reboot")
+
             # highest priority is the master power schedule
             master_power_state = self._get_master_power_state()
             if (master_power_state or self.power_on_override) and not self.power_off_override:
@@ -394,6 +402,7 @@ class LightingDesigner:
                     self.animations = None
                     print("### back to normal operation")
                     self.power_state = "on"
+                    self.auto_reboot_time = time.time() + (self.config.auto_reboot * 3600)
                     self.sensei.start()
                 self.server.camera_on()
             elif (not master_power_state or self.power_off_override) and not self.power_on_override:
@@ -407,6 +416,7 @@ class LightingDesigner:
                         self.color_override = False
                         self.animations = None
                         self.power_state = "cooling"
+                        self.auto_reboot_time = None
                         self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
                         continue
                     elif time.time() > self.turn_off_time:
@@ -415,6 +425,7 @@ class LightingDesigner:
                         self.color_override = False
                         self.animations = None
                         self.turn_off_time = None
+                        self.auto_reboot_time = None
                         if self.reboot:
                             # let it be off for config.reboot_timeout seconds, then turn it back on.
                             self.entered_custom_state = time.time()
