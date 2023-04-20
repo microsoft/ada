@@ -27,6 +27,7 @@ on the AdaKiosk to perform auto-updating of the AdaKiosk app.
 - [AdaServerRelay](AdaServerRelay/readme.md) an Azure Function used together with an Azure Logic App
 to use the Azure Web Pub Sub service to monitor the status of the Ada Server and the KasaBridge, sending emails if things
 are not running smoothly.
+- [AdaWebPubSub](AdaWebPubSub/readme.md) an Azure Web Pub Sub service is used to communicate with the Ada Server.
 - [KasaBridge](KasaBridge/readme.md) A bridge to the Kasa Power switches.  This bridge runs on a device that has
 wifi connectivity to the Kasa Power Switches.
 - **HistoricalData** Some *.csv files that capture some historical data

@@ -12,7 +12,7 @@ Install: [setup.exe](https://adaserverstorage.blob.core.windows.net/adakiosk/Cli
 The app comes up by default in full screen mode.  Press F11 to get out of full screen mode.
 
 This page is the default and provides access to the beautiful blog on Ada detailing the design
-concepts and construction effort.  This app connects to Ada via the very cool new [Azure Web Pub Sub service](https://azure.microsoft.com/en-us/services/web-pubsub/),
+concepts and construction effort.  This app connects to Ada via the very cool new [Azure Web Pub Sub service](../AdaWebPubSub/readme.md),
 and shows realtime information on what Ada is thinking while also allowing the user to control Ada.
 It also auto-updates itself via the [AdaKioskService](../AdaKioskService/readme.md).
 

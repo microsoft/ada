@@ -33,7 +33,7 @@ class WebPubSubGroup:
             token = self.client.get_client_access_token(
                 user_id=self.user_name,
                 roles=[f"webpubsub.joinLeaveGroup.{self.group_name}",
-                    f"webpubsub.sendToGroup.{self.group_name}"])
+                       f"webpubsub.sendToGroup.{self.group_name}"])
             uri = token['url']
             self.web_socket = await websockets.connect(
                 uri, subprotocols=['json.webpubsub.azure.v1'])

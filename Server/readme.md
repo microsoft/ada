@@ -7,7 +7,7 @@ The server PC has an [Anaconda](https://www.anaconda.com/distribution/) python e
 from the parent folder.
 
 This server uses an Azure Web Pub Sub service to do realtime communication with the AdaKiosk app.  See the
-[readme](../Azure/readme.md) to set that up.  This server
+[readme](../AdaWebPubSub/readme.md) to set that up.  This server
 then uses the ADA_WEBPUBSUB_CONNECTION_STRING environment variable to connect to the Web Pub Sub service.
 
 To launch the server:
@@ -79,7 +79,7 @@ confuse the real Ada server.
 
 The simplest unit test is to run `python ada_server.py` in a terminal window and
 run the [AdaKiosk](../AdaKiosk/readme.md) at the same time.  These will connect to the
-same Azure Web Pub Sub service and and when you click the AdaKiosk "Simulation" tab
+same [Azure Web Pub Sub service](../AdaWebPubSub/readme.md) and and when you click the AdaKiosk "Simulation" tab
 you will see a rendering of all the colors being set by the `ada_server`.
 
 You can also run the server with an RpiController with [TeensyUnitTest](../TeensyUnitTest/readme.md).
