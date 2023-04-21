@@ -62,6 +62,7 @@ Here is a list of commands you can send:
 | `/state/bridge` | Ping the wifi bridge to make sure it is running |
 | `/state/bridge` | Ping the wifi bridge to make sure it is running |
 | `/animation/moving gradient cycle` | start the animation defined in [Server config.json](../Server/config.json) file |
+| `/emotion/name` | set the color associated with the given emotion where the built in names are defined in the [Server config.json](../Server/config.json) are ['anger', 'contempt', 'disgust', 'fear', 'happiness', 'neutral', 'sadness', 'surprise' ]
 | `{"command": "StartRain", "size": 12, "amount": 50.0}` | Start a rain animation on top of whatever else is happening |
 | `{"command": "StopRain"}` | Stop the rain animation overlay |
 | `{"command": "Rainbow", "seconds": 0, "hold": seconds, "length": 157}` | Start an infinite rainbow animation |
@@ -116,5 +117,3 @@ Here some of the messages you might see from the system:
 Notice that the notifications relayed from the server often include the `command` that was sent to the server, or
 a command that the server is performing on it's own in response to it's programming or a higher level animation that
 was specified.
-
-
