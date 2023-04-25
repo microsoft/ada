@@ -78,7 +78,6 @@
     "cool_animations": [
         {
             "Name": "neurons",
-            "Enabled": false,
             "Reason": "Bad strip looks really ugly with this animation",
             "Commands": [
                 {
@@ -100,7 +99,6 @@
         },
         {
             "Name": "fire",
-            "Enabled": false,
             "Commands": [
                 {
                     "command": "Fire",
