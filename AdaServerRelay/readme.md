@@ -1,7 +1,7 @@
 ﻿## AdaServerRelay
 
-This project provides an HTTP gateway to the `Azure Web Pub Sub` service used for communication between the Ada
-Server and the AdaKiosk.
+This project provides a simple HTTP gateway to the `Azure Web Pub Sub` service used for providing
+3 simple commands.  For the full Web Pub Sub interface see [AdaWebPubSub](../AdaWebPubSub/readme.md).
 
 Setup for this Azure resource is included in
 the `~/Azure/setup.ps1` script.

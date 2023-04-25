@@ -1,4 +1,3 @@
-azure
 azure-storage-blob
 azure-cosmosdb-table
 azure-messaging-webpubsubservice
