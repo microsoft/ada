@@ -520,10 +520,17 @@ class LightingDesigner:
                 if self.last_cool_animation + self.config.cool_animation_timeout > time.time() and not has_new_clients:
                     continue
                 num = len(self.config.cool_animations) - 1
-                i = random.randint(0, num)
-                animation = self.config.cool_animations[i]
-                self.animations = AnimationLoop()
-                self.animations.start(animation, self.config.cool_animation_timeout)
+                animation = None
+                retries = 100
+                while animation is None and retries > 0:
+                    i = random.randint(0, num)
+                    animation = self.config.cool_animations[i]
+                    if "Enabled" in animation and not animation["Enabled"]:
+                        animation = None  # don't pick disabled animations.
+                        retries += 1
+                if animation is not None:
+                    self.animations = AnimationLoop()
+                    self.animations.start(animation, self.config.cool_animation_timeout)
                 self.last_cool_animation = time.time()
                 continue
 
