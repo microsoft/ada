@@ -35,7 +35,7 @@
     "pubsub_hub": "AdaKiosk",
 
     "on_time": [12, 0],
-    "off_time": [20, 0],
+    "off_time": [21, 0],
     "turn_off_timeout": 120,
     "bridge_ping_interval": 600,
     "on_days": [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -74,7 +74,7 @@
         "Disgust": 20,
         "Contempt": 10
     },
-
+    "default_animation": "neutral",
     "cool_animations": [
         {
             "Name": "neurons",
@@ -84,6 +84,118 @@
                 {
                     "command": "NeuralDrop",
                     "iterations": 0
+                }
+            ]
+        },
+        {
+            "Name": "neutral",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 255, 255 ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
+                }
+            ]
+        },
+        {
+            "Name": "anger",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 0, 0 ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
+                }
+            ]
+        },
+        {
+            "Name": "contempt",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 120, 30, 10 ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
+                }
+            ]
+        },
+        {
+            "Name": "disgust",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 255, 0  ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
+                }
+            ]
+        },
+        {
+            "Name": "fear",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 255, 255 ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
+                }
+            ]
+        },
+        {
+            "Name": "happiness",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 255, 255, 0 ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
+                }
+            ]
+        },
+        {
+            "Name": "sadness",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 0, 10, 80 ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
+                }
+            ]
+        },
+        {
+            "Name": "surprise",
+            "Enabled": true,
+            "Commands":[
+                {
+                    "command": "CrossFade",
+                    "colors": [
+                        [ 80, 0, 80 ]
+                    ],
+                    "seconds": 0,
+                    "hold": 300
                 }
             ]
         },
