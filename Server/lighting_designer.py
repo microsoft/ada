@@ -45,6 +45,7 @@ class LightingDesigner:
         self.power_state = "initializing"
         self.power_on_override = None
         self.power_off_override = None
+        self.power_off_latch = False  # is True when power is on, when this goes to false we can reset power_on_override
         self.reboot = False
         self.color_override = None
         self.is_raining = None
@@ -393,6 +394,16 @@ class LightingDesigner:
 
             # highest priority is the master power schedule
             master_power_state = self._get_master_power_state()
+            if master_power_state:
+                self.power_off_latch = True
+            elif self.power_off_latch:
+                # we were supposed to be on, now we are supposed to be off,
+                # so if someone set self.power_off_override to True then this is a
+                # good time to reset that to False so the lights turn on again tomorrow.
+                print("### resetting power_off_override")
+                self.power_off_override = False
+                self.power_off_latch = False  # this is a one time latch.
+
             if (master_power_state or self.power_on_override) and not self.power_off_override:
                 if bridge and (bridge.lights_on is None or not bridge.lights_on):
                     # looks like we need to turn the lights on
