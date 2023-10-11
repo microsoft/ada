@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 from datetime import datetime
+from dateutil.parser import parse
 import json
 import random
 import time
@@ -10,7 +11,6 @@ from suntime import Sun
 from utilities import TimedLatch
 from animation import AnimationLoop
 from priority_queue import PriorityQueue
-
 
 class LightingDesigner:
     """
@@ -50,11 +50,32 @@ class LightingDesigner:
         self.color_override = None
         self.is_raining = None
         self.stop_rain_time = None
-        self.on_time = self.resolve_sunrise_sunset(self.config.on_time)
-        self.off_time = self.resolve_sunrise_sunset(self.config.off_time)
+        self._check_onoff_times()
         if self._get_cool_animation_time():
             # if server is started when we are already into cool animation time, so ensure this happens.
             self.last_cool_animation = 0
+
+    def _check_onoff_times(self):
+        """ Check if Ada is scheduled to be on today and if so at what start and stop times.
+        Sets the variables self.on_today, self.on_time, and self.off_time. """
+        self.on_today = False
+        run_days = self.config.on_days
+        today = datetime.today().strftime('%A')
+        if today in run_days:
+            self.on_today = True
+
+        self.on_time = self.resolve_sunrise_sunset(self.config.on_time)
+        self.off_time = self.resolve_sunrise_sunset(self.config.off_time)
+
+        if len(self.config.scheduled_overrides):
+            now = datetime.today().date()
+            for info in self.config.scheduled_overrides:
+                d = parse(info["date"]).date()
+                if d == now:
+                    self.on_time = self.resolve_sunrise_sunset(info["on_time"])
+                    self.off_time = self.resolve_sunrise_sunset(info["off_time"])
+                    self.on_today = True
+                    break
 
     def start(self):
         if not self.running:
@@ -105,13 +126,6 @@ class LightingDesigner:
         if setting == "sunset":
             return [sunset.hour, sunset.minute]
         return setting
-
-    def is_on_today(self):
-        run_days = self.config.on_days
-        today = datetime.today().strftime('%A')
-        if today in run_days:
-            return True
-        return False
 
     def _find_animation(self, name):
         for index in range(len(self.config.cool_animations)):
@@ -359,13 +373,12 @@ class LightingDesigner:
 
     def _choreographer_thread(self):
         self.rainbow_timeout = time.time()
-        next_sunrise_check = time.time()
+        next_time_check = time.time()
         while self.running:
             self.server.increment()
-            if time.time() >= next_sunrise_check:
-                self.on_time = self.resolve_sunrise_sunset(self.config.on_time)
-                self.off_time = self.resolve_sunrise_sunset(self.config.off_time)
-                next_sunrise_check = time.time() + 3600
+            if time.time() >= next_time_check:
+                self._check_onoff_times()
+                next_time_check = time.time() + 60
 
             bridge = self.server.get_bridge()
             if bridge:
@@ -576,7 +589,7 @@ class LightingDesigner:
             self._blush(None, value, seconds=2, hold=self.config.hold_camera_blush, priority=5)
 
     def _get_master_power_state(self):
-        if not self.is_on_today():
+        if not self.on_today:
             return False
         on_hour, on_minute = self.on_time
         off_hour, off_minute = self.off_time

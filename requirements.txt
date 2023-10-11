@@ -9,3 +9,4 @@ suntime
 paramiko
 websockets
 asyncio
+pandas

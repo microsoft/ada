@@ -40,6 +40,14 @@
     "bridge_ping_interval": 600,
     "on_days": [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
 
+    "scheduled_overrides": [
+        {
+            "date": "10/14/2023",
+            "on_time": [9, 0],
+            "off_time": [16, 0]
+        }
+    ],
+
     "debug": true,
     "debug_commands": false,
 
