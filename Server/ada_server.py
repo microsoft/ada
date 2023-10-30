@@ -21,6 +21,7 @@ sys.path += [os.path.join(script_dir, "../KasaBridge")]
 
 from bridge_client import KasaBridgeClient
 from lighting_designer import LightingDesigner
+from internet import wait_for_internet, get_local_ip
 
 
 class AdaServer:
@@ -260,7 +261,6 @@ class AdaServer:
         current_priority = 50
         next_command_time = time.time()
         while not self.closed and name in self.clients:
-
             hash = self.firmware.get_hash()
             if hash and hash != firmware_hash:
                 firmware_hash = hash
@@ -458,8 +458,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--ip",
-        help="optional IP address of the server (default 'localhost')",
-        default="localhost",
+        help="optional IP address of the server (default get_local_ip())",
     )
     parser.add_argument(
         "--loop",
@@ -483,6 +482,11 @@ if __name__ == "__main__":
         )
         sys.exit(1)
 
+    wait_for_internet()
+    ip = args.ip
+    if ip is None:
+        ip = get_local_ip()
+
     sensei = sensei.Sensei(
         config.camera_zones, config.colors_for_emotions, connection_string, config.debug
     )
@@ -493,5 +497,5 @@ if __name__ == "__main__":
         sensei.load(history_files, args.delay, config.playback_weights)
 
     asyncio.get_event_loop().run_until_complete(
-        _main(config, sensei, args.ip, connection_string)
+        _main(config, sensei, ip, connection_string)
     )

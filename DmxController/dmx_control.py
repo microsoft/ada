@@ -5,10 +5,11 @@ import socket
 import _thread
 import queue
 import json as JSON
+import time
 
 from dmx import Dmx, DmxDevice
 import dmx_mock
-import time
+from internet import wait_for_internet, get_local_ip
 
 
 # In RPi, use the symlinks in /dev/serial/by-id/ instead of /dev/serialX
@@ -46,7 +47,7 @@ class Sensei:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                     self.socket = sock
                     sock.connect(self.server_endpoint)
-                    sock.sendall(bytes('DMX', 'utf-8'))
+                    sock.sendall(bytes("DMX", "utf-8"))
                     while self.running:
                         json_msg = str(sock.recv(SOCKET_BUFFER_SIZE), "utf-8")
                         try:
@@ -55,12 +56,12 @@ class Sensei:
                             if "command" in command and command["command"] == "ping":
                                 response = "{}".format(self.sequence)
 
-                            sock.sendall(bytes(response, 'utf-8'))
+                            sock.sendall(bytes(response, "utf-8"))
 
                             self.queue.put(command)
                         except Exception as e:
                             msg = "### Exception: {}".format(e)
-                            sock.sendall(bytes(msg, 'utf-8'))
+                            sock.sendall(bytes(msg, "utf-8"))
             except:
                 time.sleep(1)
 
@@ -84,7 +85,6 @@ class DmxController:
         dmx.set_output_by_type(DMX_UNIVERSE, "power_lights", [255, 220, 0, 0, 0, 0])
 
     def handle_command(self, command):
-
         if "sequence" in command:
             self.sensei.update_sequence(int(command["sequence"]))
 
@@ -114,7 +114,6 @@ class DmxController:
         self.current_colors = new_colors
 
     def run_program(self):
-
         while True:
             try:
                 command = self.sensei.get_next_command()
@@ -131,20 +130,39 @@ class DmxController:
                 print(e)
                 # if server is offline then fade to black for now to save power.
                 new_colors = [[0, 0, 0, 0, 0, 0]] * NUM_LIGHTS
-                dmx.smooth_fade(DMX_UNIVERSE, ALL_LIGHTS, self.current_colors, new_colors, 10)
+                dmx.smooth_fade(
+                    DMX_UNIVERSE, ALL_LIGHTS, self.current_colors, new_colors, 10
+                )
                 self.current_colors = new_colors
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Pulls Sensei data from the ada_server for display on the raspberry pi')
-    parser.add_argument("--ip", help="optional IP address of the server (default 'localhost')", default="localhost")
-    parser.add_argument("--color", help="Specify a specific color, including 'UV' for UV light.", default="none")
-    parser.add_argument("--test", help="Do not actually connect to DMX lights.", action="store_true")
-    parser.add_argument("--port", help="Serial port to use (default COM3).", default="com3")
+        description="Pulls Sensei data from the ada_server for display on the raspberry pi"
+    )
+    parser.add_argument(
+        "--ip",
+        help="optional IP address of the server (default from socket.gethostbyname)",
+    )
+    parser.add_argument(
+        "--color",
+        help="Specify a specific color, including 'UV' for UV light.",
+        default="none",
+    )
+    parser.add_argument(
+        "--test", help="Do not actually connect to DMX lights.", action="store_true"
+    )
+    parser.add_argument(
+        "--port", help="Serial port to use (default COM3).", default="com3"
+    )
     args = parser.parse_args()
 
-    server_endpoint = (args.ip, SERVER_PORT)
+    wait_for_internet()
+    ip = args.ip
+    if ip is None:
+        ip = get_local_ip()
+
+    server_endpoint = (ip, SERVER_PORT)
     if args.test:
         dmx = dmx_mock.Dmx(args.port)
     else:
