@@ -176,14 +176,14 @@ if __name__ == "__main__":
         try:
             switches = []
             found_server_ip = args.server
-            if args.test and (not found_server_ip or not args.local):
+            if args.test and (not found_server_ip or not local_ip):
                 print("### --test requires --server and --local arg to be set")
                 sys.exit(1)
             if args.test:
-                switches += [(args.local, "192.168.1.199")]
+                switches += [(local_ip, "192.168.1.199")]
             else:
                 for local_ip, server_ip in find_local_ips(
-                    args.local, args.host, args.port
+                    local_ip, args.host, args.port
                 ):
                     print("Searching network from ip address: {} ...".format(local_ip))
                     for addr in TplinkSmartPlug.findHS105Devices(local_ip):
