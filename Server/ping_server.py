@@ -4,11 +4,12 @@ import argparse
 import socket
 import json
 
+
 def receive_rgb_lists_from_server(server_endpoint, buffer_size):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect(server_endpoint)
-        sock.sendall(bytes('GET\n', 'utf-8'))
-        json_msg = ''
+        sock.sendall(bytes("GET\n", "utf-8"))
+        json_msg = ""
         while len(json_msg) == 0:
             json_msg = str(sock.recv(buffer_size), "utf-8")
             command = json.loads(json_msg)
@@ -22,14 +23,28 @@ def receive_rgb_lists_from_server(server_endpoint, buffer_size):
 def update_server_with_ipcamera_emotion(server_endpoint, emotion, score):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect(server_endpoint)
-        sock.sendall(bytes('IPCAMERA {} {}\n'.format(emotion, score), 'utf-8'))
+        sock.sendall(bytes("IPCAMERA {} {}\n".format(emotion, score), "utf-8"))
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Pulls Sensei data from the ada_server for display on the raspberry pi')
-    parser.add_argument("--ip", help="optional IP address of the server (default 'localhost')", default="localhost")
-    parser.add_argument("--emotion", help="optional parameter to set the ipcamera emotion in the server", default=None)
-    parser.add_argument("--score", help="optional parameter to set the ipcamera score for teh emotion", default=None)
+    parser = argparse.ArgumentParser(
+        description="Pulls Sensei data from the ada_server for display on the raspberry pi"
+    )
+    parser.add_argument(
+        "--ip",
+        help="optional IP address of the server (default 'localhost')",
+        default="localhost",
+    )
+    parser.add_argument(
+        "--emotion",
+        help="optional parameter to set the ipcamera emotion in the server",
+        default=None,
+    )
+    parser.add_argument(
+        "--score",
+        help="optional parameter to set the ipcamera score for teh emotion",
+        default=None,
+    )
     args = parser.parse_args()
 
     server_port = 12345
@@ -37,6 +52,6 @@ if __name__ == "__main__":
     server_endpoint = (args.ip, server_port)
     if args.emotion is not None:
         update_server_with_ipcamera_emotion(server_endpoint, args.emotion, args.score)
-    json = receive_rgb_lists_from_server(server_endpoint, socket_buffer_size)
+    data = receive_rgb_lists_from_server(server_endpoint, socket_buffer_size)
 
-    print(json)
+    print(data)

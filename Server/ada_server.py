@@ -157,7 +157,7 @@ class AdaServer:
         target = None
         self.msgbus.send(cmd)
         self.queued = True
-        if type(cmd) == list:
+        if isinstance(cmd, list):
             for c in cmd:
                 c["sequence"] = self.sequence
                 if "target" in c:

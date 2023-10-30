@@ -7,6 +7,7 @@ class AnimationLoop:
     """
     This class plays sequence of animation commands from the config.json file.
     """
+
     def __init__(self):
         self.animation = None
         self.start_time = None
@@ -74,5 +75,9 @@ class AnimationLoop:
 
         self.next_animation = time.time() + duration
         if result:
-            print("Running animation '{}', step {} for {} seconds".format(self.animation['Name'], self.animation_index, duration))
+            print(
+                "Running animation '{}', step {} for {} seconds".format(
+                    self.animation["Name"], self.animation_index, duration
+                )
+            )
         return result

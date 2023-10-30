@@ -7,7 +7,7 @@ import time
 class KasaBridgeClient:
     _commands = ["list", "on", "off", "status"]
 
-    def __init__(self, name, client, address, ping_delay = 600):
+    def __init__(self, name, client, address, ping_delay=600):
         self.name = name
         self.client = client  # a socket client.
         self.address = address
@@ -43,7 +43,7 @@ class KasaBridgeClient:
     def get_switch_status(self):
         result = self._send_bridge_command("status")
         if result != "error":
-            parts = result.split(',')
+            parts = result.split(",")
             states = []
             for device in parts:
                 pair = device.split(":")
@@ -73,7 +73,7 @@ class KasaBridgeClient:
 
     def _send_command(self, command):
         if self.client:
-            self.client.sendall(bytes(command, 'utf-8'))
+            self.client.sendall(bytes(command, "utf-8"))
             retries = 10
             while retries > 0 and self.client:
                 retries -= 1

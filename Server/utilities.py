@@ -10,6 +10,7 @@ class TimedLatch:
     a latch that resets automatically so it only returns True once.  Then it will not return
     True again until the delay is reached.
     """
+
     def __init__(self, delay=10):
         self.changed = time.time()
         self.delay = delay

@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+
 class HlsColor:
     def __init__(self, hue, luminance, saturation):
         self.hue = hue
@@ -8,12 +9,12 @@ class HlsColor:
         self.saturation = saturation
 
     def Lighten(self, percent):
-        self.luminance *= (1.0 + percent)
+        self.luminance *= 1.0 + percent
         if self.luminance > 1.0:
             self.luminance = 1.0
 
     def Darken(self, percent):
-        self.luminance *= (1.0 - percent)
+        self.luminance *= 1.0 - percent
 
     def ToHLS(self, red, green, blue):
         minval = min(red, min(green, blue))
@@ -65,7 +66,9 @@ class HlsColor:
             if self.luminance <= 0.5:
                 rm2 = self.luminance + self.luminance * self.saturation
             else:
-                rm2 = self.luminance + self.saturation - self.luminance * self.saturation
+                rm2 = (
+                    self.luminance + self.saturation - self.luminance * self.saturation
+                )
 
             rm1 = 2.0 * self.luminance - rm2
             red = self.ToRGB1(rm1, rm2, self.hue + 120.0)
@@ -75,7 +78,7 @@ class HlsColor:
         return [red, green, blue]
 
     def ToRGB1(rm1, rm2, rh):
-        if (rh > 360.0):
+        if rh > 360.0:
             rh -= 360.0
         elif rh < 0.0:
             rh += 360.0

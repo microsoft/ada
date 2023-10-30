@@ -26,7 +26,13 @@ API_KEY = bytes([0xC9, 0xA4, 0x03, 0xE4])
 
 
 class DmxDevice:
-    def __init__(self, device_name: str, device_type: str, output_channels: int, bytes_per_channel: int):
+    def __init__(
+        self,
+        device_name: str,
+        device_type: str,
+        output_channels: int,
+        bytes_per_channel: int,
+    ):
         self.device_name = device_name
         self.device_type = device_type
         self.output_channels = output_channels
@@ -102,7 +108,7 @@ class Dmx:
             # Write endcode
             self.port.write(bytes([END_CODE]))
         except:
-            print_error('DMX: Unable to send data')
+            print_error("DMX: Unable to send data")
             time.sleep(5)
             self.try_reconnect()
 
@@ -112,11 +118,11 @@ class Dmx:
             header = self.port.read(HEADER_LENGTH)
             start_code = header[0]
             if start_code != START_CODE:
-                print_error('DMX: Invalid return start code')
+                print_error("DMX: Invalid return start code")
                 return False
             read_label = header[1]
             if read_label != label:
-                print_error('DMX: Unexpected return label')
+                print_error("DMX: Unexpected return label")
                 return False
             data_length = header[2]
             data_length = data_length + (header[3] << 8)
@@ -129,7 +135,7 @@ class Dmx:
                 return False
             return data
         except:
-            print_error('DMX: Unable to receive data')
+            print_error("DMX: Unable to receive data")
 
     def set_api_key(self):
         self.send_data(13, API_KEY)
@@ -148,7 +154,7 @@ class Dmx:
             serial_num = self.receive_data(10)
             return serial_num
         except:
-            print_error('DMX: Unable to get serial number')
+            print_error("DMX: Unable to get serial number")
 
     def get_hardware_version(self):
         try:
@@ -156,7 +162,7 @@ class Dmx:
             version = self.receive_data(14)[0]
             return version
         except:
-            print_error('DMX: Unable to get hardware version')
+            print_error("DMX: Unable to get hardware version")
 
     def add_device(self, dmx_universe: int, dmx_device: DmxDevice):
         if dmx_universe == 1:
@@ -190,7 +196,9 @@ class Dmx:
         else:
             universe = self.universe_2
 
-        dmx_bytearray = bytearray(1)  # DMX payload needs to start with this empty byte at pos 0
+        dmx_bytearray = bytearray(
+            1
+        )  # DMX payload needs to start with this empty byte at pos 0
 
         for dmx_device in universe:
             dmx_bytearray += dmx_device.get_dmx_byte_array()
@@ -213,10 +221,10 @@ class Dmx:
             for i in range(len(lights)):
                 name = lights[i]
                 c1 = oldcolors
-                if type(c1) == list:
+                if isinstance(c1, list):
                     c1 = oldcolors[i]
                 c2 = newcolors
-                if type(c2) == list:
+                if isinstance(c2, list):
                     c2 = newcolors[i]
                 dr = c2[0] - c1[0]
                 dg = c2[1] - c1[1]
@@ -235,15 +243,16 @@ class Dmx:
 
     def findDMXDevices():
         import socket
+
         # listen for Art-Net broadcast
         artnet_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         artnet_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-        artnet_sock.bind(('', 6454))
+        artnet_sock.bind(("", 6454))
 
         while True:
             data, addr = artnet_sock.recvfrom(1024)  # buffer size is 1024 bytes
             if len(data) >= 7:
-                header = data[:7].decode('utf8')
+                header = data[:7].decode("utf8")
                 if header == "Art-Net":
                     yield addr

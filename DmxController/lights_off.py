@@ -1,15 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-import argparse
-import socket
-import json as JSON
-
 from dmx import Dmx, DmxDevice
-import time
-import sys
 
 # In RPi, use the symlinks in /dev/serial/by-id/ instead of /dev/serialX
-DMX_SERIAL_PORT = 'COM4'
+DMX_SERIAL_PORT = "COM4"
 
 SERVER_PORT = 12345
 SOCKET_BUFFER_SIZE = 32768

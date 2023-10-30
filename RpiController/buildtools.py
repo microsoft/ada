@@ -1,19 +1,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-import os
 import sys
 import subprocess
-from threading import Thread, Lock
+from threading import Thread
+
 
 class BuildTools:
-
     def logstream(self, stream):
         try:
             while True:
                 out = stream.readline()
                 if out:
-                    msg = out.decode('utf-8')
-                    print(msg.strip('\r\n'))
+                    msg = out.decode("utf-8")
+                    print(msg.strip("\r\n"))
                 else:
                     break
         except:
@@ -22,8 +21,10 @@ class BuildTools:
             print(msg)
 
     def run(self, command, print_output=True, shell=False):
-        cmdstr = command if isinstance(command, str) else " ".join(command)
-        with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0) as proc:
+        # cmdstr = command if isinstance(command, str) else " ".join(command)
+        with subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0
+        ) as proc:
             stdout_thread = Thread(target=self.logstream, args=(proc.stdout,))
             stderr_thread = Thread(target=self.logstream, args=(proc.stderr,))
 
