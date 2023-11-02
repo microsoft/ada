@@ -4,13 +4,20 @@ import io
 import sys
 from threading import Thread
 import paramiko
+import logging
 
 
 class RemoteRunner:
-    def __init__(self, ipaddress=None, username=None, password=None,
-                 command=None, verbose=True, logfile=None,
-                 timeout=None, ):
-
+    def __init__(
+        self,
+        ipaddress=None,
+        username=None,
+        password=None,
+        command=None,
+        verbose=True,
+        logfile=None,
+        timeout=None,
+    ):
         self.ipaddress = ipaddress
         self.username = username
         self.password = password
@@ -18,7 +25,7 @@ class RemoteRunner:
         self.verbose = verbose
         self.timeout = timeout
         if logfile:
-            self.logfile = open(logfile, 'w')
+            self.logfile = open(logfile, "w")
         else:
             self.logfile = None
         self.all = all
@@ -47,7 +54,7 @@ class RemoteRunner:
             while True:
                 out = stream.readline()
                 if out:
-                    msg = out.rstrip('\n')
+                    msg = out.rstrip("\n")
                     self.print(msg)
                 else:
                     break
@@ -73,10 +80,13 @@ class RemoteRunner:
 
         except:
             errorType, value, traceback = sys.exc_info()
-            msg = "### exec_remote_command exception: %s: %s" % (str(errorType), str(value))
+            msg = "### exec_remote_command exception: %s: %s" % (
+                str(errorType),
+                str(value),
+            )
             self.print(msg)
 
-        result = self.buffer.getvalue().split('\n')
+        result = self.buffer.getvalue().split("\n")
         self.buffer = None
         return result
 
@@ -97,11 +107,15 @@ class RemoteRunner:
             self.publish_bits()
             if self.command:
                 if self.target_dir:
-                    self.exec_remote_command("cd {} && chmod u+x ./{}".format(
-                        self.target_dir, self.command.split(" ")[0]))
+                    self.exec_remote_command(
+                        "cd {} && chmod u+x ./{}".format(
+                            self.target_dir, self.command.split(" ")[0]
+                        )
+                    )
 
-                    output = self.exec_remote_command("cd {} && ./{}".format(
-                        self.target_dir, self.command))
+                    output = self.exec_remote_command(
+                        "cd {} && ./{}".format(self.target_dir, self.command)
+                    )
                 else:
                     output = self.exec_remote_command(self.command)
             self.copy_files()
@@ -110,10 +124,13 @@ class RemoteRunner:
             self.close_ssh()
         except:
             errorType, value, traceback = sys.exc_info()
-            msg = "### run_command exception: %s: %s" % (str(errorType), str(value) + "\n" + str(traceback))
+            msg = "### run_command exception: %s: %s" % (
+                str(errorType),
+                str(value) + "\n" + str(traceback),
+            )
             self.print(msg)
             if self.buffer:
-                output = self.buffer.getvalue().split('\n')
+                output = self.buffer.getvalue().split("\n")
             output += [msg]
         return output
 
@@ -124,26 +141,56 @@ class RemoteRunner:
                 self.run_command()
             except:
                 errorType, value, traceback = sys.exc_info()
-                self.print("### Unexpected Exception: " + str(errorType) + ": " + str(value) + "\n" + str(traceback))
+                self.print(
+                    "### Unexpected Exception: "
+                    + str(errorType)
+                    + ": "
+                    + str(value)
+                    + "\n"
+                    + str(traceback)
+                )
 
 
 if __name__ == "__main__":
-
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     import argparse
-    arg_parser = argparse.ArgumentParser("remoterunner executes remote commands on a given machine")
 
-    arg_parser.add_argument("--ipaddress", help="Address of machine to run commands on", required=True)
-    arg_parser.add_argument("--username", help="Username for logon to remote machine", default=None)
-    arg_parser.add_argument("--password", help="Password for logon to remote machine", default=None)
-    arg_parser.add_argument("--command", help="The command to run on the remote machine", default=None)
-    arg_parser.add_argument("--logfile", help="The name of logfile to write to", default=None)
-    arg_parser.add_argument("--timeout", type=bool, help="Timeout for the command in seconds (default 300 seconds)",
-                            default=300)
+    arg_parser = argparse.ArgumentParser(
+        "remoterunner executes remote commands on a given machine"
+    )
+
+    arg_parser.add_argument(
+        "--ipaddress", help="Address of machine to run commands on", required=True
+    )
+    arg_parser.add_argument(
+        "--username", help="Username for logon to remote machine", default=None
+    )
+    arg_parser.add_argument(
+        "--password", help="Password for logon to remote machine", default=None
+    )
+    arg_parser.add_argument(
+        "--command", help="The command to run on the remote machine", default=None
+    )
+    arg_parser.add_argument(
+        "--logfile", help="The name of logfile to write to", default=None
+    )
+    arg_parser.add_argument(
+        "--timeout",
+        type=bool,
+        help="Timeout for the command in seconds (default 300 seconds)",
+        default=300,
+    )
 
     args = arg_parser.parse_args()
 
-    with RemoteRunner(ipaddress=args.ipaddress, username=args.username, password=args.password,
-                      command=args.command, verbose=True, logfile=args.logfile, timeout=args.timeout) as runner:
+    with RemoteRunner(
+        ipaddress=args.ipaddress,
+        username=args.username,
+        password=args.password,
+        command=args.command,
+        verbose=True,
+        logfile=args.logfile,
+        timeout=args.timeout,
+    ) as runner:
         runner.run_command()

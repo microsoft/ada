@@ -7,6 +7,7 @@ import datetime
 import sys
 import _thread
 from tplink_smartplug import TplinkSmartPlug
+from internet import wait_for_internet, get_local_ip
 
 
 class TplinkServer:
@@ -34,7 +35,7 @@ class TplinkServer:
                 s.bind((self.server_endpoint[0], 0))
                 s.settimeout(5)
                 s.connect(self.server_endpoint)
-                s.sendall(bytes("HS105Switches", 'utf-8'))
+                s.sendall(bytes("HS105Switches", "utf-8"))
                 while True:
                     try:
                         request = s.recv(16000)
@@ -55,7 +56,7 @@ class TplinkServer:
                                 response = self.get_status()
                             else:
                                 response = "unknown request: " + request
-                            s.sendall(bytes(response, 'utf-8'))
+                            s.sendall(bytes(response, "utf-8"))
                     except socket.timeout:
                         # totally normal, since out socket has a timeout value of 1 minute.
                         time.sleep(1)
@@ -145,27 +146,45 @@ def find_local_ips(local_ip, server_name, server_port):
     return good
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug")
-    parser.add_argument("--host", help="Name of Ada server we want to connect to.", default="ada-core")
+    parser.add_argument(
+        "--host", help="Name of Ada server we want to connect to.", default="ada-core"
+    )
     parser.add_argument("--local", help="Override the local ipaddress to use.")
-    parser.add_argument("--port", type=int, help="Port we want to connect to on that server", default=12345)
+    parser.add_argument(
+        "--port",
+        type=int,
+        help="Port we want to connect to on that server",
+        default=12345,
+    )
     parser.add_argument("--server", help="Server ip address to use", default=None)
-    parser.add_argument("--test", help="Protend we did find some switches", action="store_true")
+    parser.add_argument(
+        "--test", help="Protend we did find some switches", action="store_true"
+    )
     args = parser.parse_args()
+
+    wait_for_internet()
+    local_ip = args.local
+    if local_ip is None:
+        local_ip = get_local_ip()
+
+    retry_time = 10  # seconds
 
     # Set target IP, port and command to send
     while True:
         try:
             switches = []
             found_server_ip = args.server
-            if args.test and (not found_server_ip or not args.local):
+            if args.test and (not found_server_ip or not local_ip):
                 print("### --test requires --server and --local arg to be set")
                 sys.exit(1)
             if args.test:
-                switches += [(args.local, "192.168.1.199")]
+                switches += [(local_ip, "192.168.1.199")]
             else:
-                for local_ip, server_ip in find_local_ips(args.local, args.host, args.port):
+                for local_ip, server_ip in find_local_ips(
+                    local_ip, args.host, args.port
+                ):
                     print("Searching network from ip address: {} ...".format(local_ip))
                     for addr in TplinkSmartPlug.findHS105Devices(local_ip):
                         if not found_server_ip:
@@ -175,7 +194,7 @@ if __name__ == '__main__':
 
             if len(switches) == 0:
                 print("Could not find your local HS105 switches", flush=True)
-                time.sleep(1)
+                time.sleep(retry_time)
             elif found_server_ip is None:
                 print("Cound not find Ada server {}".format(args.host))
             else:
@@ -189,4 +208,4 @@ if __name__ == '__main__':
                     time.sleep(1)
         except Exception as e:
             print("Exception: {}".format(e), flush=True)
-            time.sleep(1)
+            time.sleep(retry_time)

@@ -4,10 +4,9 @@ import argparse
 from tplink_smartplug import *
 import datetime
 from astral import Astral
-import inspect
+
 
 class Schedule:
-
     def __init__(self):
         self.lights = []
 
@@ -29,19 +28,29 @@ class Schedule:
 
         while True:
             now = datetime.datetime.now()
-            #now = datetime.datetime(2020,1,8,22,0,0)
-            midnight = datetime.datetime(now.year, now.month, now.day, 0,0,0) + datetime.timedelta(days=1)
+            # now = datetime.datetime(2020,1,8,22,0,0)
+            midnight = datetime.datetime(
+                now.year, now.month, now.day, 0, 0, 0
+            ) + datetime.timedelta(days=1)
 
             a = Astral()
             city = a["Seattle"]
             sun = city.sun(date=now, local=True)
-            sunset = sun['sunset']
+            sunset = sun["sunset"]
 
             time_to_sunset = sunset.replace(tzinfo=None) - now
             time_to_midnight = midnight - now
 
-            print("turning on in {} seconds".format(int(time_to_sunset.total_seconds())), flush=True)
-            print("turning off in {} seconds".format(int(time_to_midnight.total_seconds())), flush=True)
+            print(
+                "turning on in {} seconds".format(int(time_to_sunset.total_seconds())),
+                flush=True,
+            )
+            print(
+                "turning off in {} seconds".format(
+                    int(time_to_midnight.total_seconds())
+                ),
+                flush=True,
+            )
 
             if time_to_sunset.days < 0:
                 print("turning on", flush=True)
@@ -56,9 +65,13 @@ class Schedule:
             time.sleep(seconds)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser("light_schedule turns lights on at sunset and off at midnight")
-    parser.add_argument("--ip", help="one or more ip addresses of HS105 devices", nargs='+')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        "light_schedule turns lights on at sunset and off at midnight"
+    )
+    parser.add_argument(
+        "--ip", help="one or more ip addresses of HS105 devices", nargs="+"
+    )
     args = parser.parse_args()
 
     if args.ip is None:

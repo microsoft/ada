@@ -28,19 +28,23 @@ class WebPubSubGroup:
     async def connect(self):
         try:
             self.client = WebPubSubServiceClient.from_connection_string(
-                connection_string=self.webpubsub_constr, hub=self.hub_name)
+                connection_string=self.webpubsub_constr, hub=self.hub_name
+            )
             self.closed = False
             token = self.client.get_client_access_token(
                 user_id=self.user_name,
-                roles=[f"webpubsub.joinLeaveGroup.{self.group_name}",
-                       f"webpubsub.sendToGroup.{self.group_name}"])
-            uri = token['url']
+                roles=[
+                    f"webpubsub.joinLeaveGroup.{self.group_name}",
+                    f"webpubsub.sendToGroup.{self.group_name}",
+                ],
+            )
+            uri = token["url"]
             self.web_socket = await websockets.connect(
-                uri, subprotocols=['json.webpubsub.azure.v1'])
-            response = await self._send_receive({
-                "type": "joinGroup",
-                "ackId": self.ack_id,
-                "group": self.group_name})
+                uri, subprotocols=["json.webpubsub.azure.v1"]
+            )
+            response = await self._send_receive(
+                {"type": "joinGroup", "ackId": self.ack_id, "group": self.group_name}
+            )
             self.ack_id += 1
             # now we should have the connection id and an idea of success
             if "event" in response and response["event"] == "connected":
@@ -58,7 +62,7 @@ class WebPubSubGroup:
             "group": self.group_name,
             "dataType": "json",
             "data": msg,
-            "ackId": self.ack_id
+            "ackId": self.ack_id,
         }
         self.ack_id += 1
         self.send_queue.put(groupMessage)

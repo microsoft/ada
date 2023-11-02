@@ -16,11 +16,13 @@ if not connection_string:
     sys.exit(1)
 
 
-zip_file_name = 'AdaKiosk.zip'
-blob_store_container = 'adakiosk'
+zip_file_name = "AdaKiosk.zip"
+blob_store_container = "adakiosk"
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-folder = os.path.join(script_dir, "..", "..", "AdaKiosk", "bin", "Release", "net5.0-windows")
+folder = os.path.join(
+    script_dir, "..", "..", "AdaKiosk", "bin", "Release", "net5.0-windows"
+)
 
 
 def zipdir(path, ziph):
@@ -29,7 +31,8 @@ def zipdir(path, ziph):
     for root, dirs, files in os.walk(path):
         for file in files:
             fullPath = os.path.join(root, file)
-            relative_path = fullPath[len(path) + 1:]
+            offset = len(path) + 1
+            relative_path = fullPath[offset:]
             print("zipping: " + relative_path)
             ziph.write(fullPath, relative_path)
             count += 1
@@ -40,12 +43,11 @@ def create_zip(filename, folder):
     print("Creating zip file: " + filename)
     if os.path.exists(filename):
         os.remove(filename)
-    with zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as zipf:
         return zipdir(folder, zipf)
 
 
 def upload_file(filename, container):
-
     with open(filename, "rb") as f:
         bytes = f.read()
         byte_key = binascii.unhexlify("414441")
@@ -61,11 +63,11 @@ def upload_file(filename, container):
     with open(filename, "rb") as data:
         container.upload_blob(filename, data, overwrite=True, validate_content=True)
 
-    hashData = bytearray(hash, 'utf-8')
+    hashData = bytearray(hash, "utf-8")
     container.upload_blob(filename + ".hash", hashData, overwrite=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if not os.path.exists(folder):
         print("Please build the Release build.")
         sys.exit(1)

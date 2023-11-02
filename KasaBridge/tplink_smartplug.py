@@ -13,18 +13,19 @@ import time
 import struct
 import json
 
-_commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
-             'on'       : '{"system":{"set_relay_state":{"state":1}}}',
-             'off'      : '{"system":{"set_relay_state":{"state":0}}}',
-             'cloudinfo': '{"cnCloud":{"get_info":{}}}',
-             'wlanscan' : '{"netif":{"get_scaninfo":{"refresh":0}}}',
-             'time'     : '{"time":{"get_time":{}}}',
-             'schedule' : '{"schedule":{"get_rules":{}}}',
-             'countdown': '{"count_down":{"get_rules":{}}}',
-             'antitheft': '{"anti_theft":{"get_rules":{}}}',
-             'reboot'   : '{"system":{"reboot":{"delay":1}}}',
-             'reset'    : '{"system":{"reset":{"delay":1}}}',
-             'energy'   : '{"emeter":{"get_realtime":{}}}'
+_commands = {
+    "info": '{"system":{"get_sysinfo":{}}}',
+    "on": '{"system":{"set_relay_state":{"state":1}}}',
+    "off": '{"system":{"set_relay_state":{"state":0}}}',
+    "cloudinfo": '{"cnCloud":{"get_info":{}}}',
+    "wlanscan": '{"netif":{"get_scaninfo":{"refresh":0}}}',
+    "time": '{"time":{"get_time":{}}}',
+    "schedule": '{"schedule":{"get_rules":{}}}',
+    "countdown": '{"count_down":{"get_rules":{}}}',
+    "antitheft": '{"anti_theft":{"get_rules":{}}}',
+    "reboot": '{"system":{"reboot":{"delay":1}}}',
+    "reset": '{"system":{"reset":{"delay":1}}}',
+    "energy": '{"emeter":{"get_realtime":{}}}',
 }
 
 
@@ -41,7 +42,7 @@ class TplinkSmartPlug(object):
         key = 171
         ascii_bytes = message.encode()
         if include_length:
-            result = bytearray(struct.pack('>I', len(ascii_bytes)))
+            result = bytearray(struct.pack(">I", len(ascii_bytes)))
         else:
             result = bytearray()
         for a in ascii_bytes:
@@ -63,6 +64,7 @@ class TplinkSmartPlug(object):
     @staticmethod
     def getLocalIpAddress():
         import socket
+
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         addr = s.getsockname()[0]
@@ -72,13 +74,15 @@ class TplinkSmartPlug(object):
     @staticmethod
     def findHS105Devices(local_ip, timeout=60):
         # this should also work, but it doesn't seem to when raspberry pi is an access point.
-        broadcast_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        broadcast_sock = socket.socket(
+            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
+        )
         broadcast_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         broadcast_sock.settimeout(10)
         broadcast_sock.bind((local_ip, 9999))
         hello = TplinkSmartPlug.encrypt(_commands["info"], False)
 
-        broadcast_sock.sendto(hello, ('<broadcast>', 9999))
+        broadcast_sock.sendto(hello, ("<broadcast>", 9999))
         start = time.time()
         result = []
         while time.time() < start + timeout:
@@ -94,7 +98,11 @@ class TplinkSmartPlug(object):
                             if info is not None and "model" in info:
                                 model = info["model"]
                                 if model is not None:
-                                    if "HS105" in model or "HS103" in model or "EP10" in model:
+                                    if (
+                                        "HS105" in model
+                                        or "HS103" in model
+                                        or "EP10" in model
+                                    ):
                                         ip = addr[0]
                                         if ip not in result:
                                             result += [ip]
@@ -103,7 +111,7 @@ class TplinkSmartPlug(object):
                 if len(result) > 0:
                     break
                 print("### listen timeout, retrying...")
-                broadcast_sock.sendto(hello, ('<broadcast>', 9999))
+                broadcast_sock.sendto(hello, ("<broadcast>", 9999))
 
         broadcast_sock.close()
         return result
@@ -164,13 +172,35 @@ class TplinkSmartPlug(object):
         sock_tcp.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parse commandline arguments
     parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug")
-    parser.add_argument("-l", "--local", metavar="<ipaddress>", help="Override for local IP address to use")
-    parser.add_argument("-t", "--target", metavar="<hostname>", help="Target hostname or IP address", default="localhost")
-    parser.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(_commands), choices=_commands)
-    parser.add_argument("-f", "--find", help="Find local HS105, HS103, and EP10 devices", action="store_true")
+    parser.add_argument(
+        "-l",
+        "--local",
+        metavar="<ipaddress>",
+        help="Override for local IP address to use",
+    )
+    parser.add_argument(
+        "-t",
+        "--target",
+        metavar="<hostname>",
+        help="Target hostname or IP address",
+        default="localhost",
+    )
+    parser.add_argument(
+        "-c",
+        "--command",
+        metavar="<command>",
+        help="Preset command to send. Choices are: " + ", ".join(_commands),
+        choices=_commands,
+    )
+    parser.add_argument(
+        "-f",
+        "--find",
+        help="Find local HS105, HS103, and EP10 devices",
+        action="store_true",
+    )
     args = parser.parse_args()
 
     # Set target IP, port and command to send
@@ -181,7 +211,9 @@ if __name__ == '__main__':
     if args.find:
         if not local_ip:
             local_ip = TplinkSmartPlug.getLocalIpAddress()
-        print("Looking for HS105, HS103, and EP10 devices on network {}".format(local_ip))
+        print(
+            "Looking for HS105, HS103, and EP10 devices on network {}".format(local_ip)
+        )
         found = False
         for addr in TplinkSmartPlug.findHS105Devices(local_ip):
             found = True

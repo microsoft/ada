@@ -1,6 +1,5 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-import datetime
 import os
 import json
 from dateutil import tz
@@ -26,14 +25,18 @@ def dump_emotions(config, partition):
 
         count = 0
         try:
-            query_results = list(storage_account.query_entities('Psi', filter=query, num_results=1000, timeout=30))
+            query_results = list(
+                storage_account.query_entities(
+                    "Psi", filter=query, num_results=1000, timeout=30
+                )
+            )
             for entity in query_results:
-                for x in ['Face1', 'Face2', 'Face3', 'Face4', 'Face5']:
+                for x in ["Face1", "Face2", "Face3", "Face4", "Face5"]:
                     d = entity["Timestamp"]
                     localtime = d.astimezone(tz.tzlocal())
                     row = [str(localtime)]
                     for sentiment in all_sentiments:
-                        key = '{}_{}'.format(x, sentiment)
+                        key = "{}_{}".format(x, sentiment)
                         if key in entity:
                             row += [entity[key]]
                     if len(row) > 1:
@@ -46,13 +49,12 @@ def dump_emotions(config, partition):
 
 
 def dump_emotions_from_all_cameras(config):
- for zone in config.camera_zones:
-     for cam in zone:
-         dump_emotions(config, cam)
+    for zone in config.camera_zones:
+        for cam in zone:
+            dump_emotions(config, cam)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     with open(os.path.join(script_dir, "config.json"), "r") as f:
         d = json.load(f)
         config = namedtuple("Config", d.keys())(*d.values())

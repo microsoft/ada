@@ -39,7 +39,7 @@ def upload_file(filename, blob_container_name):
     with open(hexfile, "rb") as data:
         container.upload_blob(filename, data, overwrite=True)
 
-    data = bytearray(hash, 'utf-8')
+    data = bytearray(hash, "utf-8")
     container.upload_blob(filename + ".hash", data, overwrite=True)
     print("Success")
 
