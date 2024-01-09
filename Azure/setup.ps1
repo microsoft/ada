@@ -19,16 +19,15 @@ $functions_service_plan = "ada-server-plan"
 $function_app_sku = "S1"
 $function_app = "ada-server-functions"
 $function_runtime = "dotnet"
-$functions_version = "3.1"
+$functions_version = "3"
+$functions_runtime_version = "3.1"
 
 Set-Location $PSScriptRoot
 
-function Invoke-Tool($prompt, $command)
-{
+function Invoke-Tool($prompt, $command) {
     $output = Invoke-Expression $command
     $ec = $LastExitCode
-    if ($ec -ne 0)
-    {
+    if ($ec -ne 0) {
         Write-Host "### Error $ec running command $command" -ForegroundColor Red
         write-Host $output
         Exit $ec
@@ -36,50 +35,48 @@ function Invoke-Tool($prompt, $command)
     return $output
 }
 
-function GetConnectionString()
-{
+function GetConnectionString() {
     $x = Invoke-Tool -prompt "Get storage account connection string..." -command "az storage account show-connection-string --name $storage_account_name  --resource-group $resource_group" | ConvertFrom-Json
     return $x.connectionString
 }
 
-function GetStorageAccount()
-{
+function GetStorageAccount() {
     $output = &az storage account list --resource-group $resource_group 2>&1
     if ($output.ToString().Contains("could not be found")) {
         $storageAcct = $null
-    } else {
+    }
+    else {
         $storageInfo = $output | ConvertFrom-Json
         $storageAcct = $storageInfo | where-object name -eq $storage_account_name
     }
     return $storageAcct
 }
 
-function PrintJsonStatus($prompt, $obj, $name)
-{
+function PrintJsonStatus($prompt, $obj, $name) {
     $x = $obj | ConvertFrom-Json
     $p = $x | Get-Member -Name $name
-    if ($null -ne $p){
+    if ($null -ne $p) {
         $value = $p.Definition.Split('=')[1]
         Write-Host $prompt " is " $value
     }
 }
 
-function Set-JToken($jobject, $name, $value)
-{
+function Set-JToken($jobject, $name, $value) {
     # adds property to Newtonsoft.Json.Linq.JObject
     $v = $jobject.GetValue($name)
-    if ($null -eq $v){
+    if ($null -eq $v) {
         $jobject.Add($name, [Newtonsoft.Json.Linq.JValue]::CreateString($value))
-    } else {
+    }
+    else {
         $v.Value = $value
     }
 }
-function AddHostSettings($filename, $name, $value)
-{
+function AddHostSettings($filename, $name, $value) {
     Write-Host "Updating $filename"
     if (-not (Test-Path -Path $filename)) {
         $json = "{ ""IsEncrypted"": false, ""Values"": { } }";
-    } else {
+    }
+    else {
         $json = Get-Content -Path $filename
     }
     $hostsettings = [Newtonsoft.Json.JsonConvert]::DeserializeObject($json)
@@ -96,8 +93,7 @@ if ($ec -eq 3) {
     Write-Host "Resource group $resource_group not found and this script doesn't have permission to create it."
     Exit-PSSession
 }
-elseif ($ec -ne 0)
-{
+elseif ($ec -ne 0) {
     Write-Host "### Error $ec looking for resource group $resource_group" -ForegroundColor Red
     write-Host $output
     Exit-PSSession
@@ -122,32 +118,41 @@ if ($null -eq $storageAcct) {
 }
 
 # create function app service plan.
-$output = Invoke-Tool -prompt "Checking functions app service plan..." -command "az appservice plan show --name $functions_service_plan --resource-group $resource_group"
-if ($null -eq $output)
-{
-    $output  = Invoke-Tool -prompt "Creating functions app service plan $functions_service_plan (windows, sku $function_app_sku)..." -command "az appservice plan create --resource-group $resource_group --name $functions_service_plan --sku $function_app_sku --location $plan_location"
-} else {
-    PrintJsonStatus -prompt "Service plan $functions_service_plan" -obj $output -name "status"
+Write-Host "Checking function app service plan..."
+$output = &az appservice plan show --name $functions_service_plan --resource-group $resource_group
+if ($null -eq $output) {
+    $output = Invoke-Tool -prompt "Creating functions app service plan $functions_service_plan (windows, sku $function_app_sku)..." -command "az appservice plan create --resource-group $resource_group --name $functions_service_plan --sku $function_app_sku --location $plan_location"
+}
+
+$output = $output | ConvertFrom-Json
+if ($output.properties.status -ne "Ready") {
+    Write-Host "### Service plan $functions_service_plan is not ready" -ForegroundColor Red
+    write-Host $output
+    Exit-PSSession
 }
 
 Write-Host "Checking function app setup..."
 $output = &az functionapp show --name $function_app --resource-group $resource_group 2>&1
 $ec = $LastExitCode
-if ($ec -eq 3)
-{
-    $output = Invoke-Tool -prompt "Creating function app $function_app..." -command "az functionapp create --resource-group $resource_group --plan $functions_service_plan --storage-account $storage_account_name --name $function_app --runtime $function_runtime --functions-version $functions_version "
+if ($ec -eq 3) {
+    $output = Invoke-Tool -prompt "Creating function app $function_app..." -command "az functionapp create --resource-group $resource_group --plan $functions_service_plan --storage-account $storage_account_name --name $function_app --runtime $function_runtime --functions-version $functions_version --os-type Windows --runtime-version $functions_runtime_version --disable-app-insights --https-only"
 }
-elseif ($ec -ne 0)
-{
-    Write-Host "### Error $ec looking for function app '$function_app' in resource group $resource_group" -ForegroundColor Red
+elseif ($ec -ne 0) {
+    Write-Host "### Error $ec looking for functionapp $function_app" -ForegroundColor Red
     write-Host $output
     Exit-PSSession
-} else {
-    PrintJsonStatus -prompt "Function $function_app" -obj $output -name "state"
+}
+
+$output = $output | ConvertFrom-Json
+if ($output.state -ne "Running") {
+    Write-Host "### Function app $function_app is not running" -ForegroundColor Red
+    write-Host $output
+    Exit-PSSession
 }
 
 $storage_connection = GetConnectionString
 $apiKey = (New-Guid).ToString()
+$apiKey = "e1ace8f3-1fac-4839-8031-f760a2e5c0f1"
 
 $output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaWebPubSubConnectionString=$webpubsub_connstr`""
 $output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaStorageConnectionString=$storage_connection`""
