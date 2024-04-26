@@ -34,8 +34,8 @@
     "pubsub_group": "demogroup",
     "pubsub_hub": "AdaKiosk",
 
-    "on_time": [12, 0],
-    "off_time": [21, 0],
+    "on_time": [14, 0],
+    "off_time": [20, 0],
     "turn_off_timeout": 120,
     "bridge_ping_interval": 600,
     "on_days": [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -559,7 +559,7 @@
                         [ 0, 0, 255 ]
                     ],
                     "seconds": 5,
-                    "hold": 5
+                    "hold": 60
                 },
                 {
                     "command": "CrossFade",
@@ -567,7 +567,7 @@
                         [ 0, 80, 255 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -576,7 +576,7 @@
                         [ 0, 128, 255 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -585,7 +585,7 @@
                         [ 0, 255, 255 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -594,7 +594,7 @@
                         [ 0, 255, 128 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -603,7 +603,7 @@
                         [ 0, 255, 80 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -612,7 +612,7 @@
                         [ 0, 255, 0 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -621,7 +621,7 @@
                         [ 80, 255, 0 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -630,7 +630,7 @@
                         [ 128, 255, 0 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -639,7 +639,7 @@
                         [ 255, 255, 0 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -648,7 +648,7 @@
                         [ 255, 128, 0 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -657,7 +657,7 @@
                         [ 255, 80, 0 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -666,6 +666,7 @@
                         [ 255, 0, 0 ]
                     ],
                     "seconds": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -674,7 +675,7 @@
                         [ 255, 0, 80 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -683,7 +684,7 @@
                         [ 255, 0, 128 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -692,7 +693,7 @@
                         [ 255, 0, 255 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -701,7 +702,7 @@
                         [ 128, 0, 255 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 },
                 {
@@ -710,7 +711,7 @@
                         [ 80, 0, 255 ]
                     ],
                     "seconds": 5,
-                    "hold": 5,
+                    "hold": 60,
                     "start": "after-previous"
                 }
             ]
