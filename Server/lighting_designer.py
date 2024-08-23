@@ -145,6 +145,7 @@ class LightingDesigner:
         if user == "server":
             # ignore our own messages.
             return
+        print(f"message received: {msg}")
         self.msgqueue.enqueue(0, msg)
 
     def _set_power_state(self, option):

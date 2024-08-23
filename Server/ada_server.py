@@ -35,7 +35,7 @@ class AdaServer:
     of priority so something can jump to the front of the queue.
     """
 
-    def __init__(self, config, msgbus, server_endpoint, connection_string):
+    def __init__(self, config, msgbus, server_endpoint, account_url):
         self.config = config
         self.msgbus = msgbus
         self.server_endpoint = server_endpoint
@@ -53,7 +53,7 @@ class AdaServer:
         self.bridge = None
         self.max_animations_per_iteration = 5
         self.firmware = firmware.TeensyFirmwareUpdater(
-            "firmware", "TeensyFirmware.TEENSY40.hex", "firmware.hex", connection_string
+            account_url, "firmware", "TeensyFirmware.TEENSY40.hex", "firmware.hex",
         )
 
     def start(self):
@@ -428,7 +428,7 @@ async def async_read_enter(server):
             await asyncio.sleep(0.1)
 
 
-async def _main(config, sensei, ip_address, connection_string):
+async def _main(config, sensei, ip_address, account_url):
     endpoint = (ip_address, config.server_port)
     msgbus = None
 
@@ -441,7 +441,7 @@ async def _main(config, sensei, ip_address, connection_string):
             webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group
         )
         await msgbus.connect()
-    server = AdaServer(config, msgbus, endpoint, connection_string)
+    server = AdaServer(config, msgbus, endpoint, account_url)
     server.start()
     designer = LightingDesigner(server, msgbus, sensei, config)
     designer.start()
@@ -475,10 +475,10 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    connection_string = os.getenv("ADA_STORAGE_CONNECTION_STRING")
-    if not connection_string and not args.loop:
+    account_url = os.getenv("ADA_STORAGE_ACCOUNT")
+    if not account_url:
         print(
-            "Please configure your ADA_STORAGE_CONNECTION_STRING environment variable"
+            "Please configure your ADA_STORAGE_ACCOUNT environment variable"
         )
         sys.exit(1)
 
@@ -487,9 +487,9 @@ if __name__ == "__main__":
     if ip is None:
         ip = get_local_ip()
 
-    sensei = sensei.Sensei(
-        config.camera_zones, config.colors_for_emotions, connection_string, config.debug
-    )
+    # sensei connection string is disabled for now since we need to move to
+    # azure arc based default credentials on the cosmos database.
+    sensei = sensei.Sensei(config.camera_zones, config.colors_for_emotions, None, config.debug)
 
     args.loop = True  # Sensei cosmos database is offline right now...
     if args.loop:
@@ -497,5 +497,5 @@ if __name__ == "__main__":
         sensei.load(history_files, args.delay, config.playback_weights)
 
     asyncio.get_event_loop().run_until_complete(
-        _main(config, sensei, ip, connection_string)
+        _main(config, sensei, ip, account_url)
     )

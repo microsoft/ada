@@ -6,6 +6,7 @@ import logging
 import _thread
 import time
 from azure.storage.blob import BlobClient
+from azure.identity import DefaultAzureCredential
 
 
 class TeensyFirmwareUpdater:
@@ -14,14 +15,14 @@ class TeensyFirmwareUpdater:
     stay in sync with the latest firmware.  It assumes the given remove blob
     name is accompanies by a hash file named: blobName + ".hash"."""
 
-    def __init__(self, container_name, blob_name, filename, connection_string):
+    def __init__(self, account_url, container_name, blob_name, filename):
         self.closed = False
         self.firmware = None
         self.container_name = container_name
         self.blob_name = blob_name
         self.filename = filename
         self.hash = None
-        self.connection_string = connection_string
+        self.account_url = account_url
 
     def start(self):
         _thread.start_new_thread(self.download_thread, ())
@@ -75,8 +76,10 @@ class TeensyFirmwareUpdater:
                 "azure.core.pipeline.policies.http_logging_policy"
             )
             logger.setLevel(logging.ERROR)
-            blob_client = BlobClient.from_connection_string(
-                self.connection_string, self.container_name, blob_name=blob_name
+            blob_client = BlobClient(self.account_url,
+                                     self.container_name,
+                                     blob_name=blob_name,
+                                     credential=DefaultAzureCredential()
             )
 
             with open(filename, "wb") as f:
