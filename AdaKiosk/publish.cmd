@@ -28,10 +28,14 @@ if not EXIST "%BITS%\setup.exe" goto :nobits
 echo "Please check contents of %BITS%..."
 pause
 
-call AzurePublishClickOnce.cmd bin\publish adakiosk/ClickOnce "%ADA_STORAGE_CONNECTION_STRING%"
-if ERRORLEVEL 1 goto :eof
+set zipfile=bin\AdaKiosk.zip
+if exist %zipfile% del %zipfile%
+powershell -c "Compress-Archive -Path .\bin\Release\net7.0-windows\* -DestinationPath %zipfile%"
+if ERRORLEVEL 1 goto :err_zip
 
-pwsh -f UploadZip.ps1
+echo Creating new github release for version %VERSION%
+gh release create %VERSION% "%zipfile%" --generate-notes --title "AdaKiosk %VERSION%"
+if ERRORLEVEL 1 goto :err_gh
 
 goto :eof
 
@@ -50,7 +54,16 @@ exit /b 1
 
 :nobits
 echo %BITS% folder seems incomplete, please check publish step.
-goto :eof
+exit /b 1
 
 :noconnection
 echo Please set ADA_STORAGE_CONNECTION_STRING
+exit /b 1
+
+:err_zip
+echo Error creating AdaKiosk.zip
+exit /b 1
+
+:err_gh
+echo Error creating github release
+exit /b 1

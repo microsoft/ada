@@ -1,6 +1,11 @@
+azure-identity
+azure-keyvault-keys
+azure-keyvault-secrets
 azure-storage-blob
 azure-cosmosdb-table
+azure-data-tables
 azure-messaging-webpubsubservice
+aiohttp
 applicationinsights
 opencv-contrib-python
 comtypes
@@ -10,3 +15,4 @@ paramiko
 websockets
 asyncio
 pandas
+
