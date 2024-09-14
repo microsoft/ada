@@ -2,9 +2,9 @@
 <Project>
 	<PropertyGroup>
 		<ApplicationRevision>0</ApplicationRevision>
-		<ApplicationVersion>1.0.7.0</ApplicationVersion>
-		<AssemblyVersion>1.0.7.0</AssemblyVersion>
-		<Version>1.0.7.0</Version>
+		<ApplicationVersion>1.0.8.0</ApplicationVersion>
+		<AssemblyVersion>1.0.8.0</AssemblyVersion>
+		<Version>1.0.8.0</Version>
 		<RunCodeAnalysis>false</RunCodeAnalysis>
 		<Company>Microsoft</Company>
 		<Product>AdaKiosk</Product>

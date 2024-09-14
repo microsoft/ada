@@ -45,6 +45,7 @@ namespace AdaKioskService
             }
             else
             {
+                this.gitBaseUrl = this.gitBaseUrl.Trim('/');
                 StartTimer();
             }
         }
@@ -113,7 +114,7 @@ namespace AdaKioskService
                 {
                     // var url = $"{baseReleasesUrl}/{version}/{zipFileName}";
                     var zipFileName = "AdaKioskService.zip";
-                    var zipUrl = $"{this.gitBaseUrl}/releases/{newVersion}/{zipFileName}";
+                    var zipUrl = $"{this.gitBaseUrl}/releases/download/{newVersion}/{zipFileName}";
                     log.WriteMessage("AdaKioskService found service version {0}", newVersion);
                     var zipFile = System.IO.Path.Combine(downloadDir, zipFileName);
                     await GitReleaseUpdater.DownloadAndUnzip(zipUrl, zipFile, serviceTempDir);
@@ -134,7 +135,7 @@ namespace AdaKioskService
                 {
                     log.WriteMessage("AdaKioskService found app update " + newVersion);
                     var zipFileName = "AdaKiosk.zip";
-                    var zipUrl = $"{this.gitBaseUrl}/releases/{newVersion}/{zipFileName}";
+                    var zipUrl = $"{this.gitBaseUrl}/releases/download/{newVersion}/{zipFileName}";
                     var zipFile = System.IO.Path.Combine(downloadDir, zipFileName);
                     await GitReleaseUpdater.InstallUpdate(zipUrl, zipFile, installDir, programName);
 
@@ -150,7 +151,6 @@ namespace AdaKioskService
                 } 
                 else
                 {
-
                     log.WriteMessage("AdaKioskService is up to date");
                 }
 
