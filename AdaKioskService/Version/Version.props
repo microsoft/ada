@@ -8,5 +8,6 @@
 		<RunCodeAnalysis>false</RunCodeAnalysis>
 		<Company>Microsoft</Company>
 		<Product>AdaKiosk</Product>
+		<UpdateDelay>60</UpdateDelay>
 	</PropertyGroup>
 </Project>
