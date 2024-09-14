@@ -12,14 +12,27 @@ namespace AdaKioskService
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static void Main()
+        static async Task Main()
         {
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
+            if (System.Diagnostics.Debugger.IsAttached)
             {
-                new AdaKioskService()
-            };
-            ServiceBase.Run(ServicesToRun);
+                await Task.Run(async () =>
+                {
+                    var service = new AdaKioskService();
+                    service.UpdateCheckDelay = 1000; // 1 second!
+                    service.DebugStart();
+                    await Task.Delay(1000 * 60 * 30);
+                });             
+            }
+            else
+            {
+                ServiceBase[] ServicesToRun;
+                ServicesToRun = new ServiceBase[]
+                {
+                    new AdaKioskService()
+                };
+                ServiceBase.Run(ServicesToRun);
+            }
         }
     }
 }
