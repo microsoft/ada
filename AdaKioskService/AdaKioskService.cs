@@ -108,7 +108,14 @@ namespace AdaKioskService
                 var path = uri.PathAndQuery;
                 var githubRawFiles = "https://raw.githubusercontent.com/";
                 var serviceVersionUrl = $"{githubRawFiles}/{path}/{mainBranch}/AdaKioskService/Version/Version.props";
-                var newVersion = await GitReleaseUpdater.CheckForUpdate(serviceVersionUrl, hashFile);
+                var newTuple = await GitReleaseUpdater.CheckForUpdate(serviceVersionUrl, hashFile);
+                var newVersion = newTuple.Item1;
+                var newUpdateRate = newTuple.Item2;
+                if (newUpdateRate >= 15)
+                {
+                    // convert minutes to milliseconds
+                    this.UpdateCheckDelay = newUpdateRate * 60 * 1000;
+                }
                 var updated = false;
                 if (newVersion != null)
                 {
@@ -130,7 +137,8 @@ namespace AdaKioskService
                 hashFileName = "AdaKiosk.zip.version";
                 hashFile = System.IO.Path.Combine(downloadDir, hashFileName);
                 var kioskVersionUrl = $"{githubRawFiles}/{path}/{mainBranch}/AdaKiosk/Version/Version.props";
-                newVersion = await GitReleaseUpdater.CheckForUpdate(kioskVersionUrl, hashFile);
+                newTuple = await GitReleaseUpdater.CheckForUpdate(kioskVersionUrl, hashFile);
+                newVersion = newTuple.Item1;
                 if (newVersion != null)
                 {
                     log.WriteMessage("AdaKioskService found app update " + newVersion);

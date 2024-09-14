@@ -20,7 +20,7 @@ namespace AdaKioskUpdater
         /// </summary>
         /// <param name="versionUrl">Location of Version.props file to download</param>
         /// <param name="localVersionFile">The local file containing previous version</param>
-        public static async Task<string> CheckForUpdate(string versionUrl, string localVersionFile)
+        public static async Task<Tuple<string, int>> CheckForUpdate(string versionUrl, string localVersionFile)
         {
             // https://raw.githubusercontent.com/microsoft/ada/main/AdaKiosk/Version/Version.props
             var text = await DownloadText(versionUrl);
@@ -30,6 +30,10 @@ namespace AdaKioskUpdater
             {
                 throw new Exception($"Could not find an Project/PropertyGroup/ApplicationVersion in the requested url: {versionUrl}");
             }
+
+            var updateDelay = xdoc.Root.Element("PropertyGroup")?.Element("UpdateDelay")?.Value;
+            int newUpdateRate = 0;
+            int.TryParse(updateDelay, out newUpdateRate);
 
             version = version.Trim();
 
@@ -43,7 +47,7 @@ namespace AdaKioskUpdater
                 }
             }
             File.WriteAllText(localVersionFile, version);
-            return version;
+            return new Tuple<string,int>(version, newUpdateRate);
         }
 
         static async Task<string> DownloadText(string url)
