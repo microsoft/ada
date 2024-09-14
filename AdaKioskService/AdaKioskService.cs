@@ -106,7 +106,7 @@ namespace AdaKioskService
                 var hashFile = System.IO.Path.Combine(downloadDir, hashFileName);
                 var uri = new Uri(this.gitBaseUrl);
                 var path = uri.PathAndQuery;
-                var githubRawFiles = "https://raw.githubusercontent.com/";
+                var githubRawFiles = "https://raw.githubusercontent.com";
                 var serviceVersionUrl = $"{githubRawFiles}/{path}/{mainBranch}/AdaKioskService/Version/Version.props";
                 var newTuple = await GitReleaseUpdater.CheckForUpdate(serviceVersionUrl, hashFile);
                 var newVersion = newTuple.Item1;

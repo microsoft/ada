@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -43,7 +44,7 @@ namespace AdaKioskUpdater
                 if (oldVersion == version)
                 {
                     // we are up to date!
-                    return null;
+                    return new Tuple<string, int>(null, newUpdateRate);
                 }
             }
             File.WriteAllText(localVersionFile, version);
@@ -53,6 +54,7 @@ namespace AdaKioskUpdater
         static async Task<string> DownloadText(string url)
         {
             HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
             return await client.GetStringAsync(url);
         }
 
@@ -93,6 +95,7 @@ namespace AdaKioskUpdater
         static async Task DownloadBinaryFile(string url, string localFile)
         {
             HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
             var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
