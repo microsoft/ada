@@ -9,6 +9,10 @@ for /f "usebackq" %%i in (`tools\xsl -e -s Version\version.xsl Version\version.p
 )
 echo ### Publishing version %VERSION%...
 
+copy .\Version\Version.props ..\AdaKioskService\Version\Version.props
+call ..\AdaKioskService\build.cmd
+if ERRORLEVEL 1 goto :err_build_service
+
 %ROOT%\tools\UpdateVersion.exe %VERSION% %ROOT%\Properties\PublishProfiles\ClickOnceProfile.pubxml
 
 msbuild /target:restore AdaKiosk.sln
@@ -34,7 +38,7 @@ powershell -c "Compress-Archive -Path .\bin\Release\net7.0-windows\* -Destinatio
 if ERRORLEVEL 1 goto :err_zip
 
 echo Creating new github release for version %VERSION%
-gh release create %VERSION% "%zipfile%" --generate-notes --title "AdaKiosk %VERSION%"
+gh release create %VERSION% "%zipfile%" "..\AdaKioskService\%serviceZipfile%" --generate-notes --title "AdaKiosk %VERSION%"
 if ERRORLEVEL 1 goto :err_gh
 
 goto :eof
@@ -66,4 +70,8 @@ exit /b 1
 
 :err_gh
 echo Error creating github release
+exit /b 1
+
+:err_build_service
+echo Error building AdaKioskService
 exit /b 1

@@ -25,7 +25,7 @@ namespace AdaKioskUpdater
             // https://raw.githubusercontent.com/microsoft/ada/main/AdaKiosk/Version/Version.props
             var text = await DownloadText(versionUrl);
             var xdoc = XDocument.Parse(text);
-            var version = xdoc.Root.Element("Project")?.Element("PropertyGroup")?.Element("ApplicationVersion")?.Value;
+            var version = xdoc.Root.Element("PropertyGroup")?.Element("ApplicationVersion")?.Value;
             if (string.IsNullOrEmpty(version))
             {
                 throw new Exception($"Could not find an Project/PropertyGroup/ApplicationVersion in the requested url: {versionUrl}");
