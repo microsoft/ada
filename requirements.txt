@@ -6,7 +6,6 @@ azure-cosmosdb-table
 azure-data-tables
 azure-messaging-webpubsubservice
 aiohttp
-applicationinsights
 opencv-contrib-python
 comtypes
 imutils
