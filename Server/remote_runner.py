@@ -35,7 +35,7 @@ class RemoteRunner:
 
     def connect_ssh(self):
         self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
         self.print("connecting to target device at " + self.ipaddress)
         self.ssh.connect(self.ipaddress, username=self.username, password=self.password)
 
