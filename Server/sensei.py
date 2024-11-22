@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-import argparse
-import os
-import json
 import _thread
+import argparse
+import json
+import os
 import time
-import pandas as pd
-import numpy as np
 from collections import namedtuple
+
+import numpy as np
+import pandas as pd
 from azure.cosmosdb.table import TableService
+
 import priority_queue
 
 script_dir = os.path.dirname(os.path.abspath(__file__))

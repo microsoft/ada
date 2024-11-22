@@ -1,16 +1,22 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-from datetime import datetime
-from dateutil.parser import parse
 import json
 import random
 import time
-from threading import Thread
 from collections import Counter
+from datetime import datetime
+from threading import Thread
+
+from dateutil.parser import parse
 from suntime import Sun
-from utilities import TimedLatch
+
 from animation import AnimationLoop
+from logger import Logger
 from priority_queue import PriorityQueue
+from utilities import TimedLatch
+
+logger = Logger()
+log = logger.get_root_logger()
 
 
 class LightingDesigner:
@@ -26,7 +32,7 @@ class LightingDesigner:
         self.config = config
         self.msgbus = msgbus
         msgbus.add_listener(self.onmessage)
-        self.entered_custom_state = 0
+        self.entered_custom_state: float = 0.0
         self.msgqueue = PriorityQueue()
         self.server = server
         self.sensei = sensei
@@ -37,8 +43,8 @@ class LightingDesigner:
         self.enable_movement = True
         self.movement_latch = TimedLatch(10)
         self.core_is_on = False
-        self.last_change = 0
-        self.last_cool_animation = 0
+        self.last_change: float = 0.0
+        self.last_cool_animation: float = 0.0
         self.last_color = None
         self.last_camera_emotion = 0
         self.turn_off_time = None
@@ -55,7 +61,7 @@ class LightingDesigner:
         self._check_onoff_times()
         if self._get_cool_animation_time():
             # if server is started when we are already into cool animation time, so ensure this happens.
-            self.last_cool_animation = 0
+            self.last_cool_animation = 0.0
 
     def _check_onoff_times(self):
         """Check if Ada is scheduled to be on today and if so at what start and stop times.
@@ -107,7 +113,7 @@ class LightingDesigner:
         )
 
     def _master_power_on(self):
-        print("### turning on the lights...")
+        log.info("### turning on the lights...")
         bridge = self.server.get_bridge()
         if bridge:
             bridge.turn_on_lights()
@@ -115,7 +121,7 @@ class LightingDesigner:
         self.msgbus.send("/state/on")
 
     def _master_power_off(self):
-        print("### turning off the lights...")
+        log.info("### turning off the lights...")
         bridge = self.server.get_bridge()
         if bridge:
             bridge.turn_off_lights()
@@ -145,13 +151,13 @@ class LightingDesigner:
         if user == "server":
             # ignore our own messages.
             return
-        print(f"message received: {msg}")
+        log.info(f"message received: {msg}")
         self.msgqueue.enqueue(0, msg)
 
     def _set_power_state(self, option):
         self.power_state = option
         if option == "on":
-            print("### power on override")
+            log.info("### power on override")
             self._master_power_on()
             self.power_on_override = True
             self.power_off_override = False
@@ -161,7 +167,7 @@ class LightingDesigner:
             self.turn_off_time = None
             self.msgbus.send("/state/on")  # broadcast to all clients
         elif option == "off":
-            print("### power off override")
+            log.info("### power off override")
             self.power_on_override = False
             self.power_off_override = True
             self.color_override = False
@@ -170,7 +176,7 @@ class LightingDesigner:
             self._fade_to_black()
             self.turn_off_time = None
         elif option == "run":
-            print("### back to normal operation")
+            log.info("### back to normal operation")
             self.power_on_override = False
             self.power_off_override = False
             self.color_override = False
@@ -187,7 +193,7 @@ class LightingDesigner:
             self.auto_reboot_time = None
             self.entered_custom_state = time.time()
         elif option == "reboot":
-            print("### rebooting...")
+            log.info("### rebooting...")
             self.power_on_override = False
             self.power_off_override = True
             self.auto_reboot_time = None
@@ -199,7 +205,7 @@ class LightingDesigner:
             self.entered_custom_state = 0
             self.msgbus.send("/state/reboot")
         elif option == "rebooted":
-            print("### reboot completed")
+            log.info("### reboot completed")
             self.reboot = False
             self.power_on_override = False
             self.power_off_override = False
@@ -209,7 +215,7 @@ class LightingDesigner:
             self.power_state == "on"
             self.msgbus.send("/state/rebooted")
         else:
-            print("error: invalid power state: /power/{}".format(option))
+            log.error("error: invalid power state: /power/{}".format(option))
 
     def _rain_command(self, option):
         if option == "toggle":
@@ -229,7 +235,7 @@ class LightingDesigner:
             self.is_raining = False
             self.stop_rain_time = None
         else:
-            print("error: invalid rain command: /rain/{}".format(option))
+            log.error("error: invalid rain command: /rain/{}".format(option))
 
     def process_next_message(self):
         item = self.msgqueue.dequeue()
@@ -259,7 +265,7 @@ class LightingDesigner:
                 else:
                     self.msgbus.send(f"{pingPrefix}/bridge/ok")
             else:
-                print("### ignoring message:", msg)
+                log.error("### ignoring message:", msg)
         else:
             cmd = parts[0]
             option = parts[1]
@@ -278,22 +284,22 @@ class LightingDesigner:
                         self.animations = AnimationLoop()
                         self.animations.start(animation)
                 except:
-                    print("### invalid animation requested: {}".format(msg))
+                    log.error("### invalid animation requested: {}".format(msg))
             elif cmd == "emotion":
-                print("### emotion override: {}".format(option))
+                log.info("### emotion override: {}".format(option))
                 self._blush(None, option, seconds=2, hold=2)
                 self.color_override = True
                 self.animations = None
                 self._set_power_state("custom")
             elif cmd == "color":
-                print("### color override: {}".format(option))
+                log.info("### color override: {}".format(option))
                 rgb_color = [int(x) for x in option.split(",")]
                 self._set_color(None, rgb_color)
                 self.color_override = True
                 self.animations = None
                 self._set_power_state("custom")
             elif cmd == "dmx":
-                print("### dmx color override: {}".format(option))
+                log.info("### dmx color override: {}".format(option))
                 colors = []
                 i = 1
                 while i < len(parts):
@@ -311,7 +317,7 @@ class LightingDesigner:
                 if len(parts) == 3:
                     color = [int(x) for x in parts[2].split(",")]
                     if len(color) == 3:
-                        print("### zone {} color: {}".format(zone, color))
+                        log.info("### zone {} color: {}".format(zone, color))
                         self._set_zone(zone, color)
                         self.color_override = True
                         self.animations = None
@@ -322,7 +328,9 @@ class LightingDesigner:
                     strip = int(parts[2])
                     color = [int(x) for x in parts[3].split(",")]
                     if len(color) == 3:
-                        print("### strip {} {} color: {}".format(target, strip, color))
+                        log.info(
+                            "### strip {} {} color: {}".format(target, strip, color)
+                        )
                         self._set_strip(target, strip, color)
                         self.color_override = True
                         self.animations = None
@@ -341,7 +349,7 @@ class LightingDesigner:
                             colors += [color]
                         i += 1
                     if len(colors) > 0:
-                        print(
+                        log.info(
                             "### gradient {} {} colors: {}".format(
                                 target, strip, colors
                             )
@@ -406,7 +414,7 @@ class LightingDesigner:
             try:
                 self.process_next_message()
             except Exception as e:
-                print("error with process_next_message: " + str(e))
+                log.error("error with process_next_message: " + str(e))
 
             if (
                 self.power_state == "custom"
@@ -435,7 +443,7 @@ class LightingDesigner:
                 # we were supposed to be on, now we are supposed to be off,
                 # so if someone set self.power_off_override to True then this is a
                 # good time to reset that to False so the lights turn on again tomorrow.
-                print("### resetting power_off_override")
+                log.info("### resetting power_off_override")
                 self.power_off_override = False
                 self.power_off_latch = False  # this is a one time latch.
 
@@ -448,7 +456,7 @@ class LightingDesigner:
                     # if we just did a power cycle then reset any previous color overrides.
                     self.color_override = False
                     self.animations = None
-                    print("### back to normal operation")
+                    log.info("### back to normal operation")
                     self.power_state = "on"
                     self.auto_reboot_time = time.time() + (
                         self.config.auto_reboot * 3600
@@ -463,7 +471,7 @@ class LightingDesigner:
                 ):
                     # looks like we need to turn the lights off
                     if self.turn_off_time is None or has_new_clients:
-                        print(
+                        log.info(
                             "### cooling down for {} seconds".format(
                                 self.config.turn_off_timeout
                             )
@@ -492,7 +500,7 @@ class LightingDesigner:
                             self.power_state = "off"
                             self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
                             on_hour, on_minute = self.on_time
-                            print(
+                            log.info(
                                 "### lights are off, waiting for wake up time: {}:{}".format(
                                     on_hour, on_minute
                                 )
@@ -554,7 +562,7 @@ class LightingDesigner:
                     if len(parts) > 1:
                         count = int(parts[1])
                         if count > 2:
-                            print("### time for some fun!")
+                            log.info("### time for some fun!")
                             self.core_is_on = True
                             seconds = self.config.rainbow_timeout
                             self.server.queue_command(
@@ -576,7 +584,7 @@ class LightingDesigner:
                         movement = parts[1]
                         if self.enable_movement:
                             if self.movement_latch.switch(movement == "movement"):
-                                print("### movement detected!")
+                                log.info("### movement detected!")
                                 # enqueue a new start rain command (but only if it is not already raining!)
                                 if (
                                     self.stop_rain_time is None
@@ -620,14 +628,14 @@ class LightingDesigner:
 
             new_emotions = self.sensei.get_next_emotions()
             if not self.color_override and new_emotions is not None:
-                print("Got new emotions: {}".format(new_emotions))
+                log.info("Got new emotions: {}".format(new_emotions))
                 self._handle_new_emotions(new_emotions)
                 continue
 
             if has_new_clients:
                 if self.last_color is None:
                     self.last_color = [0, 0, 0]
-                print(
+                log.info(
                     "### Clients {} are out of date, replaying the last color".format(
                         new_clients
                     )
@@ -655,7 +663,7 @@ class LightingDesigner:
         else:
             value = no_scores[0]
         if value:
-            print("### Highlighting camera emotion: {}".format(value))
+            log.info("### Highlighting camera emotion: {}".format(value))
             self._blush(
                 None, value, seconds=2, hold=self.config.hold_camera_blush, priority=5
             )
@@ -721,7 +729,7 @@ class LightingDesigner:
         }
         if target is not None:
             command["target"] = target
-        print(command)
+        log.info(f"_set_color: {command}")
         self.server.queue_command(priority, command)
         self.last_change = time.time()
 
@@ -733,7 +741,7 @@ class LightingDesigner:
             "colors": rgb_colors,
             "hold": hold,
         }
-        print(command)
+        log.info(f"_set_dmx: {command}")
         self.server.queue_command(priority, command)
         self.last_change = time.time()
 
@@ -792,7 +800,7 @@ class LightingDesigner:
             # SET "light_1" and 2 to be dark blue
             rgb_colors[0] = [0, 0, 80]
             rgb_colors[1] = [0, 0, 80]
-            command = {
+            command: list | dict = {
                 "command": "sensei",
                 "target": target,
                 "seconds": 2,
@@ -801,7 +809,7 @@ class LightingDesigner:
         else:
             rgb_colors = self._get_rgb_colors(emotions, self.config.colors_for_emotions)
             if len(rgb_colors) < len(self.config.camera_zones):
-                print("### don't have enough colors???")
+                log.warning("### don't have enough colors???")
 
             # return core to just the optical fiber led's.
             strips_command = self._get_zone_color_command(target, rgb_colors, False)

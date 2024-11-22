@@ -1,11 +1,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-import json
 import asyncio
+import json
+import queue
+
 import websockets
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
-import queue
 
 
 # Provides bi-directional connection to given Azure Web PubSub service group.

@@ -1,10 +1,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 import io
+import logging
 import sys
 from threading import Thread
+
 import paramiko
-import logging
 
 
 class RemoteRunner:

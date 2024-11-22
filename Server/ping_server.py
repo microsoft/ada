@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 import argparse
-import socket
 import json
+import socket
 
 
 def receive_rgb_lists_from_server(server_endpoint, buffer_size):

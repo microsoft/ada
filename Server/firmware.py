@@ -1,12 +1,13 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-import datetime
-import os
-import logging
 import _thread
+import datetime
+import logging
+import os
 import time
-from azure.storage.blob import BlobClient
+
 from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobClient
 
 
 class TeensyFirmwareUpdater:
@@ -76,10 +77,11 @@ class TeensyFirmwareUpdater:
                 "azure.core.pipeline.policies.http_logging_policy"
             )
             logger.setLevel(logging.ERROR)
-            blob_client = BlobClient(self.account_url,
-                                     self.container_name,
-                                     blob_name=blob_name,
-                                     credential=DefaultAzureCredential()
+            blob_client = BlobClient(
+                self.account_url,
+                self.container_name,
+                blob_name=blob_name,
+                credential=DefaultAzureCredential(),
             )
 
             with open(filename, "wb") as f:

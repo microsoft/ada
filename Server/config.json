@@ -1,4 +1,10 @@
 {
+    "raspberry_pis": [
+        "adapi1",
+        "adapi2",
+        "adapi3"
+    ],
+    "ssh_command": "/home/pi/git/Ada/RpiController/run.sh",
     "camera_zones": [
         [ "2FKCamera01" ],
         [ "2FKCamera02" ],

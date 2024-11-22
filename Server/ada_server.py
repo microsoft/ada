@@ -1,27 +1,35 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+import _thread
 import argparse
+import asyncio
 import json
 import os
-import time
-import _thread
 import socket
 import sys
-from threading import Lock
+import time
 from collections import namedtuple
-from priority_queue import PriorityQueue
-import sensei
+from threading import Lock
+
+import paramiko
+
 import firmware
+import sensei
 from messagebus import WebPubSubGroup
-import asyncio
+from priority_queue import PriorityQueue
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path += [os.path.join(script_dir, "../KasaBridge")]
 
 from bridge_client import KasaBridgeClient
+
+from internet import get_local_ip, wait_for_internet
 from lighting_designer import LightingDesigner
-from internet import wait_for_internet, get_local_ip
+from logger import Logger
+
+logger = Logger()
+log = logger.get_root_logger()
 
 
 class AdaServer:
@@ -31,8 +39,9 @@ class AdaServer:
     can push commands to those pi's on sockets that stay open so that we minimize
     the latency to each client.  It also provides auto-reconnection in case the
     socket is closed for any reason.
-    It maintains a queue of animations we want to play with an additional concept
-    of priority so something can jump to the front of the queue.
+
+    It also keeps open an SSH connection to the raspberry pi's so that we know
+    each pi is running their python client code that connects to this server.
     """
 
     def __init__(self, config, msgbus, server_endpoint, account_url):
@@ -52,14 +61,21 @@ class AdaServer:
         self.queued = False
         self.bridge = None
         self.max_animations_per_iteration = 5
+        self.ssh_command = config["ssh_command"]
+        self.raspberry_pis = config["raspberry_pis"]
         self.firmware = firmware.TeensyFirmwareUpdater(
-            account_url, "firmware", "TeensyFirmware.TEENSY40.hex", "firmware.hex",
+            account_url,
+            "firmware",
+            "TeensyFirmware.TEENSY40.hex",
+            "firmware.hex",
         )
 
     def start(self):
         self.firmware.start()
         self.closed = False
         _thread.start_new_thread(self.serve_forever, ())
+        for pi in self.raspberry_pis:
+            _thread.start_new_thread(self.ssh_thread, (pi,))
 
     def close(self):
         self.firmware.stop()
@@ -84,12 +100,12 @@ class AdaServer:
 
     def camera_off(self):
         if self.camera:
-            print("### Turning camera off")
+            log.info("### Turning camera off")
             self.camera = False
 
     def camera_on(self):
         if not self.camera:
-            print("### Turning camera on")
+            log.info("### Turning camera on")
             self.camera = True
 
     def has_clients(self):
@@ -106,7 +122,9 @@ class AdaServer:
             x = self.sequence_numbers[name]
             y = self.sequence_numbers_sent[name]
             if abs(x - y) > self.max_animations_per_iteration and x > 0:
-                print("### found stale client: {}, seq# {} != {}".format(name, x, y))
+                log.warning(
+                    "### found stale client: {}, seq# {} != {}".format(name, x, y)
+                )
                 result += [name]
         self.lock.release()
         return result
@@ -184,10 +202,8 @@ class AdaServer:
                 self.sequence_numbers[target] = self.sequence
                 self.lock.release()
             else:
-                print(
-                    "### dropping command to '{}' because this client is not connected".format(
-                        target
-                    )
+                log.warning(
+                    f"### dropping command to '{target}' because this client is not connected"
                 )
         else:
             # this is a broadcast to all clients.
@@ -201,6 +217,29 @@ class AdaServer:
                 self.sequence_numbers_sent[name] = self.sequence
                 self.lock.release()
 
+    def ssh_thread(self, pi: str):
+        """a new thread is created to handle the ssh connection to each connected pi"""
+        logger = Logger(pi)
+        while not self.closed:
+            try:
+                logger.set_log_file(f"{pi}.log")
+                logger.info(f"### ssh {pi} connecting...")
+                logger.info(f"### ssh {pi} connecting...")
+                ssh = paramiko.SSHClient()
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                ssh.connect(hostname=pi, username="pi")
+                while not self.closed:
+                    logger.info(f"### ssh {pi} running {self.ssh_command} ...")
+                    stdin, stdout, stderr = ssh.exec_command(self.ssh_command)
+                    for line in stdout:
+                        logger.info(line)
+                    for line in stderr:
+                        logger.error(line)
+                    time.sleep(10)
+            except Exception as e:
+                logger.error(f"### ssh {pi} exception: {e}")
+                time.sleep(10)
+
     def serve_forever(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -212,7 +251,7 @@ class AdaServer:
                 _thread.start_new_thread(self.client_thread, (client, address))
             s.close()
         except Exception as e:
-            print("## server terminating with exception: {}".format(e))
+            log.error("## server terminating with exception: {}".format(e))
 
     def client_thread(self, client, address):
         """a new thread is created to handle the heartbeats and command sending to each connected pi"""
@@ -229,7 +268,7 @@ class AdaServer:
             self.handle_client(client, address, name)
 
     def handle_client(self, client, address, name):
-        print("Client connected from {}: {}".format(address, name))
+        log.info("Client connected from {}: {}".format(address, name))
         if name in self.clients:
             try:
                 # we have a new socket for this client, which means we need to close the old one.
@@ -240,7 +279,9 @@ class AdaServer:
                 self.lock.release()
                 # and wait for the other thread to terminate
                 while self.has_client_address(address):
-                    print("waiting for previous {} thread to terminate...".format(name))
+                    log.info(
+                        "waiting for previous {} thread to terminate...".format(name)
+                    )
                     time.sleep(1)
             except:
                 pass
@@ -251,9 +292,9 @@ class AdaServer:
         self.client_queues[address] = client_queue
         self.names[address] = name
         self.sequence_numbers[name] = self.max_animations_per_iteration * -2
-        self.sequence_numbers_sent[
-            name
-        ] = 0  # ensure they start out of sync to guarantee sync up
+        self.sequence_numbers_sent[name] = (
+            0  # ensure they start out of sync to guarantee sync up
+        )
         self.lock.release()
 
         firmware_hash = None
@@ -287,7 +328,7 @@ class AdaServer:
                     seconds = command["hold"]
                 elif "seconds" in command:
                     seconds = command["seconds"]
-                print("==== next command for {} in {} seconds".format(name, seconds))
+                log.info("==== next command for {} in {} seconds".format(name, seconds))
                 next_command_time = time.time() + seconds
 
                 while client_queue.size() > 5:
@@ -320,8 +361,10 @@ class AdaServer:
                             msg = data.decode("utf-8").rstrip("\0")
 
                         if msg != "ok":
-                            print("Unexpected response from {}: {}".format(name, msg))
-                            print("Trying again {}:".format(retries))
+                            log.warning(
+                                "Unexpected response from {}: {}".format(name, msg)
+                            )
+                            log.info("Trying again {}:".format(retries))
                             time.sleep(1)
                             retries -= 1
                         else:
@@ -343,21 +386,21 @@ class AdaServer:
                                 changed = True
                             self.lock.release()
                             if changed:
-                                print(
+                                log.info(
                                     "Client {} returned ping response {} and current sequence is {}".format(
                                         name, msgno, self.sequence
                                     )
                                 )
-                        except:
-                            print(
-                                "Unexpected ping response from {}: {}".format(name, msg)
+                        except Exception as ex:
+                            log.error(
+                                f"Unexpected ping response from {name}: {msg}, exception {ex}"
                             )
                             pass
                     ping_time = time.time() + 1
 
             except socket.error as e:
                 client.close()
-                print("### socket error with pi {}: {}".format(name, e))
+                log.error("### socket error with pi {}: {}".format(name, e))
                 break
 
         self.lock.acquire()
@@ -374,7 +417,7 @@ class AdaServer:
         self.lock.release()
 
     def handle_camera(self, client, address, name):
-        print("Camera connected from {}: {}".format(address, name))
+        log.info("Camera connected from {}: {}".format(address, name))
         # the camera protocol is reversed so camera can push updates to us any time.
         # including a heartbeat ping every so often to keep the socket alive.
         while not self.closed:
@@ -388,16 +431,16 @@ class AdaServer:
                 if not self.closed:
                     msg = data.decode("utf-8")
                     if msg != "ping":
-                        print("### Camera: received " + msg)
+                        log.info("### Camera: received " + msg)
                         self.camera_queue.enqueue(0, msg)
 
             except socket.error as e:
                 client.close()
-                print("### socket error with camera {}: {}".format(name, e))
+                log.error("### socket error with camera {}: {}".format(name, e))
                 break
 
     def handle_switches(self, client, address, name):
-        print("HS105 bridge connected from {}: {}".format(address, name))
+        log.info("HS105 bridge connected from {}: {}".format(address, name))
         bridge = KasaBridgeClient(
             name, client, address, self.config.bridge_ping_interval
         )
@@ -434,8 +477,8 @@ async def _main(config, sensei, ip_address, account_url):
 
     webpubsub_constr = os.getenv("ADA_WEBPUBSUB_CONNECTION_STRING")
     if not webpubsub_constr:
-        print("Missing ADA_WEBPUBSUB_CONNECTION_STRING environment variable")
-        print("This means there will be no remote control Kiosk support")
+        log.error("Missing ADA_WEBPUBSUB_CONNECTION_STRING environment variable")
+        log.error("This means there will be no remote control Kiosk support")
     else:
         msgbus = WebPubSubGroup(
             webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group
@@ -477,9 +520,7 @@ if __name__ == "__main__":
 
     account_url = os.getenv("ADA_STORAGE_ACCOUNT")
     if not account_url:
-        print(
-            "Please configure your ADA_STORAGE_ACCOUNT environment variable"
-        )
+        log.error("Please configure your ADA_STORAGE_ACCOUNT environment variable")
         sys.exit(1)
 
     wait_for_internet()
@@ -489,13 +530,13 @@ if __name__ == "__main__":
 
     # sensei connection string is disabled for now since we need to move to
     # azure arc based default credentials on the cosmos database.
-    sensei = sensei.Sensei(config.camera_zones, config.colors_for_emotions, None, config.debug)
+    sensei = sensei.Sensei(
+        config.camera_zones, config.colors_for_emotions, None, config.debug
+    )
 
     args.loop = True  # Sensei cosmos database is offline right now...
     if args.loop:
         history_files = os.path.join(os.path.join(script_dir, config.history_dir))
         sensei.load(history_files, args.delay, config.playback_weights)
 
-    asyncio.get_event_loop().run_until_complete(
-        _main(config, sensei, ip, account_url)
-    )
+    asyncio.get_event_loop().run_until_complete(_main(config, sensei, ip, account_url))

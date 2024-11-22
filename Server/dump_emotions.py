@@ -1,11 +1,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-import os
 import json
-from dateutil import tz
+import os
 from collections import namedtuple
 
 from azure.cosmosdb.table import TableService
+from dateutil import tz
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 

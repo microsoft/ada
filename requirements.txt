@@ -7,6 +7,7 @@ azure-data-tables
 azure-messaging-webpubsubservice
 aiohttp
 opencv-contrib-python
+coloredlogs
 comtypes
 imutils
 suntime
@@ -14,4 +15,5 @@ paramiko
 websockets
 asyncio
 pandas
+types-paramiko
 

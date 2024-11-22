@@ -2,8 +2,8 @@
 # Licensed under the MIT license.
 import argparse
 import json
-import time
 import socketserver
+import time
 
 
 class Config:
