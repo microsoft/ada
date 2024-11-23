@@ -334,5 +334,6 @@ TeensyFirmware/TEENSY40.hex
 /TeensyUnitTest/test.bmp
 .pio
 Server/firmware.hex
+Server/firmware.hex.hash
 /TeensyFirmware/firmware.hex
 Server/pilogin.json

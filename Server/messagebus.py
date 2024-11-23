@@ -8,6 +8,11 @@ import queue
 import websockets
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
 
+from logger import Logger
+
+logger = Logger()
+log = logger.get_root_logger()
+
 
 # Provides bi-directional connection to given Azure Web PubSub service group.
 class WebPubSubGroup:
@@ -50,9 +55,9 @@ class WebPubSubGroup:
             # now we should have the connection id and an idea of success
             if "event" in response and response["event"] == "connected":
                 self.connection_id = response["connectionId"]
-            print("WebSocket connected")
+            log.info("WebSocket connected")
         except Exception as e:
-            print("### web socket connect failed: " + e)
+            log.error(f"### web socket connect failed:{e}")
             self.web_socket = None
             await asyncio.sleep(10)
         return
@@ -81,7 +86,7 @@ class WebPubSubGroup:
                             # websocket has been closed.
                             self.web_socket = None
                             await asyncio.sleep(1)
-                            print("### websocket send error: ", e)
+                            log.error("### websocket send error: ", e)
                 else:
                     await self.connect()  # auto-reconnect!
             else:
@@ -91,10 +96,10 @@ class WebPubSubGroup:
             try:
                 await self.web_socket.close()
             except Exception as e:
-                print(e)
+                log.error(e)
 
     async def listen(self):
-        print("Listening for messages from WebSocket...")
+        log.info("Listening for messages from WebSocket...")
         while not self.closed:
             try:
                 if not self.web_socket:
@@ -105,11 +110,11 @@ class WebPubSubGroup:
                 # websocket has been closed.
                 self.web_socket = None
                 await asyncio.sleep(1)
-                print("### websocket receive error: ", e)
-        print("Stopped listening to WebSocket.")
+                log.info("### websocket receive error: ", e)
+        log.info("Stopped listening to WebSocket.")
 
     def _handle_message(self, data):
-        # print("Message received: " + data)
+        # log.info("Message received: " + data)
         message = json.loads(data)
         if "fromUserId" in message:
             user = message["fromUserId"]
@@ -131,4 +136,4 @@ class WebPubSubGroup:
             try:
                 self.client.close()
             except Exception as e:
-                print(e)
+                log.error(e)

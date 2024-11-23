@@ -5,6 +5,18 @@
         "adapi3"
     ],
     "ssh_command": "/home/pi/git/Ada/RpiController/run.sh",
+    "controllers": [
+        {
+            "name": "DmxController",
+            "cwd": "../DmxController",
+            "cmd": "python dmx_control.py --port com4"
+        },
+        {
+            "name": "KasaBridge",
+            "cwd": "../KasaBridge",
+            "cmd": "python bridge.py"
+        }
+    ],
     "camera_zones": [
         [ "2FKCamera01" ],
         [ "2FKCamera02" ],

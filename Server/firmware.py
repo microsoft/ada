@@ -9,6 +9,11 @@ import time
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobClient
 
+from logger import Logger
+
+logger = Logger()
+log = logger.get_root_logger()
+
 
 class TeensyFirmwareUpdater:
     """TeensyFirmwareUpdater: this class downloads new version of the firmware
@@ -89,7 +94,7 @@ class TeensyFirmwareUpdater:
                 f.write(data.readall())
 
         except Exception as e:
-            print(f"### Error downloading blob '{filename}' to local file: {e}")
+            log.error(f"### Error downloading blob '{filename}' to local file: {e}")
 
 
 # for a quick test...

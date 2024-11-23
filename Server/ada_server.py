@@ -18,6 +18,7 @@ import firmware
 import sensei
 from messagebus import WebPubSubGroup
 from priority_queue import PriorityQueue
+from utilities import Process
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path += [os.path.join(script_dir, "../KasaBridge")]
@@ -26,10 +27,10 @@ from bridge_client import KasaBridgeClient
 
 from internet import get_local_ip, wait_for_internet
 from lighting_designer import LightingDesigner
-from logger import Logger
+from logger import Logger, SshInteractiveChannel
 
 logger = Logger()
-log = logger.get_root_logger()
+log = logger.get_root_logger(log_file="server.log")
 
 
 class AdaServer:
@@ -61,8 +62,9 @@ class AdaServer:
         self.queued = False
         self.bridge = None
         self.max_animations_per_iteration = 5
-        self.ssh_command = config["ssh_command"]
-        self.raspberry_pis = config["raspberry_pis"]
+        self.ssh_command = config.ssh_command
+        self.controllers = []
+        self.raspberry_pis = dict((name, None) for name in config.raspberry_pis)
         self.firmware = firmware.TeensyFirmwareUpdater(
             account_url,
             "firmware",
@@ -74,13 +76,26 @@ class AdaServer:
         self.firmware.start()
         self.closed = False
         _thread.start_new_thread(self.serve_forever, ())
-        for pi in self.raspberry_pis:
+        for pi in self.raspberry_pis.keys():
             _thread.start_new_thread(self.ssh_thread, (pi,))
+        for controller in config.controllers:
+            name = controller["name"]
+            cmd = controller["cmd"]
+            cwd = controller["cwd"]
+            self.controllers += [Process(cmd, cwd, name + ".log")]
 
     def close(self):
         self.firmware.stop()
         self.msgbus.close()
         self.closed = True
+        for proc in self.controllers:
+            proc.terminate()
+        for _, ssh in self.raspberry_pis.items():
+            if ssh:
+                try:
+                    ssh.close()
+                except Exception as e:
+                    log.error(f"Error closing ssh connection {e}")
 
     def get_clients(self):
         self.lock.acquire()
@@ -219,25 +234,32 @@ class AdaServer:
 
     def ssh_thread(self, pi: str):
         """a new thread is created to handle the ssh connection to each connected pi"""
-        logger = Logger(pi)
+        logger = Logger(pi, console=False)
+        log = logger.get_root_logger(log_file=f"{pi}.log")
+        log.handlers.pop(0)  # remove the StandardHandler that does console output.
         while not self.closed:
             try:
-                logger.set_log_file(f"{pi}.log")
-                logger.info(f"### ssh {pi} connecting...")
-                logger.info(f"### ssh {pi} connecting...")
+                log.info(f"### ssh {pi} connecting...")
                 ssh = paramiko.SSHClient()
+                self.raspberry_pis[pi] = ssh
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(hostname=pi, username="pi")
-                while not self.closed:
-                    logger.info(f"### ssh {pi} running {self.ssh_command} ...")
-                    stdin, stdout, stderr = ssh.exec_command(self.ssh_command)
-                    for line in stdout:
-                        logger.info(line)
-                    for line in stderr:
-                        logger.error(line)
-                    time.sleep(10)
+
+                # get a pseudo-terminal from the connection so that it kills
+                # our ssh_command when we close this ssh connection.
+                transport = ssh.get_transport()
+                channel = transport.open_session()
+                clog = SshInteractiveChannel(pi, log, channel)
+                clog.start_listening()
+                clog.exec_command(self.ssh_command)
+                # now block to keep the ssh object alive on the stack until we're done!
+                # TODO: detect if command terminated and needs a restart.
+                while not channel.closed:
+                    time.sleep(1)
+                if not self.closed:
+                    log.error(f"Channel to {pi} closed unexpectedly!")
             except Exception as e:
-                logger.error(f"### ssh {pi} exception: {e}")
+                log.error(f"### ssh {pi} exception: {e}")
                 time.sleep(10)
 
     def serve_forever(self):
