@@ -6,18 +6,31 @@ The `dmx_control.py` script gets commands from the Server and drives the big par
 To launch the DMX controller run this from an `Ada` conda environment:
 
 ```
-python dmx_control.py --ip 192.168.1.11
+python dmx_control.py --port ...
 ```
 
-The Server at 192.168.1.1 will push commands over a TCP socket that stays open for
-minimal latency.  The server also sends regular "pings" over that socket to keep
-it alive.
+On Windows it will be a COM port.
+
+On Linux the port name can be found under:
+```
+ ls /dev/serial/by-id/
+```
+It should show something like `usb-DMXking.com_DMX_USB_PRO_6A3ZO5R6-if00-port0`.  So you would run
+```
+python dmx_control.py --port /dev/serial/by-id/usb-DMXking.com_DMX_USB_PRO_6A3ZO5R6-if00-port0
+```
 
 ## Setup
 
 Only pyserial. We've tested this on Windows an Raspberry Pi, without needing to install any drivers on either platform (I think it's just an FTDI chip).
 ```
 pip install pyserial
+```
+
+On Linux you need to also do the following:
+```
+sudo usermod -a -G dialup $USER
+sudo gpasswd --add $USER dialout
 ```
 
 ## dmx.py
@@ -27,7 +40,7 @@ This is a bit of example code:
 
 ```python
 from dmx import Dmx, DmxDevice
-# In RPi, use the symlinks in /dev/serial/by-id/ instead of /dev/serialX
+# In Linux, use the symlinks in /dev/serial/by-id/ instead of /dev/serialX
 DMX_SERIAL_PORT = '/dev/serial/by-id/usb-ENTTEC_DMX_USB_PRO_Mk2_EN252261-if00-port0'
 dmx = Dmx(DMX_SERIAL_PORT)
 ```

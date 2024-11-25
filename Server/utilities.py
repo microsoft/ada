@@ -42,7 +42,7 @@ class TimedLatch:
 
 def find_program(name):
     """Find the given program in the PATH and return the full path to it"""
-    extensions = [] if os.name == "posix" else [".cmd", ".bat", ".exe"]
+    extensions = [""] if os.name == "posix" else [".cmd", ".bat", ".exe"]
     for path in os.environ["PATH"].split(os.pathsep):
         for ext in extensions:
             exe_file = os.path.join(path, name + ext)
