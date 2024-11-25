@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-import platform
 import subprocess
 
 storage_roles = [
@@ -31,15 +30,19 @@ def get_keyvault_scope(subscription, resource_group, key_vault):
 
 
 def find_az_cmd():
-    for path in os.environ["PATH"].split(os.pathsep):
-        az = os.path.join(path, "az.cmd")
-        if os.path.exists(az):
-            return az
-    return None
+    if os.name == "nt":
+        for path in os.environ["PATH"].split(os.pathsep):
+            az = os.path.join(path, "az.cmd")
+            if os.path.exists(az):
+                return az
+        return None
+    return "az"
 
 
 def add_role_assignment(az, scope, user, role, resource):
-    cmd = f'"{az}" role assignment create --assignee "{user}" --role "{role}" --scope "{scope}"'
+    cmd = f'{az} role assignment create --assignee "{user}" --role "{role}" --scope "{scope}"'
+    print(cmd)
+    return
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"Error: {result.stderr}")
@@ -62,6 +65,7 @@ def parse_command_line():
     parser.add_argument(
         "--storage_account", "-a", help="The storage account to use", required=True
     )
+    parser.add_argument("--object_id", "-o", help="The assignee being added", required=True)
     return parser.parse_args()
 
 
@@ -74,14 +78,18 @@ def main():
     args = parse_command_line()
 
     storage_account = args.storage_account
+<<<<<<< HEAD
     storage_scope = get_storage_scope(
         args.subscription, args.resource_group, storage_account
     )
     machine = platform.node()
+=======
+    storage_scope = get_storage_scope(args.subscription, args.resource_group, storage_account)
+    assignee = args.object_id
+>>>>>>> 476a139 (fixes)
     for role in storage_roles:
-        add_role_assignment(az, storage_scope, machine, role, storage_account)
+        add_role_assignment(az, storage_scope, assignee, role, storage_account)
 
 
 if __name__ == "__main__":
-    print(platform.node())
-    # main()
+    main()
