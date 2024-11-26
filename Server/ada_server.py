@@ -493,7 +493,7 @@ async def async_read_enter(server):
             await asyncio.sleep(0.1)
 
 
-async def _main(config, sensei, ip_address, account_url):
+async def _main(config, sensei, ip_address, internet_address, account_url):
     endpoint = (ip_address, config.server_port)
     msgbus = None
 
@@ -508,7 +508,7 @@ async def _main(config, sensei, ip_address, account_url):
         await msgbus.connect()
     server = AdaServer(config, msgbus, endpoint, account_url)
     server.start()
-    designer = LightingDesigner(server, msgbus, sensei, config)
+    designer = LightingDesigner(server, msgbus, sensei, internet_address, config)
     designer.start()
     await asyncio.gather(async_read_enter(server), msgbus.listen(), msgbus.consume())
 
@@ -545,7 +545,7 @@ if __name__ == "__main__":
         log.error("Please configure your ADA_STORAGE_ACCOUNT environment variable")
         sys.exit(1)
 
-    wait_for_internet()
+    internet_address = wait_for_internet()
     ip = args.ip
     if ip is None:
         ip = get_local_ip()
@@ -561,4 +561,4 @@ if __name__ == "__main__":
         history_files = os.path.join(os.path.join(script_dir, config.history_dir))
         sensei.load(history_files, args.delay, config.playback_weights)
 
-    asyncio.get_event_loop().run_until_complete(_main(config, sensei, ip, account_url))
+    asyncio.get_event_loop().run_until_complete(_main(config, sensei, ip, internet_address, account_url))

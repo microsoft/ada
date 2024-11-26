@@ -28,9 +28,10 @@ class LightingDesigner:
     until the power comes back on the next day, both on the RaspberryPi's and on the DMX controller.
     """
 
-    def __init__(self, server, msgbus, sensei, config):
+    def __init__(self, server, msgbus, sensei, internet_address, config):
         self.config = config
         self.msgbus = msgbus
+        self.internet_address = internet_address
         msgbus.add_listener(self.onmessage)
         self.entered_custom_state: float = 0.0
         self.msgqueue = PriorityQueue()
@@ -255,7 +256,7 @@ class LightingDesigner:
         parts = msg.split("/")
         if len(parts) < 2:
             if parts[0] == "ping":
-                self.msgbus.send(f"{pingPrefix}/state/{self.power_state}")
+                self.msgbus.send(f"{pingPrefix}/state/{self.power_state} at {self.internet_address}")
             elif parts[0] == "bridge":
                 bridge = self.server.get_bridge()
                 if not bridge:

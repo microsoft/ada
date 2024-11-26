@@ -14,6 +14,7 @@ def wait_for_internet():
         except Exception as e:
             print(str(e))
             time.sleep(10)
+            return str(e)
 
 
 def get_local_ip():
