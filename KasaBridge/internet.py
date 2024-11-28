@@ -14,17 +14,3 @@ def wait_for_internet():
         except Exception as e:
             print(str(e))
             time.sleep(10)
-
-
-def get_local_ip():
-    local_ip = socket.gethostbyname(socket.gethostname())
-    print(f"Using local ip address {local_ip}")
-    return local_ip
-
-
-def main():
-    get_local_ip()
-
-
-if __name__ == "__main__":
-    main()

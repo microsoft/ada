@@ -7,7 +7,7 @@ import datetime
 import sys
 import _thread
 from tplink_smartplug import TplinkSmartPlug
-from internet import wait_for_internet, get_local_ip
+from internet import wait_for_internet
 
 
 class TplinkServer:
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--host", help="Name of Ada server we want to connect to.", default="ada-core"
     )
-    parser.add_argument("--local", help="Override the local ipaddress to use.")
+    parser.add_argument("--local", help="The local ipaddress to use.", required=True)
     parser.add_argument(
         "--port",
         type=int,
@@ -166,8 +166,6 @@ if __name__ == "__main__":
 
     wait_for_internet()
     local_ip = args.local
-    if local_ip is None:
-        local_ip = get_local_ip()
 
     retry_time = 10  # seconds
 
