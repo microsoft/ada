@@ -25,11 +25,7 @@ def dump_emotions(config, partition):
 
         count = 0
         try:
-            query_results = list(
-                storage_account.query_entities(
-                    "Psi", filter=query, num_results=1000, timeout=30
-                )
-            )
+            query_results = list(storage_account.query_entities("Psi", filter=query, num_results=1000, timeout=30))
             for entity in query_results:
                 for x in ["Face1", "Face2", "Face3", "Face4", "Face5"]:
                     d = entity["Timestamp"]

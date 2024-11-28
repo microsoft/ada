@@ -47,6 +47,8 @@
         "sadness": [ 0, 0, 255 ],
         "surprise": [ 200, 0, 255 ]
     },
+
+    "internet_iface": "eno2",
     "server_address": "192.168.1.11",
     "server_port": 12345,
     "pubsub_group": "demogroup",

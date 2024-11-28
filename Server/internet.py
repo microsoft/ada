@@ -1,6 +1,8 @@
 import socket
 import time
 
+from netifaces import AF_INET, ifaddresses, interfaces
+
 
 def wait_for_internet():
     while True:
@@ -17,9 +19,11 @@ def wait_for_internet():
             return str(e)
 
 
-def main():
-    get_local_ip()
-
-
-if __name__ == "__main__":
-    main()
+def get_ip_addresses():
+    result = {}
+    for ifaceName in interfaces():
+        addresses = [i["addr"] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{"addr": None}])]
+        non_none = [x for x in addresses if x is not None]
+        if non_none:
+            result[ifaceName] = non_none
+    return result

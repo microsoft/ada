@@ -109,14 +109,10 @@ class RemoteRunner:
             if self.command:
                 if self.target_dir:
                     self.exec_remote_command(
-                        "cd {} && chmod u+x ./{}".format(
-                            self.target_dir, self.command.split(" ")[0]
-                        )
+                        "cd {} && chmod u+x ./{}".format(self.target_dir, self.command.split(" ")[0])
                     )
 
-                    output = self.exec_remote_command(
-                        "cd {} && ./{}".format(self.target_dir, self.command)
-                    )
+                    output = self.exec_remote_command("cd {} && ./{}".format(self.target_dir, self.command))
                 else:
                     output = self.exec_remote_command(self.command)
             self.copy_files()
@@ -142,14 +138,7 @@ class RemoteRunner:
                 self.run_command()
             except:
                 errorType, value, traceback = sys.exc_info()
-                self.print(
-                    "### Unexpected Exception: "
-                    + str(errorType)
-                    + ": "
-                    + str(value)
-                    + "\n"
-                    + str(traceback)
-                )
+                self.print("### Unexpected Exception: " + str(errorType) + ": " + str(value) + "\n" + str(traceback))
 
 
 if __name__ == "__main__":
@@ -157,25 +146,13 @@ if __name__ == "__main__":
 
     import argparse
 
-    arg_parser = argparse.ArgumentParser(
-        "remoterunner executes remote commands on a given machine"
-    )
+    arg_parser = argparse.ArgumentParser("remoterunner executes remote commands on a given machine")
 
-    arg_parser.add_argument(
-        "--ipaddress", help="Address of machine to run commands on", required=True
-    )
-    arg_parser.add_argument(
-        "--username", help="Username for logon to remote machine", default=None
-    )
-    arg_parser.add_argument(
-        "--password", help="Password for logon to remote machine", default=None
-    )
-    arg_parser.add_argument(
-        "--command", help="The command to run on the remote machine", default=None
-    )
-    arg_parser.add_argument(
-        "--logfile", help="The name of logfile to write to", default=None
-    )
+    arg_parser.add_argument("--ipaddress", help="Address of machine to run commands on", required=True)
+    arg_parser.add_argument("--username", help="Username for logon to remote machine", default=None)
+    arg_parser.add_argument("--password", help="Password for logon to remote machine", default=None)
+    arg_parser.add_argument("--command", help="The command to run on the remote machine", default=None)
+    arg_parser.add_argument("--logfile", help="The name of logfile to write to", default=None)
     arg_parser.add_argument(
         "--timeout",
         type=bool,

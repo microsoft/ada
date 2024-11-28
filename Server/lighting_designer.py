@@ -226,9 +226,7 @@ class LightingDesigner:
                 option = "on"
         if option == "on":
             self._set_power_state("custom")
-            self.server.queue_command(
-                0, {"command": "StartRain", "size": 12, "amount": 50.0}
-            )
+            self.server.queue_command(0, {"command": "StartRain", "size": 12, "amount": 50.0})
             self.is_raining = True
             self.stop_rain_time = None
         elif option == "off":
@@ -329,9 +327,7 @@ class LightingDesigner:
                     strip = int(parts[2])
                     color = [int(x) for x in parts[3].split(",")]
                     if len(color) == 3:
-                        log.info(
-                            "### strip {} {} color: {}".format(target, strip, color)
-                        )
+                        log.info("### strip {} {} color: {}".format(target, strip, color))
                         self._set_strip(target, strip, color)
                         self.color_override = True
                         self.animations = None
@@ -350,14 +346,8 @@ class LightingDesigner:
                             colors += [color]
                         i += 1
                     if len(colors) > 0:
-                        log.info(
-                            "### gradient {} {} colors: {}".format(
-                                target, strip, colors
-                            )
-                        )
-                        self._add_gradient(
-                            target, strip, colorsPerStrip, colors, seconds
-                        )
+                        log.info("### gradient {} {} colors: {}".format(target, strip, colors))
+                        self._add_gradient(target, strip, colorsPerStrip, colors, seconds)
                         self.color_override = True
                         self.animations = None
                         self._set_power_state("custom")
@@ -419,8 +409,7 @@ class LightingDesigner:
 
             if (
                 self.power_state == "custom"
-                and time.time()
-                > self.entered_custom_state + self.config.custom_animation_timeout
+                and time.time() > self.entered_custom_state + self.config.custom_animation_timeout
             ):
                 # timeout custom animations and go back to normal "run" mode so Ada can go to sleep
                 # if necessary.
@@ -448,9 +437,7 @@ class LightingDesigner:
                 self.power_off_override = False
                 self.power_off_latch = False  # this is a one time latch.
 
-            if (
-                master_power_state or self.power_on_override
-            ) and not self.power_off_override:
+            if (master_power_state or self.power_on_override) and not self.power_off_override:
                 if bridge and (bridge.lights_on is None or not bridge.lights_on):
                     # looks like we need to turn the lights on
                     self._master_power_on()
@@ -459,24 +446,14 @@ class LightingDesigner:
                     self.animations = None
                     log.info("### back to normal operation")
                     self.power_state = "on"
-                    self.auto_reboot_time = time.time() + (
-                        self.config.auto_reboot * 3600
-                    )
+                    self.auto_reboot_time = time.time() + (self.config.auto_reboot * 3600)
                     self.sensei.start()
                 self.server.camera_on()
-            elif (
-                not master_power_state or self.power_off_override
-            ) and not self.power_on_override:
-                if bridge and (
-                    bridge.lights_on is None or bridge.lights_on or has_new_clients
-                ):
+            elif (not master_power_state or self.power_off_override) and not self.power_on_override:
+                if bridge and (bridge.lights_on is None or bridge.lights_on or has_new_clients):
                     # looks like we need to turn the lights off
                     if self.turn_off_time is None or has_new_clients:
-                        log.info(
-                            "### cooling down for {} seconds".format(
-                                self.config.turn_off_timeout
-                            )
-                        )
+                        log.info("### cooling down for {} seconds".format(self.config.turn_off_timeout))
                         self.turn_off_time = time.time() + self.config.turn_off_timeout
                         self.server.clear_queue()
                         self._fade_to_black()
@@ -501,11 +478,7 @@ class LightingDesigner:
                             self.power_state = "off"
                             self.sensei.stop()  # no need to keep pinging cosmos while we are sleeping.
                             on_hour, on_minute = self.on_time
-                            log.info(
-                                "### lights are off, waiting for wake up time: {}:{}".format(
-                                    on_hour, on_minute
-                                )
-                            )
+                            log.info("### lights are off, waiting for wake up time: {}:{}".format(on_hour, on_minute))
                     else:
                         # let the lights cool down for 3 minutes before turning them off.
                         time.sleep(0.1)
@@ -587,10 +560,7 @@ class LightingDesigner:
                             if self.movement_latch.switch(movement == "movement"):
                                 log.info("### movement detected!")
                                 # enqueue a new start rain command (but only if it is not already raining!)
-                                if (
-                                    self.stop_rain_time is None
-                                    or self.stop_rain_time < time.time()
-                                ):
+                                if self.stop_rain_time is None or self.stop_rain_time < time.time():
                                     self.server.queue_command(
                                         0,
                                         {
@@ -599,18 +569,12 @@ class LightingDesigner:
                                             "amount": 50.0,
                                         },
                                     )
-                                self.stop_rain_time = (
-                                    time.time() + self.config.movement_rain_timeout
-                                )
+                                self.stop_rain_time = time.time() + self.config.movement_rain_timeout
                                 self.last_change = time.time()
 
             if not self.color_override and self._get_cool_animation_time():
                 self.last_change = time.time()
-                if (
-                    self.last_cool_animation + self.config.cool_animation_timeout
-                    > time.time()
-                    and not has_new_clients
-                ):
+                if self.last_cool_animation + self.config.cool_animation_timeout > time.time() and not has_new_clients:
                     continue
                 num = len(self.config.cool_animations) - 1
                 animation = None
@@ -636,11 +600,7 @@ class LightingDesigner:
             if has_new_clients:
                 if self.last_color is None:
                     self.last_color = [0, 0, 0]
-                log.info(
-                    "### Clients {} are out of date, replaying the last color".format(
-                        new_clients
-                    )
-                )
+                log.info("### Clients {} are out of date, replaying the last color".format(new_clients))
                 for target in new_clients:
                     self._set_color(target, self.last_color)
 
@@ -649,13 +609,7 @@ class LightingDesigner:
     def _handle_camera_emotions(self, emotions):
         # IpCameraGui could send something like this, depending on how many faces are looking at the camera:
         # ['Happiness,0.9999596', 'Happiness,0.997026', 'Happiness,0.7164325', 'Happiness,0.703617']
-        no_scores = [
-            x.strip()
-            for x in emotions.replace("[", "")
-            .replace("]", "")
-            .replace("'", "")
-            .split(",")
-        ][::2]
+        no_scores = [x.strip() for x in emotions.replace("[", "").replace("]", "").replace("'", "").split(",")][::2]
         # just show the most popular emotion.
         if len(no_scores) > 1:
             value, count = Counter(no_scores)
@@ -665,9 +619,7 @@ class LightingDesigner:
             value = no_scores[0]
         if value:
             log.info("### Highlighting camera emotion: {}".format(value))
-            self._blush(
-                None, value, seconds=2, hold=self.config.hold_camera_blush, priority=5
-            )
+            self._blush(None, value, seconds=2, hold=self.config.hold_camera_blush, priority=5)
 
     def _get_master_power_state(self):
         if not self.on_today:
@@ -675,19 +627,14 @@ class LightingDesigner:
         on_hour, on_minute = self.on_time
         off_hour, off_minute = self.off_time
         now = datetime.now()
-        if (
-            now.hour > on_hour or (now.hour == on_hour and now.minute >= on_minute)
-        ) and (
+        if (now.hour > on_hour or (now.hour == on_hour and now.minute >= on_minute)) and (
             now.hour < off_hour or (now.hour == off_hour and now.minute < off_minute)
         ):
             return True
         return False
 
     def _get_cool_animation_time(self):
-        if (
-            self.server.idle()
-            and self.last_change + self.config.cool_animation_timeout < time.time()
-        ):
+        if self.server.idle() and self.last_change + self.config.cool_animation_timeout < time.time():
             return True
 
         on_hour, on_minute = self.config.cool_animation_time
@@ -777,9 +724,7 @@ class LightingDesigner:
         self.server.queue_command(1, commands)
         self.last_change = time.time()
 
-    def _add_gradient(
-        self, target, strip, colorsPerStrip, colors, seconds, priority=10
-    ):
+    def _add_gradient(self, target, strip, colorsPerStrip, colors, seconds, priority=10):
         if target == "DMX":
             return  # not supported on dmx at the moment...
         command = {"command": "Gradient", "colors": colors, "seconds": seconds}
@@ -795,9 +740,7 @@ class LightingDesigner:
     def _fade_to_zones(self, target, emotions, priority):
         command = None
         if target == "DMX":
-            rgb_colors = self._get_rgb_colors(
-                emotions, self.config.colors_for_dmx_emotions
-            )
+            rgb_colors = self._get_rgb_colors(emotions, self.config.colors_for_dmx_emotions)
             # SET "light_1" and 2 to be dark blue
             rgb_colors[0] = [0, 0, 80]
             rgb_colors[1] = [0, 0, 80]

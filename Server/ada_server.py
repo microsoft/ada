@@ -25,7 +25,7 @@ sys.path += [os.path.join(script_dir, "../KasaBridge")]
 
 from bridge_client import KasaBridgeClient
 
-from internet import wait_for_internet
+from internet import get_ip_addresses, wait_for_internet
 from lighting_designer import LightingDesigner
 from logger import Logger, SshInteractiveChannel
 
@@ -139,9 +139,7 @@ class AdaServer:
             x = self.sequence_numbers[name]
             y = self.sequence_numbers_sent[name]
             if abs(x - y) > self.max_animations_per_iteration and x > 0:
-                log.warning(
-                    "### found stale client: {}, seq# {} != {}".format(name, x, y)
-                )
+                log.warning("### found stale client: {}, seq# {} != {}".format(name, x, y))
                 result += [name]
         self.lock.release()
         return result
@@ -198,9 +196,7 @@ class AdaServer:
                 if "target" in c:
                     name = c["target"]
                     if target is not None and target != name:
-                        raise Exception(
-                            "Please don't queue commands to different targets in one call, thanks."
-                        )
+                        raise Exception("Please don't queue commands to different targets in one call, thanks.")
                     target = name
         else:
             cmd["sequence"] = self.sequence
@@ -219,9 +215,7 @@ class AdaServer:
                 self.sequence_numbers[target] = self.sequence
                 self.lock.release()
             else:
-                log.warning(
-                    f"### dropping command to '{target}' because this client is not connected"
-                )
+                log.warning(f"### dropping command to '{target}' because this client is not connected")
         else:
             # this is a broadcast to all clients.
             for c in self.client_queues:
@@ -308,9 +302,7 @@ class AdaServer:
                 self.lock.release()
                 # and wait for the other thread to terminate
                 while self.has_client_address(address):
-                    log.info(
-                        "waiting for previous {} thread to terminate...".format(name)
-                    )
+                    log.info("waiting for previous {} thread to terminate...".format(name))
                     time.sleep(1)
             except:
                 pass
@@ -321,9 +313,7 @@ class AdaServer:
         self.client_queues[address] = client_queue
         self.names[address] = name
         self.sequence_numbers[name] = self.max_animations_per_iteration * -2
-        self.sequence_numbers_sent[name] = (
-            0  # ensure they start out of sync to guarantee sync up
-        )
+        self.sequence_numbers_sent[name] = 0  # ensure they start out of sync to guarantee sync up
         self.lock.release()
 
         firmware_hash = None
@@ -390,9 +380,7 @@ class AdaServer:
                             msg = data.decode("utf-8").rstrip("\0")
 
                         if msg != "ok":
-                            log.warning(
-                                "Unexpected response from {}: {}".format(name, msg)
-                            )
+                            log.warning("Unexpected response from {}: {}".format(name, msg))
                             log.info("Trying again {}:".format(retries))
                             time.sleep(1)
                             retries -= 1
@@ -421,9 +409,7 @@ class AdaServer:
                                     )
                                 )
                         except Exception as ex:
-                            log.error(
-                                f"Unexpected ping response from {name}: {msg}, exception {ex}"
-                            )
+                            log.error(f"Unexpected ping response from {name}: {msg}, exception {ex}")
                             pass
                     ping_time = time.time() + 1
 
@@ -470,9 +456,7 @@ class AdaServer:
 
     def handle_switches(self, client, address, name):
         log.info("HS105 bridge connected from {}: {}".format(address, name))
-        bridge = KasaBridgeClient(
-            name, client, address, self.config.bridge_ping_interval
-        )
+        bridge = KasaBridgeClient(name, client, address, self.config.bridge_ping_interval)
         bridge.update_switch_status()
         self.bridge = bridge
 
@@ -508,9 +492,7 @@ async def _main(config, sensei, internet_address, account_url):
         log.error("Missing ADA_WEBPUBSUB_CONNECTION_STRING environment variable")
         log.error("This means there will be no remote control Kiosk support")
     else:
-        msgbus = WebPubSubGroup(
-            webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group
-        )
+        msgbus = WebPubSubGroup(webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group)
         await msgbus.connect()
     server = AdaServer(config, msgbus, account_url)
     server.start()
@@ -524,9 +506,7 @@ if __name__ == "__main__":
         d = json.load(f)
         config = namedtuple("Config", d.keys())(*d.values())
 
-    parser = argparse.ArgumentParser(
-        "ada_server makes Sensei database available to the ada raspberry pi devices"
-    )
+    parser = argparse.ArgumentParser("ada_server makes Sensei database available to the ada raspberry pi devices")
     parser.add_argument(
         "--loop",
         help="Loop values from a file or not (default 'false')",
@@ -536,9 +516,7 @@ if __name__ == "__main__":
         "--delay",
         type=int,
         default=config.playback_delay,
-        help="Timeout in seconds between each row of replay loop (default {})".format(
-            config.playback_delay
-        ),
+        help="Timeout in seconds between each row of replay loop (default {})".format(config.playback_delay),
     )
     args = parser.parse_args()
 
@@ -548,12 +526,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     internet_address = wait_for_internet()
+    addresses = get_ip_addresses()
+    internet_address = addresses.get(config.internet_iface, internet_address)
 
     # sensei connection string is disabled for now since we need to move to
     # azure arc based default credentials on the cosmos database.
-    sensei = sensei.Sensei(
-        config.camera_zones, config.colors_for_emotions, None, config.debug
-    )
+    sensei = sensei.Sensei(config.camera_zones, config.colors_for_emotions, None, config.debug)
 
     args.loop = True  # Sensei cosmos database is offline right now...
     if args.loop:

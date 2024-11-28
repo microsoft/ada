@@ -10,6 +10,7 @@ opencv-contrib-python
 coloredlogs
 comtypes
 imutils
+netifaces
 suntime
 paramiko
 websockets

@@ -52,15 +52,9 @@ class TeensyFirmwareUpdater:
 
             now = datetime.datetime.now()
             seconds_to_midnight = 60 - now.second  # get us to the next minute
-            seconds_to_midnight += (
-                60 - (now.minute + 1)
-            ) * 60  # gets us to the next hour
-            seconds_to_midnight += (
-                24 - (now.hour + 1)
-            ) * 3600  # gets us to the next midnight
-            time.sleep(
-                seconds_to_midnight
-            )  # sleep to the next midnight and check firmware again then.
+            seconds_to_midnight += (60 - (now.minute + 1)) * 60  # gets us to the next hour
+            seconds_to_midnight += (24 - (now.hour + 1)) * 3600  # gets us to the next midnight
+            time.sleep(seconds_to_midnight)  # sleep to the next midnight and check firmware again then.
 
     def read_hash(self, hash_file):
         if os.path.exists(hash_file):
@@ -78,9 +72,7 @@ class TeensyFirmwareUpdater:
 
     def download_blob(self, blob_name, filename):
         try:
-            logger = logging.getLogger(
-                "azure.core.pipeline.policies.http_logging_policy"
-            )
+            logger = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
             logger.setLevel(logging.ERROR)
             blob_client = BlobClient(
                 self.account_url,
