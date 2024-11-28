@@ -25,7 +25,7 @@ sys.path += [os.path.join(script_dir, "../KasaBridge")]
 
 from bridge_client import KasaBridgeClient
 
-from internet import get_local_ip, wait_for_internet
+from internet import wait_for_internet
 from lighting_designer import LightingDesigner
 from logger import Logger, SshInteractiveChannel
 
@@ -45,10 +45,10 @@ class AdaServer:
     each pi is running their python client code that connects to this server.
     """
 
-    def __init__(self, config, msgbus, server_endpoint, account_url):
+    def __init__(self, config, msgbus, account_url):
         self.config = config
         self.msgbus = msgbus
-        self.server_endpoint = server_endpoint
+        self.server_endpoint = (config.server_address, config.server_port)
         self.client_queues = {}  # the pending command queue for each rpi client.
         self.clients = {}  # the dictionary of connected client sockets
         self.names = {}  # map of client address => name
@@ -77,11 +77,13 @@ class AdaServer:
         self.closed = False
         _thread.start_new_thread(self.serve_forever, ())
         for pi in self.raspberry_pis.keys():
+            log.info(f"Starting ssh thread for '{pi}'")
             _thread.start_new_thread(self.ssh_thread, (pi,))
         for controller in config.controllers:
             name = controller["name"]
             cmd = controller["cmd"]
             cwd = controller["cwd"]
+            log.info(f"launching {cmd}...")
             self.controllers += [Process(cmd, cwd, name + ".log")]
 
     def close(self):
@@ -237,6 +239,7 @@ class AdaServer:
         logger = Logger(pi, console=False)
         log = logger.get_root_logger(log_file=f"{pi}.log")
         log.handlers.pop(0)  # remove the StandardHandler that does console output.
+        connected = False
         while not self.closed:
             try:
                 log.info(f"### ssh {pi} connecting...")
@@ -244,7 +247,8 @@ class AdaServer:
                 self.raspberry_pis[pi] = ssh
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(hostname=pi, username="pi")
-
+                connected = True
+                log.info(f"### ssh {pi} connected!")
                 # get a pseudo-terminal from the connection so that it kills
                 # our ssh_command when we close this ssh connection.
                 transport = ssh.get_transport()
@@ -260,6 +264,8 @@ class AdaServer:
                     log.error(f"Channel to {pi} closed unexpectedly!")
             except Exception as e:
                 log.error(f"### ssh {pi} exception: {e}")
+                if connected:
+                    ssh.close()
                 time.sleep(10)
 
     def serve_forever(self):
@@ -267,6 +273,7 @@ class AdaServer:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.bind(self.server_endpoint)
             s.listen()
+            log.info(f"server listening on {self.server_endpoint}")
             self.closed = False
             while not self.closed:
                 client, address = s.accept()
@@ -493,8 +500,7 @@ async def async_read_enter(server):
             await asyncio.sleep(0.1)
 
 
-async def _main(config, sensei, ip_address, internet_address, account_url):
-    endpoint = (ip_address, config.server_port)
+async def _main(config, sensei, internet_address, account_url):
     msgbus = None
 
     webpubsub_constr = os.getenv("ADA_WEBPUBSUB_CONNECTION_STRING")
@@ -506,7 +512,7 @@ async def _main(config, sensei, ip_address, internet_address, account_url):
             webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group
         )
         await msgbus.connect()
-    server = AdaServer(config, msgbus, endpoint, account_url)
+    server = AdaServer(config, msgbus, account_url)
     server.start()
     designer = LightingDesigner(server, msgbus, sensei, internet_address, config)
     designer.start()
@@ -520,10 +526,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         "ada_server makes Sensei database available to the ada raspberry pi devices"
-    )
-    parser.add_argument(
-        "--ip",
-        help="optional IP address of the server (default get_local_ip())",
     )
     parser.add_argument(
         "--loop",
@@ -546,9 +548,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     internet_address = wait_for_internet()
-    ip = args.ip
-    if ip is None:
-        ip = get_local_ip()
 
     # sensei connection string is disabled for now since we need to move to
     # azure arc based default credentials on the cosmos database.
@@ -561,4 +560,4 @@ if __name__ == "__main__":
         history_files = os.path.join(os.path.join(script_dir, config.history_dir))
         sensei.load(history_files, args.delay, config.playback_weights)
 
-    asyncio.get_event_loop().run_until_complete(_main(config, sensei, ip, internet_address, account_url))
+    asyncio.get_event_loop().run_until_complete(_main(config, sensei, internet_address, account_url))

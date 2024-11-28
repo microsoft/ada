@@ -17,13 +17,6 @@ def wait_for_internet():
             return str(e)
 
 
-def get_local_ip():
-    wait_for_internet()
-    local_ip = socket.gethostbyname(socket.gethostname())
-    print(f"Using local ip address {local_ip}")
-    return local_ip
-
-
 def main():
     get_local_ip()
 
