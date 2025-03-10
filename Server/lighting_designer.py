@@ -279,7 +279,7 @@ class LightingDesigner:
                     animation = self._find_animation(option)
                     if animation is not None:
                         self._set_power_state("custom")
-                        self.color_override = False
+                        self.color_override = True
                         self.animations = AnimationLoop()
                         self.animations.start(animation)
                 except:
@@ -493,7 +493,7 @@ class LightingDesigner:
                 self.server.queue_command(0, {"command": "StopRain", "seconds": 1})
                 self.is_raining = False
 
-            if not self.color_override and self.animations is not None:
+            if self.animations is not None:
                 if has_new_clients:
                     # make sure animation is not finished.
                     self.animations.reset()
