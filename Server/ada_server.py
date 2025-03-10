@@ -240,6 +240,9 @@ class AdaServer:
                 ssh = paramiko.SSHClient()
                 self.raspberry_pis[pi] = ssh
                 ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
+                hosts = os.path.join(os.path.expanduser("~"), ".ssh", "known_hosts")
+                if os.path.exists(hosts):
+                    ssh.load_host_keys(hosts)
                 ssh.connect(hostname=pi, username="pi")
                 connected = True
                 log.info(f"### ssh {pi} connected!")

@@ -9,7 +9,7 @@
         {
             "name": "DmxController",
             "cwd": "../DmxController",
-            "cmd": "python dmx_control.py --port /dev/serial/by-id/usb-DMXking.com_DMX_USB_PRO_6A3ZO5R6-if00-port0"
+            "cmd": "python dmx_control.py --port com4"
         },
         {
             "name": "KasaBridge",
