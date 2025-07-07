@@ -40,6 +40,11 @@ function GetConnectionString() {
     return $x.connectionString
 }
 
+function GetApiKey() {
+    $x = Read-Host "Enter the Api Key Guid "
+    return $x
+}
+
 function GetStorageAccount() {
     $output = &az storage account list --resource-group $resource_group 2>&1
     if ($output.ToString().Contains("could not be found")) {
@@ -151,8 +156,7 @@ if ($output.state -ne "Running") {
 }
 
 $storage_connection = GetConnectionString
-$apiKey = (New-Guid).ToString()
-$apiKey = "e1ace8f3-1fac-4839-8031-f760a2e5c0f1"
+$apiKey = GetApiKey()
 
 $output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaWebPubSubConnectionString=$webpubsub_connstr`""
 $output = Invoke-Tool -prompt "Configure settings on '$function_app'..." -command "az functionapp config appsettings set --name $function_app --resource-group $resource_group --settings `"AdaStorageConnectionString=$storage_connection`""
