@@ -1,5 +1,5 @@
 pushd %~dp0
-call "C:\ProgramData\Anaconda3\Scripts\activate.bat" Ada
+call conda activate ada
 
 powershell -f Server\find_network.ps1
 

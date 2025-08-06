@@ -45,7 +45,7 @@ class AdaServer:
     each pi is running their python client code that connects to this server.
     """
 
-    def __init__(self, config, msgbus, account_url):
+    def __init__(self, config, msgbus, blob_storage_url):
         self.config = config
         self.msgbus = msgbus
         self.server_endpoint = (config.server_address, config.server_port)
@@ -66,7 +66,7 @@ class AdaServer:
         self.controllers = []
         self.raspberry_pis = dict((name, None) for name in config.raspberry_pis)
         self.firmware = firmware.TeensyFirmwareUpdater(
-            account_url,
+            blob_storage_url,
             "firmware",
             "TeensyFirmware.TEENSY40.hex",
             "firmware.hex",
@@ -487,7 +487,7 @@ async def async_read_enter(server):
             await asyncio.sleep(0.1)
 
 
-async def _main(config, sensei, internet_address, account_url):
+async def _main(config, sensei, internet_address, blob_storage_url):
     msgbus = None
 
     webpubsub_constr = os.getenv("ADA_WEBPUBSUB_CONNECTION_STRING")
@@ -497,7 +497,7 @@ async def _main(config, sensei, internet_address, account_url):
     else:
         msgbus = WebPubSubGroup(webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group)
         await msgbus.connect()
-    server = AdaServer(config, msgbus, account_url)
+    server = AdaServer(config, msgbus, blob_storage_url)
     server.start()
     designer = LightingDesigner(server, msgbus, sensei, internet_address, config)
     designer.start()
@@ -523,10 +523,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    account_url = os.getenv("ADA_STORAGE_ACCOUNT")
-    if not account_url:
+    account_name = os.getenv("ADA_STORAGE_ACCOUNT")
+    if not account_name:
         log.error("Please configure your ADA_STORAGE_ACCOUNT environment variable")
         sys.exit(1)
+
+    blob_storage_url = f"http://{account_name}.blob.core.windows.net/"
 
     internet_address = wait_for_internet()
     addresses = get_ip_addresses()
@@ -541,4 +543,4 @@ if __name__ == "__main__":
         history_files = os.path.join(os.path.join(script_dir, config.history_dir))
         sensei.load(history_files, args.delay, config.playback_weights)
 
-    asyncio.get_event_loop().run_until_complete(_main(config, sensei, internet_address, account_url))
+    asyncio.get_event_loop().run_until_complete(_main(config, sensei, internet_address, blob_storage_url))

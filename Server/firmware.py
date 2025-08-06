@@ -21,14 +21,14 @@ class TeensyFirmwareUpdater:
     stay in sync with the latest firmware.  It assumes the given remove blob
     name is accompanies by a hash file named: blobName + ".hash"."""
 
-    def __init__(self, account_url, container_name, blob_name, filename):
+    def __init__(self, blob_storage_url, container_name, blob_name, filename):
         self.closed = False
         self.firmware = None
         self.container_name = container_name
         self.blob_name = blob_name
         self.filename = filename
         self.hash = None
-        self.account_url = account_url
+        self.blob_storage_url = blob_storage_url
 
     def start(self):
         _thread.start_new_thread(self.download_thread, ())
@@ -75,7 +75,7 @@ class TeensyFirmwareUpdater:
             logger = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
             logger.setLevel(logging.ERROR)
             blob_client = BlobClient(
-                self.account_url,
+                self.blob_storage_url,
                 self.container_name,
                 blob_name=blob_name,
                 credential=DefaultAzureCredential(),
