@@ -25,7 +25,7 @@ sys.path += [os.path.join(script_dir, "../KasaBridge")]
 
 from bridge_client import KasaBridgeClient
 
-from internet import get_ip_addresses, wait_for_internet
+from internet import get_ip_address, wait_for_internet
 from lighting_designer import LightingDesigner
 from logger import Logger, SshInteractiveChannel
 
@@ -531,8 +531,7 @@ if __name__ == "__main__":
     blob_storage_url = f"http://{account_name}.blob.core.windows.net/"
 
     internet_address = wait_for_internet()
-    addresses = get_ip_addresses()
-    internet_address = addresses.get(config.internet_iface, internet_address)
+    internet_address = get_ip_address(blob_storage_url)
 
     # sensei connection string is disabled for now since we need to move to
     # azure arc based default credentials on the cosmos database.

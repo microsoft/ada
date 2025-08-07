@@ -1,1 +1,1 @@
-powershell -f run_dmx.ps1
+pwsh -f run_dmx.ps1

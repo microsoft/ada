@@ -1,7 +1,6 @@
 import socket
 import time
-
-from netifaces import AF_INET, ifaddresses, interfaces
+from urllib.parse import urlparse
 
 
 def wait_for_internet():
@@ -19,11 +18,18 @@ def wait_for_internet():
             return str(e)
 
 
-def get_ip_addresses():
-    result = {}
-    for ifaceName in interfaces():
-        addresses = [i["addr"] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{"addr": None}])]
-        non_none = [x for x in addresses if x is not None]
-        if non_none:
-            result[ifaceName] = non_none
-    return result
+def get_ip_address(url: str):
+
+    try:
+        parsed_url = urlparse(url)
+        hostname = parsed_url.hostname
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect((hostname, 80))
+        ip = s.getsockname()[0]
+        s.close()
+        print(f"Found internet via local ip {ip}")
+        return ip
+    except Exception as e:
+        print(str(e))
+        time.sleep(10)
+        return str(e)

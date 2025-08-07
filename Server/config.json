@@ -9,7 +9,7 @@
         {
             "name": "DmxController",
             "cwd": "../DmxController",
-            "cmd": "python dmx_control.py --port com4"
+            "cmd": "python dmx_control.py --port com3"
         },
         {
             "name": "KasaBridge",
