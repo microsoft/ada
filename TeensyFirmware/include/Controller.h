@@ -368,6 +368,10 @@ public:
         }
     }
 
+    void PrintStatus(){
+        buffer.PrintStatus();
+    }
+
 private:
 
     void QueryStatus()

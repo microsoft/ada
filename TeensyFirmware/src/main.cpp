@@ -128,15 +128,13 @@ void setup()
     // Print some stats about the current configuration:
     auto msg = stringf("LED max length: %d x %d cols\r\n", LEDSPerStrip, NUM_LEDStrips);
     DebugPrint(msg.c_str());
-    DebugPrint("F_CPU_ACTUAL: %d\r\n", F_CPU_ACTUAL);
-    DebugPrint("T0H: %d\r\n", (F_CPU_ACTUAL / 4000000));
-    DebugPrint("T1H: %d\r\n", (F_CPU_ACTUAL / 1250000));
-    DebugPrint("800: %d\r\n", (F_CPU_ACTUAL / 800000));
 
     // setup GPIO pins for strips
     controller.GetBuffer().setOutputPins();
     controller.Initialize();
     DebugPrint("WS2812 setup complete...\r\n");
+
+    controller.PrintStatus();
 
     // start default infinite Neural drop pattern
     DebugPrint("Starting neural drop\r\n");
