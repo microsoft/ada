@@ -61,7 +61,6 @@ class LightingDesigner:
         self.last_color = None
         self.last_camera_emotion = 0
         self.animations = None
-        self.power_state = "initializing"
         self.bridge_initialized = False
         self.cooling = False
         self.color_override = None
@@ -173,7 +172,7 @@ class LightingDesigner:
             self.msgbus.send("/state/on")  # broadcast to all clients
         elif option == "off":
             log.info("### power off override")
-            self.power_state = self.state_machine.turn_off()
+            self.state_machine.turn_off()
             self.color_override = False
             self.animations = None
             self._fade_to_black()
@@ -401,7 +400,10 @@ class LightingDesigner:
             except Exception as e:
                 log.error("error with process_next_message: " + str(e))
 
-            self.power_state = self.state_machine.advance(time.time())
+            new_state = self.state_machine.advance(time.time())
+            if new_state != self.power_state:
+                log.info(f"### power state changed: {self.power_state} -> {new_state}")
+                self.power_state = new_state
 
             if self.power_state == States.COOL_DOWN:
                 if not self.cooling:
