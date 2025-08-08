@@ -460,7 +460,8 @@ class AdaServer:
     def handle_switches(self, client, address, name):
         log.info("HS105 bridge connected from {}: {}".format(address, name))
         bridge = KasaBridgeClient(name, client, address, self.config.bridge_ping_interval)
-        bridge.update_switch_status()
+        status = bridge.update_switch_status()
+        log.info(f"HS105 status: {status}")
         self.bridge = bridge
 
     def get_bridge(self):

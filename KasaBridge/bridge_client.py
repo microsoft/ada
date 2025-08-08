@@ -57,6 +57,7 @@ class KasaBridgeClient:
             else:
                 # mixed states needs to be corrected later
                 self.lights_on = None
+        return result
 
     def update_switch_status(self):
         if not self.client:
@@ -68,8 +69,9 @@ class KasaBridgeClient:
         if self.last_ping + self.ping_delay > time.time():
             return
 
-        self.get_switch_status()
+        result = self.get_switch_status()
         self.last_ping = time.time()
+        return result
 
     def _send_command(self, command):
         if self.client:

@@ -252,108 +252,104 @@ class LightingDesigner:
         if msg.startswith("/"):
             msg = msg[1:]
         parts = msg.split("/")
-        if len(parts) < 2:
-            if parts[0] == "ping":
-                self.msgbus.send(f"{pingPrefix}/state/{self.power_state} at {self.internet_address}")
-            elif parts[0] == "bridge":
-                bridge = self.server.get_bridge()
-                if not bridge:
-                    self.msgbus.send(f"{pingPrefix}/bridge/disconnected")
-                elif bridge.bridge_error:
-                    self.msgbus.send(f"{pingPrefix}/bridge/{bridge.bridge_error}")
-                else:
-                    self.msgbus.send(f"{pingPrefix}/bridge/ok")
+        cmd = parts[0]
+        option = parts[1] if len(parts) > 1 else ""
+        # every remote command turns ada on, except for the "run" command which
+        # puts ada back on program according to config.
+        if parts[0] == "ping":
+            self.msgbus.send(f"{pingPrefix}/state/{self.power_state} at {self.internet_address}")
+        elif parts[0] == "bridge":
+            bridge = self.server.get_bridge()
+            if not bridge:
+                self.msgbus.send(f"{pingPrefix}/bridge/disconnected")
+            elif bridge.bridge_error:
+                self.msgbus.send(f"{pingPrefix}/bridge/{bridge.bridge_error}")
             else:
-                log.error("### ignoring message:", msg)
-        else:
-            cmd = parts[0]
-            option = parts[1]
-            # every remote command turns ada on, except for the "run" command which
-            # puts ada back on program according to config.
-            if cmd == "power":
-                self._set_power_state(option)
-            elif cmd == "rain":
-                self._rain_command(option)
-            elif cmd == "animation":
-                try:
-                    animation = self._find_animation(option)
-                    if animation is not None:
-                        self._set_power_state("custom")
-                        self.color_override = True
-                        self.animations = AnimationLoop()
-                        self.animations.start(animation)
-                except:
-                    log.error("### invalid animation requested: {}".format(msg))
-            elif cmd == "emotion":
-                log.info("### emotion override: {}".format(option))
-                self._blush(None, option, seconds=2, hold=2)
+                self.msgbus.send(f"{pingPrefix}/bridge/ok")
+        elif cmd == "power":
+            self._set_power_state(option)
+        elif cmd == "rain":
+            self._rain_command(option)
+        elif cmd == "animation":
+            try:
+                animation = self._find_animation(option)
+                if animation is not None:
+                    self._set_power_state("custom")
+                    self.color_override = True
+                    self.animations = AnimationLoop()
+                    self.animations.start(animation)
+            except:
+                log.error("### invalid animation requested: {}".format(msg))
+        elif cmd == "emotion":
+            log.info("### emotion override: {}".format(option))
+            self._blush(None, option, seconds=2, hold=2)
+            self.color_override = True
+            self.animations = None
+            self._set_power_state("custom")
+        elif cmd == "color":
+            log.info("### color override: {}".format(option))
+            rgb_color = [int(x) for x in option.split(",")]
+            self._set_color(None, rgb_color)
+            self.color_override = True
+            self.animations = None
+            self._set_power_state("custom")
+        elif cmd == "dmx":
+            log.info("### dmx color override: {}".format(option))
+            colors = []
+            i = 1
+            while i < len(parts):
+                color = [int(x) for x in parts[i].split(",")]
+                if len(color) == 3:
+                    colors += [color]
+                i += 1
+            if len(colors) > 0:
+                self._set_dmx(colors)
                 self.color_override = True
                 self.animations = None
                 self._set_power_state("custom")
-            elif cmd == "color":
-                log.info("### color override: {}".format(option))
-                rgb_color = [int(x) for x in option.split(",")]
-                self._set_color(None, rgb_color)
-                self.color_override = True
-                self.animations = None
-                self._set_power_state("custom")
-            elif cmd == "dmx":
-                log.info("### dmx color override: {}".format(option))
+        elif cmd == "zone":
+            zone = int(option)
+            if len(parts) == 3:
+                color = [int(x) for x in parts[2].split(",")]
+                if len(color) == 3:
+                    log.info("### zone {} color: {}".format(zone, color))
+                    self._set_zone(zone, color)
+                    self.color_override = True
+                    self.animations = None
+                    self._set_power_state("custom")
+        elif cmd == "strip":
+            target = option
+            if len(parts) == 4:
+                strip = int(parts[2])
+                color = [int(x) for x in parts[3].split(",")]
+                if len(color) == 3:
+                    log.info("### strip {} {} color: {}".format(target, strip, color))
+                    self._set_strip(target, strip, color)
+                    self.color_override = True
+                    self.animations = None
+                    self._set_power_state("custom")
+        elif cmd == "gradient":
+            target = option
+            if len(parts) > 4:
+                strip = -1 if parts[2] == "" else int(parts[2])
+                colorsPerStrip = -1 if parts[3] == "" else int(parts[3])
+                seconds = int(parts[4])
+                i = 5
                 colors = []
-                i = 1
                 while i < len(parts):
                     color = [int(x) for x in parts[i].split(",")]
                     if len(color) == 3:
                         colors += [color]
                     i += 1
                 if len(colors) > 0:
-                    self._set_dmx(colors)
+                    log.info("### gradient {} {} colors: {}".format(target, strip, colors))
+                    self._add_gradient(target, strip, colorsPerStrip, colors, seconds)
                     self.color_override = True
                     self.animations = None
                     self._set_power_state("custom")
-            elif cmd == "zone":
-                zone = int(option)
-                if len(parts) == 3:
-                    color = [int(x) for x in parts[2].split(",")]
-                    if len(color) == 3:
-                        log.info("### zone {} color: {}".format(zone, color))
-                        self._set_zone(zone, color)
-                        self.color_override = True
-                        self.animations = None
-                        self._set_power_state("custom")
-            elif cmd == "strip":
-                target = option
-                if len(parts) == 4:
-                    strip = int(parts[2])
-                    color = [int(x) for x in parts[3].split(",")]
-                    if len(color) == 3:
-                        log.info("### strip {} {} color: {}".format(target, strip, color))
-                        self._set_strip(target, strip, color)
-                        self.color_override = True
-                        self.animations = None
-                        self._set_power_state("custom")
-            elif cmd == "gradient":
-                target = option
-                if len(parts) > 4:
-                    strip = -1 if parts[2] == "" else int(parts[2])
-                    colorsPerStrip = -1 if parts[3] == "" else int(parts[3])
-                    seconds = int(parts[4])
-                    i = 5
-                    colors = []
-                    while i < len(parts):
-                        color = [int(x) for x in parts[i].split(",")]
-                        if len(color) == 3:
-                            colors += [color]
-                        i += 1
-                    if len(colors) > 0:
-                        log.info("### gradient {} {} colors: {}".format(target, strip, colors))
-                        self._add_gradient(target, strip, colorsPerStrip, colors, seconds)
-                        self.color_override = True
-                        self.animations = None
-                        self._set_power_state("custom")
-            elif cmd == "pixels":
-                self._set_pixels(msg)
-                self._set_power_state("custom")
+        elif cmd == "pixels":
+            self._set_pixels(msg)
+            self._set_power_state("custom")
 
     def _set_pixels(self, cmd):
         s = cmd.split("/")
