@@ -71,8 +71,9 @@
     "debug": true,
     "debug_commands": false,
 
-    "latitude": 47.642057,
-    "longitude": -122.142041,
+    "latitude": 47.67399000,
+    "longitude": -122.12151000,
+    "timezone": -7,
 
     "zone_maps": {
         "adapi1": "zone_map_1.json",
@@ -85,12 +86,11 @@
     "hold_camera_blush": 5,
     "hold_sensei_blush": 10,
     "rainbow_timeout": 10,
-    "custom_animation_timeout": 10800,
+    "custom_animation_timeout": 3600,
     "reboot_timeout": 10,
     "cool_animation_timeout": 300,
     "cool_animation_time": [ 10, 0 ],
     "movement_rain_timeout": 10,
-    "auto_reboot": 3,
 
     "playback_weights": {
         "Neutral": 0.4,
