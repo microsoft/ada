@@ -66,7 +66,9 @@ class HlsColor:
             if self.luminance <= 0.5:
                 rm2 = self.luminance + self.luminance * self.saturation
             else:
-                rm2 = self.luminance + self.saturation - self.luminance * self.saturation
+                rm2 = (
+                    self.luminance + self.saturation - self.luminance * self.saturation
+                )
 
             rm1 = 2.0 * self.luminance - rm2
             red = self.ToRGB1(rm1, rm2, self.hue + 120.0)

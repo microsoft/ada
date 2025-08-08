@@ -56,10 +56,18 @@ def parse_command_line():
         description="Add user roles to our Azure storage account and key vault."
         + " The user should be an SC-ALT account."
     )
-    parser.add_argument("--subscription", "-s", help="The subscription to use", required=True)
-    parser.add_argument("--resource_group", "-g", help="The resource group to use", required=True)
-    parser.add_argument("--storage_account", "-a", help="The storage account to use", required=True)
-    parser.add_argument("--object_id", "-o", help="The assignee being added", required=True)
+    parser.add_argument(
+        "--subscription", "-s", help="The subscription to use", required=True
+    )
+    parser.add_argument(
+        "--resource_group", "-g", help="The resource group to use", required=True
+    )
+    parser.add_argument(
+        "--storage_account", "-a", help="The storage account to use", required=True
+    )
+    parser.add_argument(
+        "--object_id", "-o", help="The assignee being added", required=True
+    )
     return parser.parse_args()
 
 
@@ -72,7 +80,9 @@ def main():
     args = parse_command_line()
 
     storage_account = args.storage_account
-    storage_scope = get_storage_scope(args.subscription, args.resource_group, storage_account)
+    storage_scope = get_storage_scope(
+        args.subscription, args.resource_group, storage_account
+    )
     assignee = args.object_id
     for role in storage_roles:
         add_role_assignment(az, storage_scope, assignee, role, storage_account)

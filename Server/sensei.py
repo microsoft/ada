@@ -52,7 +52,9 @@ class Sensei:
                 return
 
             try:
-                self.storage_account = TableService(connection_string=self.connection_string)
+                self.storage_account = TableService(
+                    connection_string=self.connection_string
+                )
             except:
                 print("Cannot connect to Sensei storage.")
                 return
@@ -60,7 +62,9 @@ class Sensei:
             self.running = True
             self.stopping = False
             self.start_time = time.time()
-            _thread.start_new_thread(self._fetch_data_and_compute_emotions_perodically, ())
+            _thread.start_new_thread(
+                self._fetch_data_and_compute_emotions_perodically, ()
+            )
 
     def stop(self):
         self.stopping = True
@@ -87,7 +91,9 @@ class Sensei:
         for i in range(len(self.camera_zones)):
             zone = self.camera_zones[i]
             for name in zone:
-                filename = os.path.join(history_dir, "Grouped_by_Hour_{}.csv".format(name))
+                filename = os.path.join(
+                    history_dir, "Grouped_by_Hour_{}.csv".format(name)
+                )
                 print("Loading: {}".format(filename))
                 temp = pd.read_csv(filename)
                 rows = temp.shape[0]
@@ -135,10 +141,18 @@ class Sensei:
 
         try:
             start = time.time()
-            query_results = list(self.storage_account.query_entities("Psi", filter=query, num_results=20, timeout=5))
+            query_results = list(
+                self.storage_account.query_entities(
+                    "Psi", filter=query, num_results=20, timeout=5
+                )
+            )
             stop = time.time()
             if stop - start > 5:
-                print("### Cosmos is slow, {} took {} seconds".format(partition, stop - start))
+                print(
+                    "### Cosmos is slow, {} took {} seconds".format(
+                        partition, stop - start
+                    )
+                )
 
             for entity in query_results:
                 for x in ["Face1", "Face2", "Face3", "Face4", "Face5"]:
@@ -153,7 +167,9 @@ class Sensei:
                                 # average
                                 # face_sentiment[sentiment] = (face_sentiment[sentiment] + sentiment_score) / 2
                                 # take max
-                                face_sentiment[sentiment] = max(face_sentiment[sentiment], sentiment_score)
+                                face_sentiment[sentiment] = max(
+                                    face_sentiment[sentiment], sentiment_score
+                                )
 
         except Exception as e:
             print("### error in _read_face_sentiment_data", e)
@@ -193,9 +209,13 @@ class Sensei:
             for sentiment in all_sentiments:
                 # not all samples have emotion data
                 if self.playback_row >= self.recorded_data[camera_no].shape[0]:
-                    face_sentiment[sentiment] = self.recorded_data[camera_no].iloc[0][sentiment]
+                    face_sentiment[sentiment] = self.recorded_data[camera_no].iloc[0][
+                        sentiment
+                    ]
                 else:
-                    face_sentiment[sentiment] = self.recorded_data[camera_no].iloc[self.playback_row][sentiment]
+                    face_sentiment[sentiment] = self.recorded_data[camera_no].iloc[
+                        self.playback_row
+                    ][sentiment]
         except Exception as e:
             print("### error in _read_face_sentiment_data_file:", e)
 
@@ -256,9 +276,13 @@ class Sensei:
     def _compute_emotion_by_zone(self):
         zone_dict_list = self._compute_most_probable_dicts()
         # emotion with the highest score for each camera zone, not including the overly dominant 'Neutral' emotion
-        highest_other_emotion_and_values_per_zone = self._get_highest_emotions_and_values(zone_dict_list, ["neutral"])
+        highest_other_emotion_and_values_per_zone = (
+            self._get_highest_emotions_and_values(zone_dict_list, ["neutral"])
+        )
         # now include the neutral emotion.
-        highest_emotion_and_values_per_zone = self._get_highest_emotions_and_values(zone_dict_list)
+        highest_emotion_and_values_per_zone = self._get_highest_emotions_and_values(
+            zone_dict_list
+        )
 
         i1 = np.argmax([x[1] for x in highest_other_emotion_and_values_per_zone])
         i2 = np.argmax([x[1] for x in highest_emotion_and_values_per_zone])
@@ -267,7 +291,9 @@ class Sensei:
 
         if s1 > s2 / 4:
             # then favor the other emotion over the more boring 'Neutral' emotions
-            highest_emotion_and_values_per_zone = highest_other_emotion_and_values_per_zone
+            highest_emotion_and_values_per_zone = (
+                highest_other_emotion_and_values_per_zone
+            )
 
         zones = []
         for highest_ev in highest_emotion_and_values_per_zone:
@@ -301,7 +327,9 @@ if __name__ == "__main__":
 
     emotions = [key for key in config.colors_for_emotions]
 
-    sensei = Sensei(config.camera_zones, emotions, config.connection_string, config.debug)
+    sensei = Sensei(
+        config.camera_zones, emotions, config.connection_string, config.debug
+    )
     args = parser.parse_args()
     if args.loop:
         history_files = os.path.join(os.path.join(script_dir, config.history_dir))

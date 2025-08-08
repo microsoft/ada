@@ -45,8 +45,12 @@ class WebPubSubGroup:
                 ],
             )
             uri = token["url"]
-            self.web_socket = await websockets.connect(uri, subprotocols=["json.webpubsub.azure.v1"])
-            response = await self._send_receive({"type": "joinGroup", "ackId": self.ack_id, "group": self.group_name})
+            self.web_socket = await websockets.connect(
+                uri, subprotocols=["json.webpubsub.azure.v1"]
+            )
+            response = await self._send_receive(
+                {"type": "joinGroup", "ackId": self.ack_id, "group": self.group_name}
+            )
             self.ack_id += 1
             # now we should have the connection id and an idea of success
             if "event" in response and response["event"] == "connected":

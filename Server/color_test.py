@@ -65,7 +65,9 @@ def _main(ip_address):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("ada_server makes Sensei database available to the ada raspberry pi devices")
+    parser = argparse.ArgumentParser(
+        "ada_server makes Sensei database available to the ada raspberry pi devices"
+    )
     parser.add_argument(
         "--ip",
         help="optional IP address of the server (default 'localhost')",

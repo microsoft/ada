@@ -60,7 +60,9 @@ class Logger:
         self.root_logger.propagate = False
         global has_console_handler
         if not has_console_handler:
-            console_handler_formatter = logging.Formatter("%(filename)s [%(levelname)s]: %(message)s")
+            console_handler_formatter = logging.Formatter(
+                "%(filename)s [%(levelname)s]: %(message)s"
+            )
             console_handler = logging.StreamHandler()
             console_handler.setLevel(self.log_level)
             console_handler.setFormatter(console_handler_formatter)
@@ -98,7 +100,9 @@ class SshInteractiveChannel:
         self.log = log
 
     def start_listening(self):
-        _thread.start_new_thread(self._log_lines, (self.stdout, self.channel.recv_ready, self.log.info))
+        _thread.start_new_thread(
+            self._log_lines, (self.stdout, self.channel.recv_ready, self.log.info)
+        )
         _thread.start_new_thread(
             self._log_lines,
             (self.stderr, self.channel.recv_stderr_ready, self.log.error),
