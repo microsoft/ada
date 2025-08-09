@@ -13,9 +13,12 @@ import pandas as pd
 from azure.cosmosdb.table import TableService
 
 import priority_queue
+from logger import Logger
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
+logger = Logger()
+log = logger.get_root_logger()
 
 class Sensei:
     """
@@ -48,7 +51,7 @@ class Sensei:
     def start(self):
         if not self.running:
             if not self.connection_string:
-                print("Missing Sensei connection string")
+                log.warning("Missing Sensei connection string")
                 return
 
             try:
@@ -56,7 +59,7 @@ class Sensei:
                     connection_string=self.connection_string
                 )
             except:
-                print("Cannot connect to Sensei storage.")
+                log.error("Cannot connect to Sensei storage.")
                 return
 
             self.running = True
@@ -94,7 +97,7 @@ class Sensei:
                 filename = os.path.join(
                     history_dir, "Grouped_by_Hour_{}.csv".format(name)
                 )
-                print("Loading: {}".format(filename))
+                log.info("Loading: {}".format(filename))
                 temp = pd.read_csv(filename)
                 rows = temp.shape[0]
                 if rows > self.max_rows:
@@ -148,7 +151,7 @@ class Sensei:
             )
             stop = time.time()
             if stop - start > 5:
-                print(
+                log.warning(
                     "### Cosmos is slow, {} took {} seconds".format(
                         partition, stop - start
                     )
@@ -172,7 +175,7 @@ class Sensei:
                                 )
 
         except Exception as e:
-            print("### error in _read_face_sentiment_data", e)
+            log.error("### error in _read_face_sentiment_data", e)
 
         # face_sentiment is an average sentiment array over all samples (and faces)
         # e.g. {'Anger': 0.002378021,
@@ -217,7 +220,7 @@ class Sensei:
                         self.playback_row
                     ][sentiment]
         except Exception as e:
-            print("### error in _read_face_sentiment_data_file:", e)
+            log.error("### error in _read_face_sentiment_data_file:", e)
 
         # scale by the weights
         if self.playback_weights is not None:
@@ -339,4 +342,4 @@ if __name__ == "__main__":
     while True:
         result = sensei.get_next_emotions(10)
         if result is not None:
-            print(result)
+            log.info(result)
