@@ -87,17 +87,21 @@ class StateMachine:
 
     def set_state(self, new_state, now: float = time.time()) -> str:
         if new_state in States.ALL:
-            if new_state == States.OFF and self.state == States.ON:
+            if new_state == States.OFF and self.state in [States.ON, States.CUSTOM]:
                 # need to cool down before turning off
                 new_state = States.COOL_DOWN
                 self.turn_off_start = now
             elif new_state == States.CUSTOM:
+                self.power_off_day_of_week = ""
                 self.custom_start = now
             elif new_state == States.REBOOT:
+                self.power_off_day_of_week = ""
                 self.reboot_start = now
                 self.rebooting = True
                 new_state = States.COOL_DOWN
                 self.turn_off_start = now
+            elif new_state == States.ON:                
+                self.power_off_day_of_week = ""
 
             self.state = new_state
             return new_state

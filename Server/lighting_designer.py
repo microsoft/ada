@@ -45,8 +45,8 @@ class LightingDesigner:
         self.power_state = "initiailizing"
         self.state_machine = StateMachine(
             self.config.on_days,
-            self.config.on_time,
             self.config.off_time,
+            self.config.on_time,
             self.config.latitude,
             self.config.longitude,
             self.config.timezone,
@@ -66,6 +66,8 @@ class LightingDesigner:
         self.color_override = None
         self.is_raining = None
         self.stop_rain_time = None
+        self.bridge_status = 0
+        self.reboot = False
         self._check_onoff_times()
         if self._get_cool_animation_time():
             # if server is started when we are already into cool animation time, so ensure this happens.
@@ -379,9 +381,10 @@ class LightingDesigner:
                 next_time_check = time.time() + 60
 
             bridge = self.server.get_bridge()
-            if bridge:
+            if bridge and (not self.bridge_initialized or time.time() > self.bridge_status + 60):
                 # a kind of heart beat to keep the bridge socket alive.
                 bridge.update_switch_status()
+                self.bridge_status = time.time()
                 if not self.bridge_initialized and bridge.lights_on is not None:
                     self.bridge_initialized = True
                     self.power_state = States.ON if bridge.lights_on else States.OFF
@@ -389,7 +392,7 @@ class LightingDesigner:
 
             if not self.bridge_initialized:
                 log.info("### waiting for bridge to find the Kasa Power Switches...")
-                time.sleep(60)
+                time.sleep(1)
                 continue
 
             new_clients = self.server.get_stale_clients()
@@ -448,7 +451,7 @@ class LightingDesigner:
                     self.animations = None
 
                 self.server.camera_off()
-                time.sleep(0.1)
+                time.sleep(1)
                 continue  # wait for power to go on again tomorrow.
 
             if self.stop_rain_time is not None and time.time() > self.stop_rain_time:
