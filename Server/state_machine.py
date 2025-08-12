@@ -100,7 +100,7 @@ class StateMachine:
                 self.rebooting = True
                 new_state = States.COOL_DOWN
                 self.turn_off_start = now
-            elif new_state == States.ON:                
+            elif new_state == States.ON:
                 self.power_off_day_of_week = ""
 
             self.state = new_state

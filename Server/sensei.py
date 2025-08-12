@@ -20,6 +20,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 logger = Logger()
 log = logger.get_root_logger()
 
+
 class Sensei:
     """
     A class that provides emotion data from Sensei cosmos database or from

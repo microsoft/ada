@@ -381,7 +381,9 @@ class LightingDesigner:
                 next_time_check = time.time() + 60
 
             bridge = self.server.get_bridge()
-            if bridge and (not self.bridge_initialized or time.time() > self.bridge_status + 60):
+            if bridge and (
+                not self.bridge_initialized or time.time() > self.bridge_status + 60
+            ):
                 # a kind of heart beat to keep the bridge socket alive.
                 bridge.update_switch_status()
                 self.bridge_status = time.time()
@@ -404,9 +406,11 @@ class LightingDesigner:
                 log.error("error with process_next_message: " + str(e))
 
             new_state = self.state_machine.advance(time.time())
+            state_changed = False
             if new_state != self.power_state:
                 log.info(f"### power state changed: {self.power_state} -> {new_state}")
                 self.power_state = new_state
+                state_changed = True
 
             if self.power_state == States.COOL_DOWN:
                 if not self.cooling:
@@ -432,18 +436,19 @@ class LightingDesigner:
 
             master_power_state = self.power_state in [States.ON, States.CUSTOM]
             if master_power_state:
-                if bridge and (not bridge.lights_on or has_new_clients):
+                if bridge and (
+                    not bridge.lights_on or has_new_clients or state_changed
+                ):
                     # looks like we need to turn the lights on
                     self._master_power_on()
                     # if we just did a power cycle then reset any previous color overrides.
                     self.color_override = False
                     self.animations = None
                     log.info("### back to normal operation")
-                    self.power_state = "on"
                     self.sensei.start()
                 self.server.camera_on()
             else:
-                if bridge and (bridge.lights_on or has_new_clients):
+                if bridge and (bridge.lights_on or has_new_clients or state_changed):
                     # looks like we need to turn the lights off
                     self.server.clear_queue()
                     self._master_power_off()
