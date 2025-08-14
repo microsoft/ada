@@ -451,6 +451,7 @@ class LightingDesigner:
                 if bridge and (bridge.lights_on or has_new_clients or state_changed):
                     # looks like we need to turn the lights off
                     self.server.clear_queue()
+                    self._fade_to_black()  # to ensure DMX is also off.
                     self._master_power_off()
                     self.color_override = False
                     self.animations = None
