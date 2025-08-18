@@ -52,11 +52,8 @@ class KasaBridgeClient:
                     states += [is_on]
             if np.all(states):
                 self.lights_on = True
-            elif np.all([not x for x in states]):
-                self.lights_on = False
             else:
-                # mixed states needs to be corrected later
-                self.lights_on = None
+                self.lights_on = False
         return result
 
     def update_switch_status(self):
