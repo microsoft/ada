@@ -41,10 +41,9 @@ class StateMachine:
         self.turn_off_start = 0.0  # seconds
         self.custom_start = 0.0  # seconds since epoch
         self.reboot_start = 0.0  # seconds since epoch
-        self.rebooting = (
-            False  # performs auto-cooldown, then off for reboot timeout then on again.
-        )
-        self.power_off_day_of_week = ""  # used to track if we are off today
+        # performs auto-cooldown, then off for reboot timeout then on again.
+        self.rebooting = False
+        self.freeze_until = None  # freeze state (off or on) until this time is reached.
 
     def advance(self, now: float) -> str:
         desired_state = self._get_master_power_state(now)
@@ -80,12 +79,22 @@ class StateMachine:
 
         return self.state
 
+    def turn_on(self, now: float = time.time()):
+        # override the on time for the rest of the day until next scheduled off time.
+        self.freeze_until = self._get_freeze_time(States.ON, now)
+        self.set_state(States.ON, now)
+
     def turn_off(self, now: float = time.time()):
-        # override the on time for the rest of the day.
-        self.power_off_day_of_week = datetime.fromtimestamp(now).strftime("%A")
+        # override the off time for the rest of the day until next scheduled on time.
+        self.freeze_until = self._get_freeze_time(States.OFF, now)
         self.set_state(States.OFF, now)
 
-    def set_state(self, new_state, now: float = time.time()) -> str:
+    def reset(self, now: float = time.time()):
+        # reset any custom overrides
+        self.freeze_until = None
+        self.advance(now)
+
+    def set_state(self, new_state: str, now: float = time.time()) -> str:
         if new_state in States.ALL:
             if new_state == States.OFF and self.state in [States.ON, States.CUSTOM]:
                 # need to cool down before turning off
@@ -108,17 +117,45 @@ class StateMachine:
         else:
             raise ValueError("Invalid state")
 
-    def _get_master_power_state(self, now: float):
-        if not self._get_on_today(now):
-            return False
+    def _get_freeze_time(self, state: str, now: float):
         on_hour, on_minute = self._resolve_sunrise_sunset(self.on_time)
         off_hour, off_minute = self._resolve_sunrise_sunset(self.off_time)
-        d = datetime.fromtimestamp(now)
-        if (d.hour > on_hour or (d.hour == on_hour and d.minute >= on_minute)) and (
-            d.hour < off_hour or (d.hour == off_hour and d.minute < off_minute)
-        ):
-            return True
-        return False
+        d = datetime.fromtimestamp(now, tz=self.timezone)
+        start = datetime(
+            d.year, d.month, d.day, on_hour, on_minute, 0, tzinfo=self.timezone
+        )
+        end = datetime(
+            d.year, d.month, d.day, off_hour, off_minute, 0, tzinfo=self.timezone
+        )
+
+        if d > start and d < end:
+            # we are inside the on-time window, so freeze until the normal scheduled off time.
+            return end
+        else:
+            # We are off so freeze until the normal scheduled on_time (possibly tomorrow since
+            # off time normally wraps around to the next day).
+            return start if d.hour < on_hour else start + timedelta(days=1)
+
+    def _get_master_power_state(self, now: float):
+        d = datetime.fromtimestamp(now, tz=self.timezone)
+        on_hour, on_minute = self._resolve_sunrise_sunset(self.on_time)
+        off_hour, off_minute = self._resolve_sunrise_sunset(self.off_time)
+        start = datetime(
+            d.year, d.month, d.day, on_hour, on_minute, 0, tzinfo=self.timezone
+        )
+        end = datetime(
+            d.year, d.month, d.day, off_hour, off_minute, 0, tzinfo=self.timezone
+        )
+
+        if self.freeze_until is not None and d < self.freeze_until:
+            # then we are in a power override state due to user pressing On or Off, and so we
+            # stay in this state until the freeze time is over.
+            return self.state in [States.ON, States.CUSTOM]
+
+        if not self._get_on_today(now):
+            return False
+
+        return d >= start and d < end
 
     def _get_on_today(self, now: float):
         """Check if Ada is scheduled to be on today and if so at what start and stop times.
@@ -126,11 +163,6 @@ class StateMachine:
         run_days = self.on_days
         today = datetime.fromtimestamp(now)
         day_of_week = today.strftime("%A")
-        if self.power_off_day_of_week == day_of_week:
-            # if we turned off today, we are not on today
-            return False
-        else:
-            self.power_off_day_of_week = ""  # reset for next day
         return day_of_week in run_days
 
     def _resolve_sunrise_sunset(self, setting):
@@ -163,6 +195,7 @@ def test():
     # pick a Friday so we roll into the weekend
     date = datetime(2025, 8, 1, 12, 0, 0, 0)
     now = date.timestamp()
+    start = date
     machine.set_state(States.OFF)
     custom = False
     reboot = False
@@ -177,38 +210,45 @@ def test():
                 f"New day: {date}======================================================"
             )
         state = machine.advance(now)  # Advance by 1 hour
+        expecting_cool_down = False
         print(f"{date}: {state}")
         if state == States.COOL_DOWN:
-            # make sure cool down state latches for turn off timeout
-            while state == States.COOL_DOWN:
-                now += 10
-                state = machine.advance(now)  # Advance by 10 seconds
-                print(f"{date}: {state} (cool down)")
+            expecting_cool_down = True
 
         elif state == States.ON and not custom:
             custom = True
             state = States.CUSTOM
             machine.set_state(States.CUSTOM, now)
             print(f"{date}: {state} (custom)")
-            # make sure custom state latches for custom timeout
-            while state == States.CUSTOM:
-                now += 10
-                state = machine.advance(now)  # Advance by 10 seconds
-                print(f"{date}: {state} (custom)")
 
         elif state == States.ON and not reboot:
             reboot = True
             state = States.REBOOT
             machine.set_state(States.REBOOT, now)
             print(f"{date}: {state} (reboot)")
-            # make sure reboot state latches for cool down timeout + reboot timeout
-            while state in [States.COOL_DOWN, States.OFF, States.REBOOT, States.CUSTOM]:
-                now += 10
-                state = machine.advance(now)  # Advance by 10 seconds
-                print(f"{date}: {state} (reboot)")
+            expecting_cool_down = True
+            state = machine.advance(now)
 
+        elif date.hour == 21 and (date - start).days == 1:
             # test we can now turn off for the rest of the day.
+            print(f"{date}: {state} (on override)")
+            machine.turn_on(now)
+
+        elif date.hour == 15 and (date - start).days == 4:
+            # test we can now turn off for the rest of the day.
+            print(f"{date}: {state} (off override)")
             machine.turn_off(now)
+            expecting_cool_down = True
+            state = machine.state
+
+        if expecting_cool_down:
+            expecting_cool_down = False
+            # make sure reboot state latches for cool down timeout + reboot timeout
+            while state in [States.COOL_DOWN, States.REBOOT, States.CUSTOM]:
+                now += 10
+                date = datetime.fromtimestamp(now)
+                state = machine.advance(now)  # Advance by 10 seconds
+                print(f"{date}: {state}")
 
 
 if __name__ == "__main__":

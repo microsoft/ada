@@ -167,7 +167,7 @@ class LightingDesigner:
     def _set_power_state(self, option):
         if option == "on":
             log.info("### power on override")
-            self.state_machine.set_state(States.CUSTOM)
+            self.state_machine.turn_on()
             self.last_change = 0
             self.last_camera_emotion = 0
             self.last_cool_animation = 0
@@ -180,7 +180,7 @@ class LightingDesigner:
             self._fade_to_black()
         elif option == "run":
             log.info("### back to normal operation")
-            self.state_machine.set_state(States.ON)
+            self.state_machine.reset()
             self.color_override = False
             self.animations = None
             self.msgbus.send("/state/run")  # broadcast to all clients
