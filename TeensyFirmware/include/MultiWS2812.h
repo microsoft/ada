@@ -55,23 +55,18 @@ const struct {
     // Nominal values (F_CPU_ACTUAL typically is 600,000,000, 600MHz, a cycle is 1.666667ns)
     // Convert cycles to ns: cycles * 1/600e6 = ns (use 1/0.6, to go directly to ns)
     // Convert cycles to Hz: 1/cycles * 600e6 = Hz (600e3, for kHz)
+
+    // Datasheet says 800khz is the max.
     const uint32_t DEFAULT_CYCLES_800 = 600e6 / 800000; // 750 cycles [1.25us, 800kHz]
-    //const uint32_t DEFAULT_CYCLES_800 = 726; // 750 cycles [1.25us, 800kHz]
-    const uint32_t DEFAULT_CYCLES_T0H = 600e6 / 4000000; // 150 cycles [250ns]
-    //const uint32_t DEFAULT_CYCLES_T1H = 600e6 / 1250000; // 480 cycles [800ns]
-    //const uint32_t DEFAULT_CYCLES_T1H = 390; // 390 cycles [650ns]
-    const uint32_t DEFAULT_CYCLES_T1H = 522; // 522 cycles [870ns]
-    const uint32_t CYCLES_MIN = 480; //  800ns [1250kHz] [ 800ns = 220ns +  580ns]
-    const uint32_t CYCLES_MAX = 1212; // 2020ns [ 495kHz] [2020ns = 1600ns + 420ns]
-    const uint32_t CYCLES_T0H_MIN = 132; //  220ns
-    const uint32_t CYCLES_T0H_MAX = 228; //  380ns
-    const uint32_t CYCLES_T1H_MIN = 348; //  480ns
-    const uint32_t CYCLES_T1H_MAX = 960; // 1600ns
+
+    // Datasheet says T0H should be 0.4 us
+    const uint32_t DEFAULT_CYCLES_T0H = 240; // 400 ns
+    // Datasheet says T0H should be 0.8 us
+    const uint32_t DEFAULT_CYCLES_T1H = 480; // 800 ns
 
     // Wait a bit longer than 300us to avoid any timing issues
-    const uint32_t DEFAULT_FRAME_RESET = 3310; // us of delay
-    const uint32_t FRAME_RESET_MIN = 280; // us of delay
-    const uint32_t FRAME_RESET_MAX = 500; // us of delay
+    // Datasheet says frame reset has to be >= 50 us.
+    const uint32_t DEFAULT_FRAME_RESET = 300; // us of delay
 } WS2812Timing;
 
 extern void DebugPrint(const char* format, ...);
@@ -85,31 +80,12 @@ public:
     int busy(void);
     boolean enableOutputPin(uint32_t bankStringNum, uint32_t pin);
 
-    // Update any parameter that isn't 0
-    void setCycleDividersForced(uint32_t cyclesPeriod, uint32_t cyclesT0H, uint32_t cyclesT1H, uint32_t cyclesFrameDelay) {
-        timingFrameResetDelay = cyclesFrameDelay != 0 ? cyclesFrameDelay : timingFrameResetDelay;
-        timingCyclesPeriod800 = cyclesPeriod != 0 ? cyclesPeriod : timingCyclesPeriod800;
-        timingCyclesT0H = cyclesT0H != 0 ? cyclesT0H : timingCyclesT0H;
-        timingCyclesT1H = cyclesT1H != 0 ? cyclesT1H : timingCyclesT1H;
-    }
-
-    // Apply some logic to the timing constraints (see MultiWS2812::show() for timing diagram)
-    void setCycleDividers(uint32_t cyclesPeriod, uint32_t cyclesT0H, uint32_t cyclesT1H, uint32_t cyclesFrameDelay) {
-        timingFrameResetDelay = (cyclesFrameDelay > WS2812Timing.FRAME_RESET_MAX) ? WS2812Timing.FRAME_RESET_MAX : cyclesFrameDelay;
-        timingFrameResetDelay = (cyclesFrameDelay < WS2812Timing.FRAME_RESET_MIN) ? WS2812Timing.FRAME_RESET_MIN : cyclesFrameDelay;
-        timingCyclesPeriod800 = (cyclesPeriod > WS2812Timing.CYCLES_MAX) ? WS2812Timing.CYCLES_MAX : cyclesPeriod;
-        timingCyclesPeriod800 = (cyclesPeriod < WS2812Timing.CYCLES_MIN) ? WS2812Timing.CYCLES_MIN : cyclesPeriod;
-        timingCyclesT0H = (cyclesT0H > WS2812Timing.CYCLES_T0H_MAX) ? WS2812Timing.CYCLES_T0H_MAX : cyclesT0H;
-        timingCyclesT0H = (cyclesT0H < WS2812Timing.CYCLES_T0H_MIN) ? WS2812Timing.CYCLES_T0H_MIN : cyclesT0H;
-        timingCyclesT1H = (cyclesT1H > WS2812Timing.CYCLES_T1H_MAX) ? WS2812Timing.CYCLES_T1H_MAX : cyclesT1H;
-        timingCyclesT1H = (cyclesT1H < WS2812Timing.CYCLES_T1H_MIN) ? WS2812Timing.CYCLES_T1H_MIN : cyclesT1H;
-    }
-
     void printTimingCycleStats() {
         DebugPrint("CPU Clock time: %u\r\n", F_CPU_ACTUAL);
         DebugPrint("800kHz total cycle duration: %u cycles [%.2fkHz]\r\n", timingCyclesPeriod800, 1.0 / timingCyclesPeriod800 * ((double)F_CPU_ACTUAL / 1000.0));
-        DebugPrint("T0H NZR high time duration: %u cycles [%.2fns]\r\n", timingCyclesT0H, timingCyclesT0H * 1.0 / ((double)F_CPU_ACTUAL / 1.0e9));
-        DebugPrint("T1H NZR high time duration: %u cycles [%.2fns]\r\n", timingCyclesT1H, timingCyclesT1H * 1.0 / ((double)F_CPU_ACTUAL / 1.0e9));
+        DebugPrint("T0H NZR high time duration: %u cycles\r\n", timingCyclesT0H);
+        DebugPrint("T1H NZR high time duration: %u cycles\r\n", timingCyclesT1H);
+        DebugPrint("Reset delay %u cycles\r\n", timingFrameResetDelay);
         DebugPrint("frameBuffer: 0x%08X [32bit alignment: 0x%08X]\r\n", (int)frameBuffer, (int)frameBuffer % 32);
     }
 
