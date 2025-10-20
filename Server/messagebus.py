@@ -55,7 +55,8 @@ class WebPubSubGroup:
             # now we should have the connection id and an idea of success
             if "event" in response and response["event"] == "connected":
                 self.connection_id = response["connectionId"]
-            log.info("WebSocket connected")
+            
+            log.info("### websocket connected.")
         except Exception as e:
             log.error(f"### web socket connect failed:{e}")
             self.web_socket = None
@@ -79,42 +80,39 @@ class WebPubSubGroup:
                 message = self.send_queue.get()
                 if self.web_socket:
                     if message:
-                        data = json.dumps(message)
                         try:
+                            data = json.dumps(message)
                             await self.web_socket.send(data)
                         except Exception as e:
-                            # websocket has been closed.
-                            self.web_socket = None
-                            await asyncio.sleep(1)
+                            # websocket has been closed?
                             log.error("### websocket send error: ", e)
+                            await asyncio.sleep(10)
                 else:
-                    await self.connect()  # auto-reconnect!
+                    # drop it on the floor and wait for reconnect in listen thread.
+                    await asyncio.sleep(10)
             else:
                 await asyncio.sleep(0.1)
-
-        if self.web_socket:
-            try:
-                await self.web_socket.close()
-            except Exception as e:
-                log.error(e)
+        
+        await self.close()
 
     async def listen(self):
         log.info("Listening for messages from WebSocket...")
         while not self.closed:
             try:
                 if not self.web_socket:
+                    log.info("### websocket connecting..")
                     await self.connect()  # auto-reconnect!
                 async for message in self.web_socket:
                     self._handle_message(message)
             except Exception as e:
                 # websocket has been closed.
-                self.web_socket = None
+                log.info("### websocket listen error: ", e)
+                await self.close()
                 await asyncio.sleep(1)
-                log.info("### websocket receive error: ", e)
         log.info("Stopped listening to WebSocket.")
 
     def _handle_message(self, data):
-        # log.info("Message received: " + data)
+        log.info("Message received: " + data)
         message = json.loads(data)
         if "fromUserId" in message:
             user = message["fromUserId"]
@@ -130,10 +128,20 @@ class WebPubSubGroup:
         response = await self.web_socket.recv()
         return json.loads(response)
 
-    def close(self):
+    async def close(self):
         self.closed = True
+        
+        if self.web_socket:
+            try:
+                await self.web_socket.close()
+            except Exception as e:
+                log.error(f"### error closing web_socket {e}")
+        
+        self.web_socket = None
+
         if self.client:
             try:
                 self.client.close()
             except Exception as e:
-                log.error(e)
+                log.error(f"### error closing client {e}")
+            self.client = None
