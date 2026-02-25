@@ -32,6 +32,10 @@ if not EXIST "%BITS%\setup.exe" goto :nobits
 echo "Please check contents of %BITS%..."
 pause
 
+echo Uploading ClickOnce installer 
+call AzurePublishClickOnce.cmd .\bin\publish adakiosk "%LOVETTSOFTWARE_STORAGE_CONNECTION_STRING%"
+if ERRORLEVEL 1 goto :uploadfailed
+
 set zipfile=bin\AdaKiosk.zip
 if exist %zipfile% del %zipfile%
 powershell -c "Compress-Archive -Path .\bin\Release\net7.0-windows\* -DestinationPath %zipfile%"

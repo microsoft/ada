@@ -151,7 +151,7 @@ namespace AdaKiosk
             if (offline != flag)
             {
                 offline = flag;
-                ShowStatus(offline ? "Ada is not online!" : "Ada is back!");
+                UpdateState(offline ? "Ada is not online!" : "Ada is back!");
             }
             this.sim.Offline = flag;
         }
@@ -162,7 +162,6 @@ namespace AdaKiosk
             {
                 // didn't receive a response last time, so is Ada down?
                 SetOffline(true);
-                this.ButtonControl.Visibility = Visibility.Collapsed;
                 if (this.currentView == ViewType.Control)
                 {
                     OnBlog(this, null);
@@ -171,7 +170,6 @@ namespace AdaKiosk
             else
             {
                 SetOffline(false);
-                this.ButtonControl.Visibility = Visibility.Visible; 
             }
         }
 
@@ -242,10 +240,13 @@ namespace AdaKiosk
         private void UpdateState(string state)
         {
             ShowStatus(state);
-            this.pongTick = Environment.TickCount; 
-            this.sim.Offline = false;
-            this.sim.Powered = (state != "off");
-            this.ButtonControl.Visibility = Visibility.Visible;
+            UiDispatcher.Instance.RunOnUIThread(() =>
+            {
+                this.pongTick = Environment.TickCount;
+                this.sim.Offline = this.offline;
+                this.sim.Powered = (state != "off");
+                this.ButtonControl.Visibility = this.offline ? Visibility.Collapsed : Visibility.Visible;
+            });
         }
 
         private void HandleDebug(string message)
