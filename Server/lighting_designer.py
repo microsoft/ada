@@ -15,6 +15,7 @@ from logger import Logger
 from priority_queue import PriorityQueue
 from state_machine import StateMachine, States
 from utilities import TimedLatch
+from messagebus import WebPubSubGroup
 
 logger = Logger()
 log = logger.get_root_logger()
@@ -29,7 +30,7 @@ class LightingDesigner:
     until the power comes back on the next day, both on the RaspberryPi's and on the DMX controller.
     """
 
-    def __init__(self, server, msgbus, sensei, internet_address, config):
+    def __init__(self, server, msgbus: WebPubSubGroup, sensei, internet_address, config):
         self.config = config
         self.msgbus = msgbus
         self.internet_address = internet_address
