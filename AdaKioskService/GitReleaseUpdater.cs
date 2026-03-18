@@ -94,7 +94,8 @@ namespace AdaKioskUpdater
 
         static async Task DownloadBinaryFile(string url, string localFile)
         {
-            HttpClient client = new HttpClient();
+            var handler = new HttpClientHandler { AllowAutoRedirect = true };
+            HttpClient client = new HttpClient(handler);
             client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
             var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)

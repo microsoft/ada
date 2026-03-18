@@ -38,7 +38,7 @@ if ERRORLEVEL 1 goto :uploadfailed
 
 set zipfile=bin\AdaKiosk.zip
 if exist %zipfile% del %zipfile%
-powershell -c "Compress-Archive -Path .\bin\Release\net7.0-windows\* -DestinationPath %zipfile%"
+powershell -c "Compress-Archive -Path .\bin\Release\net9.0-windows\* -DestinationPath %zipfile%"
 if ERRORLEVEL 1 goto :err_zip
 
 echo Creating new github release for version %VERSION%
