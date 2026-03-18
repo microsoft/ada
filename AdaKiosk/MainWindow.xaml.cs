@@ -28,6 +28,7 @@ namespace AdaKiosk
         const string hubName = "AdaKiosk";
         const string userName = "kiosk";
         const string groupName = "demogroup";
+        private string serverAddress = null;
         int sleepTick = 0;
         bool debugEnabled = true;
         int pingTick = 0;
@@ -125,7 +126,7 @@ namespace AdaKiosk
             {
                 try
                 {
-                    this.bus = new WebPubSubGroup();
+                    this.bus = new WebPubSubGroup(this.observer?.IpAddress);
                     await bus.Connect(connectionString, hubName, userName, groupName, TimeSpan.FromSeconds(30));
                     this.bus.MessageReceived += OnMessageReceived; 
                     SendVersionInfo();
@@ -270,6 +271,8 @@ namespace AdaKiosk
             {
                 if (message.User == "server")
                 {
+                    this.serverAddress = this.ContactPanel.ServerAddress = message.IpAddress;
+                    
                     SetOffline(false);
                 }
                 var simpleMessage = message.Text;
@@ -362,7 +365,6 @@ namespace AdaKiosk
                     this.strips.HidePopup();
                     break;
                 case ViewType.Contact:
-                    this.ContactPanel.Visibility = Visibility.Visible;
                     sim.Stop();
                     this.strips.HidePopup();
                     this.controller.HidePopup();

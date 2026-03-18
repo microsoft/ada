@@ -41,6 +41,7 @@ namespace AdaKiosk.Utilities
         public string group { get; set; }
         public string dataType { get; set; }
         public string data { get; set; }
+        public string ip { get; set; }
     }
 
     class WebPubSubGroup 
@@ -52,6 +53,7 @@ namespace AdaKiosk.Utilities
         private string connectionId;
         private string groupName;
         private string userId;
+        private string senderIp;
 
         public int NextId { get => ackId; set => ackId = value; }
 
@@ -61,9 +63,9 @@ namespace AdaKiosk.Utilities
 
         public string HubName { get => hubName; }
 
-        public WebPubSubGroup()
+        public WebPubSubGroup(string senderIp)
         {
-            Debug.WriteLine("New WebPubSubGroup");
+            this.senderIp = senderIp;
         }
 
         public async Task Connect(string connectionString, string hubName, string userId, string groupName, TimeSpan timeout)

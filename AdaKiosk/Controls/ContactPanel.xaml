@@ -43,10 +43,10 @@
         <TextBlock Text="IP Address: "  Style="{StaticResource HeaderStyle}"  Grid.Row="2" Grid.Column="0"/>
         <TextBlock x:Name="TextBlockAddress"  Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
-        <TextBlock Text="UserName: "  Style="{StaticResource HeaderStyle}"  Grid.Row="3" Grid.Column="0"/>
-        <TextBlock x:Name="TextBlockUserName"  Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
+    <TextBlock Text="Server IP Address: "  Style="{StaticResource HeaderStyle}"  Grid.Row="3" Grid.Column="0"/>
+    <TextBlock x:Name="TextBlockServerIp"  Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
-        <TextBlock Text="Version: " Style="{StaticResource HeaderStyle}"  Grid.Row="4" Grid.Column="0"/>
+    <TextBlock Text="Version: " Style="{StaticResource HeaderStyle}"  Grid.Row="4" Grid.Column="0"/>
         <TextBlock x:Name="TextBlockVersion"  Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" />
 
     </Grid>

@@ -37,7 +37,7 @@ namespace AdaKioskUnitTest
                 Console.WriteLine("Please set ADA_WEBPUBSUB_CONNECTION_STRING");
                 return;
             }
-            client = new WebPubSubGroup();
+            client = new WebPubSubGroup("ipaddress");
             client.MessageReceived += Client_MessageReceived;
             await client.Connect(connectionString, "AdaKiosk", "unittest", "demogroup", TimeSpan.FromSeconds(30));
             Console.WriteLine("Ada Web PubSub connected...");

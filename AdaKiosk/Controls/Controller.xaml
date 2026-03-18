@@ -70,7 +70,7 @@
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Reboot&#xa;(2 minutes)" TextWrapping="Wrap" TextAlignment="Center"/>
             </Button>
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/power/run" Background="#303030">
-                <TextBlock Style="{StaticResource ControlTextLight}" Text="Sensei"/>
+                <TextBlock Style="{StaticResource ControlTextLight}" Text="Run&#xa;Program" TextWrapping="Wrap" TextAlignment="Center"/>
             </Button>
             <Button Style="{StaticResource ControlButton}" Click="OnButtonClick" Tag="/color/0,0,0" Background="#101010">
                 <TextBlock Style="{StaticResource ControlTextLight}" Text="Black"/>

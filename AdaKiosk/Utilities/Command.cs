@@ -15,6 +15,7 @@ namespace AdaKiosk
         public string Text;
         public string FromGroup;
         public string Group;
+        public string IpAddress;
         public Command[] Commands;
 
         public static Message FromJson(string json)
@@ -77,24 +78,67 @@ namespace AdaKiosk
                                 Debug.WriteLine("missing json mapping for string property: " + name + " = " + value);
                             }
                         }
-                        else if (reader.TokenType == JsonToken.StartArray)
-                        {
-                            if (name == "data")
-                            {
-                                result.Commands = Command.ReadCommandArray(reader);
-                            }
-                        }
                         else if (reader.TokenType == JsonToken.StartObject)
                         {
                             if (name == "data")
                             {
-                                result.Commands = new Command[1] { Command.ReadCommand(reader) };
+                                ReadData(reader, result);
+                            }
+                            else
+                            {
+                                Debug.WriteLine("missing json mapping for object property: " + name);
+                                // skip the object.
+                                while (reader.Read() && reader.TokenType != JsonToken.EndObject)
+                                    ;
                             }
                         }
                     }
                 }
             }
             return result;
+        }
+
+        private static void ReadData(JsonTextReader reader, Message result)
+        {
+            // Unpack the { "message": msg, "ip": "address" } wrapper.
+            while (reader.Read() && reader.TokenType != JsonToken.EndObject)
+            {
+                if (reader.TokenType == JsonToken.PropertyName)
+                {
+                    string name = reader.Value as string;
+                    if (reader.Read())
+                    {
+                        if (reader.TokenType == JsonToken.String)
+                        {
+                            string value = reader.Value as string;
+                            if (name == "message")
+                            {
+                                result.Text = value;
+                            }
+                            else if (name == "ip")
+                            {
+                                result.IpAddress = value;
+                            }
+                            else
+                            {
+                                Debug.WriteLine("missing json mapping for string property in data object: " + name + " = " + value);
+                            }
+                        }
+                        else if (reader.TokenType == JsonToken.StartArray)
+                        {
+                            result.Commands = Command.ReadCommandArray(reader);
+                        }
+                        else if (reader.TokenType == JsonToken.StartObject)
+                        {
+                            result.Commands = new Command[1] { Command.ReadCommand(reader) };
+                        }
+                        else
+                        {
+                            throw new Exception("unexpected token type for data property: " + reader.TokenType);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -234,7 +278,7 @@ namespace AdaKiosk
                             {
                                 result.Colors = ReadColors(reader);
                             }
-                            else if(name == "columns")
+                            else if (name == "columns")
                             {
                                 result.Columns = ReadColumns(reader);
                             }
