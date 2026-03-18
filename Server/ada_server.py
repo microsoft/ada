@@ -513,7 +513,8 @@ async def _main(config, sensei, internet_address, blob_storage_url):
         log.error("This means there will be no remote control Kiosk support")
     else:
         msgbus = WebPubSubGroup(
-            webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group
+            webpubsub_constr, config.pubsub_hub, "server", config.pubsub_group,
+            internet_address
         )
         await msgbus.connect()
     server = AdaServer(config, msgbus, blob_storage_url)

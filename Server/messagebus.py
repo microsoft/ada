@@ -16,7 +16,7 @@ log = logger.get_root_logger()
 
 # Provides bi-directional connection to given Azure Web PubSub service group.
 class WebPubSubGroup:
-    def __init__(self, webpubsub_constr, hub_name, user_name, group_name):
+    def __init__(self, webpubsub_constr, hub_name, user_name, group_name, internet_address):
         self.webpubsub_constr = webpubsub_constr
         self.client = None
         self.listeners = []
@@ -28,6 +28,7 @@ class WebPubSubGroup:
         self.web_socket = None
         self.send_queue = queue.Queue()
         self.connection_id = None
+        self.internet_address = internet_address
 
     def add_listener(self, handler):
         self.listeners += [handler]
@@ -51,7 +52,7 @@ class WebPubSubGroup:
                 uri, subprotocols=["json.webpubsub.azure.v1"]
             )
             await self._join_group()
-            
+
             log.info("### websocket connected.")
         except Exception as e:
             log.error(f"### web socket connect failed:{e}")
@@ -66,11 +67,12 @@ class WebPubSubGroup:
             "dataType": "json",
             "data": msg,
             "ackId": self.ack_id,
+            "ip": self.internet_address,
         }
         self.ack_id += 1
         self.send_queue.put(groupMessage)
 
-    async def consume(self):        
+    async def consume(self):
         while not self.closed:
             if not self.send_queue.empty():
                 message = self.send_queue.get()
@@ -79,7 +81,7 @@ class WebPubSubGroup:
                         data = None
                         try:
                             data = json.dumps(message)
-                        except Exception as e:                            
+                        except Exception as e:
                             log.error("### cannot serialize data: ", message)
                             continue
 
@@ -96,7 +98,7 @@ class WebPubSubGroup:
                     await asyncio.sleep(10)
             else:
                 await asyncio.sleep(0.1)
-        
+
         await self.close()
 
     async def listen(self):
@@ -133,7 +135,7 @@ class WebPubSubGroup:
                 for h in self.listeners:
                     h(user, message)
 
-    async def _join_group(self):        
+    async def _join_group(self):
         log.info(f"### websocket joining group {self.group_name}...")
         msg = {"type": "joinGroup", "ackId": self.ack_id, "group": self.group_name}
         if not self.web_socket:
@@ -145,7 +147,7 @@ class WebPubSubGroup:
             response = json.loads(response)
             self.ack_id += 1
             # now we should have the connection id and an idea of success
-            if "event" in response and response["event"] == "connected":                
+            if "event" in response and response["event"] == "connected":
                 self.connection_id = response["connectionId"]
                 log.info(f"### websocket joined group id = {self.connection_id}")
             else:
@@ -155,7 +157,7 @@ class WebPubSubGroup:
             # TODO: how to recover from this?
             log.warning(f"error parsing joinGroup response as json")
             return {}
-    
+
     async def close(self, closed=True):
         self.closed = closed
         socket = self.web_socket
@@ -164,7 +166,7 @@ class WebPubSubGroup:
             try:
                 await socket.close()
             except Exception as e:
-                log.error(f"### error closing web_socket {e}")        
+                log.error(f"### error closing web_socket {e}")
         if self.client:
             try:
                 self.client.close()
