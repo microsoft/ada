@@ -244,7 +244,7 @@ class LightingDesigner:
         # puts ada back on program according to config.
         if parts[0] == "ping":
             self.msgbus.send(
-                f"{pingPrefix}/state/{self.power_state} at {self.internet_address}"
+                f"{pingPrefix}/state/{self.power_state}"
             )
         elif parts[0] == "bridge":
             bridge = self.server.get_bridge()

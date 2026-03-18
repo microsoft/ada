@@ -65,9 +65,11 @@ class WebPubSubGroup:
             "type": "sendToGroup",
             "group": self.group_name,
             "dataType": "json",
-            "data": msg,
+            "data": {
+                "message": msg,
+                "ip": self.internet_address,
+            },
             "ackId": self.ack_id,
-            "ip": self.internet_address,
         }
         self.ack_id += 1
         self.send_queue.put(groupMessage)
