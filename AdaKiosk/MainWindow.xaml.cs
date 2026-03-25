@@ -35,7 +35,7 @@ namespace AdaKiosk
         int pongTick = 0;
         bool offline = false;
         const int PingTimeout = 15; // minutes;
-        const int PongTimeout = 30; // seconds.
+        const int PongTimeout = 60; // seconds.
 
         enum ViewType
         {
@@ -58,7 +58,6 @@ namespace AdaKiosk
             this.sim.SimulatingCommand += OnSimulatingCommand;
             this.controller.CommandSelected += OnSendCommand;
             this.strips.CommandSelected += OnSendCommand;
-            this.ContactPanel.Observer = observer;
             this.UpdateView();
             // Hide the DEBUG tab when running on the actual Kiosk with user name Ada.
             if (string.Compare(Environment.GetEnvironmentVariable("USERNAME"), "ADA", StringComparison.OrdinalIgnoreCase) == 0)
@@ -115,7 +114,8 @@ namespace AdaKiosk
                 this.bus.MessageReceived -= OnMessageReceived;
                 this.bus.Close();
                 this.bus = null;
-                this.sim.Offline = true;
+                this.SetOffline(true);
+                this.ContactPanel.InternalAddress = this.observer?.IpAddress;
             }
         }
 
@@ -154,14 +154,16 @@ namespace AdaKiosk
                 offline = flag;
                 UpdateState(offline ? "Ada is not online!" : "Ada is back!");
             }
-            this.sim.Offline = flag;
+            this.sim.Offline = flag;            
         }
 
-        private void CheckPing() 
+        private void CheckPong() 
         {
             if (this.pingTick != 0 && this.pongTick == this.pingTick)
             {
                 // didn't receive a response last time, so is Ada down?
+                var seconds = Environment.TickCount - this.pingTick;
+                Debug.WriteLine($"Have not received the pong response after ${seconds} seconds");
                 SetOffline(true);
                 if (this.currentView == ViewType.Control)
                 {
@@ -180,8 +182,8 @@ namespace AdaKiosk
             // sends a ping request, which should return the ada power state.
             this.pingTick = this.pongTick = Environment.TickCount;
             OnSendCommand(this, "ping");
+            this.actions.StartDelayedAction("pong", CheckPong, TimeSpan.FromSeconds(PongTimeout));
             this.actions.StartDelayedAction("ping", OnPing, TimeSpan.FromMinutes(PingTimeout));
-            this.actions.StartDelayedAction("pong", CheckPing, TimeSpan.FromSeconds(PongTimeout));
         }
 
         private void StartDelayedSleep(int seconds)

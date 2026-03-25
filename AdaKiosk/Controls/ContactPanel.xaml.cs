@@ -12,29 +12,12 @@ namespace AdaKiosk.Controls
     /// </summary>
     public partial class ContactPanel : UserControl
     {
-        NetworkObserver observer;
+        internal string InternalAddress;
         internal string ServerAddress;
 
         public ContactPanel()
         {
             InitializeComponent();
-        }
-
-        internal NetworkObserver Observer
-        {
-            get => observer;
-            set
-            {
-                if (this.observer != null)
-                {
-                    observer.NetworkStatusChanged -= OnNetworkStatusChanged;
-                }
-                observer = value;
-                if (observer != null)
-                {
-                    observer.NetworkStatusChanged += OnNetworkStatusChanged;
-                }
-            }
         }
 
         private void OnNetworkStatusChanged(object sender, EventArgs e)
@@ -48,8 +31,8 @@ namespace AdaKiosk.Controls
             {
                 TextBlockContact.Text = "clovett@microsoft.com ";
                 TextBlockIssues.Text = "https://github.com/microsoft/ada";
-                TextBlockAddress.Text = observer?.IpAddress;
-                TextBlockServerIp.Text = this.ServerAddress;
+                TextBlockAddress.Text = "" + this.InternalAddress;
+                TextBlockServerIp.Text = "" + this.ServerAddress;
 
                 var assembly = this.GetType().Assembly;
                 this.TextBlockVersion.Text = assembly.GetName().Version.ToString();
