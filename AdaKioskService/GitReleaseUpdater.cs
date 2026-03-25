@@ -4,6 +4,7 @@
 using AdaKioskService;
 using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -54,8 +55,19 @@ namespace AdaKioskUpdater
         static async Task<string> DownloadText(string url)
         {
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-            return await client.GetStringAsync(url);
+            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+            {
+                NoCache = true,
+                NoStore = true
+            };
+            client.DefaultRequestHeaders.Pragma.ParseAdd("no-cache");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Expires", "0");
+            var response = await client.GetAsync(url);
+            foreach (var h in response.Headers)
+            {
+                Debug.WriteLine($"{h.Key}: {string.Join(", ", h.Value)}");
+            }
+            return await response.Content.ReadAsStringAsync();
         }
 
 
@@ -96,7 +108,13 @@ namespace AdaKioskUpdater
         {
             var handler = new HttpClientHandler { AllowAutoRedirect = true };
             HttpClient client = new HttpClient(handler);
-            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+            {
+                NoCache = true,
+                NoStore = true
+            };
+            client.DefaultRequestHeaders.Pragma.ParseAdd("no-cache");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Expires", "0");
             var response = await client.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
