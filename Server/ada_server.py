@@ -10,6 +10,7 @@ import socket
 import sys
 import time
 from collections import namedtuple
+from datetime import datetime, timedelta
 from threading import Lock
 
 import paramiko
@@ -504,7 +505,18 @@ async def async_read_enter(server):
             await asyncio.sleep(0.1)
 
 
-async def _main(config, sensei, internet_address, blob_storage_url):
+async def async_midnight_shutdown(server):
+    """Wait until midnight then shut down the server."""
+    now = datetime.now()
+    tomorrow = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    seconds_until_midnight = (tomorrow - now).total_seconds()
+    log.info(f"--one-day mode: server will shut down in {seconds_until_midnight:.0f} seconds at midnight")
+    await asyncio.sleep(seconds_until_midnight)
+    log.info("Midnight reached, shutting down server for daily restart.")
+    server.close()
+
+
+async def _main(config, sensei, internet_address, blob_storage_url, one_day=False):
     msgbus = None
 
     webpubsub_constr = os.getenv("ADA_WEBPUBSUB_CONNECTION_STRING")
@@ -521,10 +533,18 @@ async def _main(config, sensei, internet_address, blob_storage_url):
     server.start()
     designer = LightingDesigner(server, msgbus, sensei, internet_address, config)
     designer.start()
-    await asyncio.gather(async_read_enter(server), msgbus.listen(), msgbus.consume())
+    tasks = [async_read_enter(server), msgbus.listen(), msgbus.consume()]
+    if one_day:
+        tasks.append(async_midnight_shutdown(server))
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 
 if __name__ == "__main__":
+
+    print("=======================================================================================")
+    print(f"Starting Ada Server at {datetime.now()}")
+    print("=======================================================================================")
+
     with open(os.path.join(script_dir, "config.json"), "r") as f:
         d = json.load(f)
         config = namedtuple("Config", d.keys())(*d.values())
@@ -544,6 +564,11 @@ if __name__ == "__main__":
         help="Timeout in seconds between each row of replay loop (default {})".format(
             config.playback_delay
         ),
+    )
+    parser.add_argument(
+        "--one-day",
+        help="Shut down the server at midnight so it can be restarted daily",
+        action="store_true",
     )
     args = parser.parse_args()
 
@@ -569,5 +594,5 @@ if __name__ == "__main__":
         sensei.load(history_files, args.delay, config.playback_weights)
 
     asyncio.get_event_loop().run_until_complete(
-        _main(config, sensei, internet_address, blob_storage_url)
+        _main(config, sensei, internet_address, blob_storage_url, one_day=args.one_day)
     )
