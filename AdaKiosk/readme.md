@@ -7,7 +7,7 @@ The kiosk is configured to boot when the power is plugged in, and auto-login the
 and that login is configured to auto-launch the AdaKiosk app when it does that.
 
 Note: sometimes some kids like to try and break it, and if they kill the Ada app then it leaves the PC in a state that
-allows sleep mode to ckick in and the power unplug/replug does not bring it out of sleep mode, so for that you need to
+allows sleep mode to click in and the power unplug/replug does not bring it out of sleep mode, so for that you need to
 open the case and press the power button.  Then when it comes out of sleep use the onscreen power button to reboot it.
 This brings back the Kiosk app this disables sleep mode. 
 There's probably a windows setting some place to fix that but might take some digging.  
