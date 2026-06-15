@@ -1,6 +1,20 @@
 ## AdaKiosk
 
-This is a Windows WPF app that provides a nice Kiosk experience to
+The AdaKiosk app is running on a Windows 10 tablet in the building 99 lobby in a locked stand.
+This is running Windows 10, because Windows 11 removed kiosk mode in the OS.
+
+The kiosk is configured to boot when the power is plugged in, and auto-login the user named "ada"
+and that login is configured to auto-launch the AdaKiosk app when it does that.
+
+Note: sometimes some kids like to try and break it, and if they kill the Ada app then it leaves the PC in a state that
+allows sleep mode to ckick in and the power unplug/replug does not bring it out of sleep mode, so for that you need to
+open the case and press the power button.  Then when it comes out of sleep use the onscreen power button to reboot it.
+This brings back the Kiosk app this disables sleep mode. 
+There's probably a windows setting some place to fix that but might take some digging.  
+
+## App
+
+The app is Windows WPF app that provides a nice Kiosk experience to
 accompany Ada.
 
 Install: [setup.exe](https://adaserverstorage.blob.core.windows.net/downloads/AdaKiosk/setup.exe)
